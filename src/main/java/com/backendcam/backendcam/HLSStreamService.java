@@ -11,6 +11,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**
@@ -27,9 +28,11 @@ public class HLSStreamService {
 
     private static final String HLS_ROOT = "./hls"; // โฟลเดอร์ root สำหรับเก็บ HLS output
 
+    private final ConcurrentHashMap<String, String> streamLinks = new ConcurrentHashMap<>();
     /**
      * เริ่มต้นสตรีม HLS จาก RTSP
-     * @param rtspUrl URL ของกล้อง/MTX RTSP
+     * 
+     * @param rtspUrl    URL ของกล้อง/MTX RTSP
      * @param streamName ชื่อ stream สำหรับโฟลเดอร์ output
      * @return path ของ m3u8 playlist สำหรับ controller
      */
@@ -37,11 +40,15 @@ public class HLSStreamService {
         try {
             logger.info("Starting HLS stream: " + rtspUrl + " as " + streamName);
 
+            if (streamLinks.containsKey(streamName)) {
+                return streamLinks.get(streamName);
+            }
+
             // --- Step 1: Connect to RTSP with fallback variants ---
             FFmpegFrameGrabber grabber = tryStartRtspWithFallback(rtspUrl);
 
-            logger.info("Grabber started. Initial resolution: " 
-                        + grabber.getImageWidth() + "x" + grabber.getImageHeight());
+            logger.info("Grabber started. Initial resolution: "
+                    + grabber.getImageWidth() + "x" + grabber.getImageHeight());
 
             // --- Step 2: สร้างโฟลเดอร์ output ---
             File outputDir = new File(HLS_ROOT + "/" + streamName);
@@ -53,13 +60,17 @@ public class HLSStreamService {
             String hlsOutput = outputDir.getAbsolutePath() + "/stream.m3u8";
 
             // --- Step 3: Warm-up grab few frames เพื่อหาความละเอียด ---
-            int warmupMax = 200; // limit loop ป้องกัน infinite
+            int warmupMax = 5; // limit loop ป้องกัน infinite
             int warmCount = 0;
             Frame firstVideoFrame = null;
             while (warmCount < warmupMax) {
                 Frame f = grabber.grab();
-                if (f == null) break;
-                if (f.image != null) { firstVideoFrame = f; break; }
+                if (f == null)
+                    break;
+                if (f.image != null) {
+                    firstVideoFrame = f;
+                    break;
+                }
                 warmCount++;
             }
 
@@ -70,6 +81,7 @@ public class HLSStreamService {
                 height = firstVideoFrame.imageHeight;
             }
             if (width <= 0 || height <= 0) {
+
                 throw new RuntimeException("Could not determine video resolution from RTSP stream");
             }
 
@@ -80,11 +92,13 @@ public class HLSStreamService {
                     height,
                     Math.max(0, grabber.getAudioChannels()) // ตรวจสอบ audio channels
             );
+           System.out.println("width: " + width);
+           System.out.println("height: " + height);
 
             // --- Video Settings ---
             recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
             recorder.setFormat("hls");
-            int fps = Math.max(15, grabber.getFrameRate() > 0 ? (int)Math.round(grabber.getFrameRate()) : 25);
+            int fps = Math.max(15, grabber.getFrameRate() > 0 ? (int) Math.round(grabber.getFrameRate()) : 25);
             recorder.setFrameRate(fps);
             recorder.setGopSize(2 * fps); // keyframe ทุก ~2 วินาที
 
@@ -96,12 +110,12 @@ public class HLSStreamService {
             }
 
             // --- HLS Options ---
-            recorder.setOption("hls_time", "2"); // 2 วินาทีต่อ segment
-            recorder.setOption("hls_list_size", "6"); // playlist window เล็ก
+            recorder.setOption("hls_time", "2"); // 1 วินาทีต่อ segment
+            recorder.setOption("hls_list_size", "3"); // playlist window เล็ก
             recorder.setOption("hls_flags", "delete_segments+independent_segments+program_date_time");
             recorder.setOption("hls_segment_type", "mpegts");
             recorder.setOption("hls_allow_cache", "0");
-            String segPath = outputDir.getAbsolutePath().replace('\\','/') + "/seg%05d.ts";
+            String segPath = outputDir.getAbsolutePath().replace('\\', '/') + "/seg%05d.ts";
             recorder.setOption("hls_segment_filename", segPath);
             recorder.setOption("reset_timestamps", "1");
 
@@ -140,16 +154,25 @@ public class HLSStreamService {
             while ((frame = grabber.grab()) != null) {
                 recorder.record(frame);
                 count++;
-                if (count % 100 == 0) logger.info("Processed " + count + " frames for " + streamName);
+                if (count % 100 == 0)
+                    logger.info("Processed " + count + " frames for " + streamName);
             }
         } catch (Exception e) {
             logger.severe("Error streaming " + streamName + ": " + e.getMessage());
             stopHLSStream(streamName);
         } finally {
             try {
-                if (recorder != null) { recorder.stop(); recorder.release(); }
-                if (grabber != null) { grabber.stop(); grabber.release(); }
-            } catch (Exception e) { logger.warning("Cleanup error: " + e.getMessage()); }
+                if (recorder != null) {
+                    recorder.stop();
+                    recorder.release();
+                }
+                if (grabber != null) {
+                    grabber.stop();
+                    grabber.release();
+                }
+            } catch (Exception e) {
+                logger.warning("Cleanup error: " + e.getMessage());
+            }
         }
     }
 
@@ -160,7 +183,9 @@ public class HLSStreamService {
         File dir = new File(HLS_ROOT + "/" + streamName);
         if (dir.exists()) {
             File[] files = dir.listFiles();
-            if (files != null) for (File f : files) f.delete();
+            if (files != null)
+                for (File f : files)
+                    f.delete();
             dir.delete();
         }
     }
@@ -175,7 +200,8 @@ public class HLSStreamService {
         try {
             URI u = new URI(rtspUrl);
             String userInfo = u.getUserInfo();
-            String base = u.getScheme() + "://" + (userInfo != null ? userInfo + "@" : "") + u.getHost() + (u.getPort() > 0 ? ":" + u.getPort() : "");
+            String base = u.getScheme() + "://" + (userInfo != null ? userInfo + "@" : "") + u.getHost()
+                    + (u.getPort() > 0 ? ":" + u.getPort() : "");
             String path = u.getPath() != null ? u.getPath() : "/";
 
             // ถ้า path เป็น vendor indices ลอง variants ต่าง ๆ
@@ -195,40 +221,54 @@ public class HLSStreamService {
             candidates.add(base + path + (path.endsWith("/") ? "" : "/") + "trackID=0");
             candidates.add(base + path + (path.endsWith("/") ? "" : "/") + "trackID=1");
 
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
 
         Exception last = null;
         for (String cand : candidates) {
-            for (String transport : new String[]{"tcp","udp","http"}) {
+            for (String transport : new String[] { "tcp", "udp", "http" }) {
                 logger.info("Trying RTSP URL: " + cand + " via " + transport);
                 FFmpegFrameGrabber g = new FFmpegFrameGrabber(cand);
                 g.setFormat("rtsp");
                 g.setOption("rtsp_transport", transport);
-                if ("tcp".equals(transport)) g.setOption("rtsp_flags", "prefer_tcp");
+                if ("tcp".equals(transport))
+                    g.setOption("rtsp_flags", "prefer_tcp");
                 g.setOption("stimeout", "20000000");
                 g.setOption("rw_timeout", "20000000");
-                g.setOption("analyzeduration", "5000000");
-                g.setOption("probesize", "5000000");
+                g.setOption("analyzeduration", "1000000");
+                g.setOption("probesize", "1000000");
                 g.setOption("fflags", "+nobuffer+genpts+igndts");
-                g.setOption("max_delay", "500000");
+                g.setOption("max_delay", "0");
                 g.setOption("reorder_queue_size", "0");
                 g.setOption("use_wallclock_as_timestamps", "1");
                 g.setOption("allowed_media_types", "video");
                 g.setOption("user_agent", "LibVLC/3.0.18 (LIVE555 Streaming Media v2021.06.08)");
                 g.setOption("loglevel", "info");
+                if ("udp".equals(transport)) {
+                    g.setOption("fflags", "+nobuffer+genpts+igndts");
+                    g.setOption("max_delay", "0"); // ลด delay buffer
+                    g.setOption("flags", "low_delay"); // low-latency mode
+                    g.setOption("probesize", "1000000"); // probe น้อยลงเพื่อเร็วขึ้น
+                    g.setOption("analyzeduration", "1000000"); // analyze short duration
+                }
 
                 try {
                     g.start();
-                    logger.info("Connected to RTSP: " + cand + ", size=" + g.getImageWidth() + "x" + g.getImageHeight());
+                    logger.info(
+                            "Connected to RTSP: " + cand + ", size=" + g.getImageWidth() + "x" + g.getImageHeight());
                     return g;
                 } catch (Exception e) {
                     last = e;
                     logger.warning("Failed URL/transport: " + cand + " (" + transport + ") - " + e.getMessage());
-                    try { g.release(); } catch (Exception ignore) {}
+                    try {
+                        g.release();
+                    } catch (Exception ignore) {
+                    }
                 }
             }
         }
-        if (last != null) throw last;
+        if (last != null)
+            throw last;
         throw new RuntimeException("RTSP connection failed for all candidates");
     }
 }
