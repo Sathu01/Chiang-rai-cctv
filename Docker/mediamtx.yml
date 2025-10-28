@@ -1,0 +1,243 @@
+# MediaMTX Configuration - Optimized for 100+ Concurrent Streams
+# Place this file as mediamtx.yml in your MediaMTX directory
+
+# General Settings
+logLevel: info
+logDestinations: [stdout]
+logFile: mediamtx.log
+
+# API Settings
+api: yes
+apiAddress: :9997
+
+# Metrics
+metrics: yes
+metricsAddress: :9998
+
+# Performance Tuning
+readTimeout: 20s
+writeTimeout: 20s
+readBufferCount: 2048  # Increased for multiple streams
+writeQueueSize: 1024   # Increased queue size
+
+# RTSP Server Settings
+rtspDisable: no
+protocols: [tcp, udp]
+encryption: no
+rtspAddress: :8554
+rtspsAddress: :8555
+rtpAddress: :8000
+rtcpAddress: :8001
+multicastIPRange: 224.1.0.0/16
+multicastRTPPort: 8002
+multicastRTCPPort: 8003
+
+# Server Resource Limits - Critical for 100 streams
+serverUDPMaxPayloadSize: 1472
+serverTCPMaxConnections: 200  # Allow 200 connections (100 publishers + 100 your app)
+
+# Path Defaults - Applied to all streams
+pathDefaults:
+  # Source Settings
+  source: publisher
+  sourceProtocol: automatic
+  sourceAnyPortEnable: no
+  
+  # Recording (disabled for performance)
+  record: no
+  
+  # Performance Settings
+  disablePublisherOverride: no
+  fallback: ""
+  
+  # Publisher settings
+  publishUser: ""
+  publishPass: ""
+  publishIPs: []
+  
+  # Reader settings  
+  readUser: ""
+  readPass: ""
+  readIPs: []
+  
+  # RTSP-specific
+  sourceOnDemand: no
+  sourceOnDemandStartTimeout: 10s
+  sourceOnDemandCloseAfter: 10s
+  
+  # Redirect
+  sourceRedirect: ""
+  
+  # Override with publisher
+  overridePublisher: yes
+  
+  # SRT
+  srtPublishPassphrase: ""
+  
+  # Raspberry Pi Camera
+  rpiCameraCamID: 0
+  rpiCameraWidth: 1920
+  rpiCameraHeight: 1080
+  rpiCameraFPS: 30
+  
+  # Run on init/demand
+  runOnInit: ""
+  runOnInitRestart: no
+  runOnDemand: ""
+  runOnDemandRestart: no
+  runOnDemandStartTimeout: 10s
+  runOnDemandCloseAfter: 10s
+  runOnReady: ""
+  runOnNotReady: ""
+  runOnRead: ""
+  runOnUnread: ""
+
+# Paths - Define streams v1 to v100
+paths:
+  # Stream 1-10
+  v1:
+    source: publisher
+    sourceOnDemand: no
+  v2:
+    source: publisher
+    sourceOnDemand: no
+  v3:
+    source: publisher
+    sourceOnDemand: no
+  v4:
+    source: publisher
+    sourceOnDemand: no
+  v5:
+    source: publisher
+    sourceOnDemand: no
+  v6:
+    source: publisher
+    sourceOnDemand: no
+  v7:
+    source: publisher
+    sourceOnDemand: no
+  v8:
+    source: publisher
+    sourceOnDemand: no
+  v9:
+    source: publisher
+    sourceOnDemand: no
+  v10:
+    source: publisher
+    sourceOnDemand: no
+  
+  # Stream 11-20
+  v11:
+    source: publisher
+    sourceOnDemand: no
+  v12:
+    source: publisher
+    sourceOnDemand: no
+  v13:
+    source: publisher
+    sourceOnDemand: no
+  v14:
+    source: publisher
+    sourceOnDemand: no
+  v15:
+    source: publisher
+    sourceOnDemand: no
+  v16:
+    source: publisher
+    sourceOnDemand: no
+  v17:
+    source: publisher
+    sourceOnDemand: no
+  v18:
+    source: publisher
+    sourceOnDemand: no
+  v19:
+    source: publisher
+    sourceOnDemand: no
+  v20:
+    source: publisher
+    sourceOnDemand: no
+  
+  # Stream 21-50
+  v21: { source: publisher, sourceOnDemand: no }
+  v22: { source: publisher, sourceOnDemand: no }
+  v23: { source: publisher, sourceOnDemand: no }
+  v24: { source: publisher, sourceOnDemand: no }
+  v25: { source: publisher, sourceOnDemand: no }
+  v26: { source: publisher, sourceOnDemand: no }
+  v27: { source: publisher, sourceOnDemand: no }
+  v28: { source: publisher, sourceOnDemand: no }
+  v29: { source: publisher, sourceOnDemand: no }
+  v30: { source: publisher, sourceOnDemand: no }
+  v31: { source: publisher, sourceOnDemand: no }
+  v32: { source: publisher, sourceOnDemand: no }
+  v33: { source: publisher, sourceOnDemand: no }
+  v34: { source: publisher, sourceOnDemand: no }
+  v35: { source: publisher, sourceOnDemand: no }
+  v36: { source: publisher, sourceOnDemand: no }
+  v37: { source: publisher, sourceOnDemand: no }
+  v38: { source: publisher, sourceOnDemand: no }
+  v39: { source: publisher, sourceOnDemand: no }
+  v40: { source: publisher, sourceOnDemand: no }
+  v41: { source: publisher, sourceOnDemand: no }
+  v42: { source: publisher, sourceOnDemand: no }
+  v43: { source: publisher, sourceOnDemand: no }
+  v44: { source: publisher, sourceOnDemand: no }
+  v45: { source: publisher, sourceOnDemand: no }
+  v46: { source: publisher, sourceOnDemand: no }
+  v47: { source: publisher, sourceOnDemand: no }
+  v48: { source: publisher, sourceOnDemand: no }
+  v49: { source: publisher, sourceOnDemand: no }
+  v50: { source: publisher, sourceOnDemand: no }
+  
+  # Stream 51-100
+  v51: { source: publisher, sourceOnDemand: no }
+  v52: { source: publisher, sourceOnDemand: no }
+  v53: { source: publisher, sourceOnDemand: no }
+  v54: { source: publisher, sourceOnDemand: no }
+  v55: { source: publisher, sourceOnDemand: no }
+  v56: { source: publisher, sourceOnDemand: no }
+  v57: { source: publisher, sourceOnDemand: no }
+  v58: { source: publisher, sourceOnDemand: no }
+  v59: { source: publisher, sourceOnDemand: no }
+  v60: { source: publisher, sourceOnDemand: no }
+  v61: { source: publisher, sourceOnDemand: no }
+  v62: { source: publisher, sourceOnDemand: no }
+  v63: { source: publisher, sourceOnDemand: no }
+  v64: { source: publisher, sourceOnDemand: no }
+  v65: { source: publisher, sourceOnDemand: no }
+  v66: { source: publisher, sourceOnDemand: no }
+  v67: { source: publisher, sourceOnDemand: no }
+  v68: { source: publisher, sourceOnDemand: no }
+  v69: { source: publisher, sourceOnDemand: no }
+  v70: { source: publisher, sourceOnDemand: no }
+  v71: { source: publisher, sourceOnDemand: no }
+  v72: { source: publisher, sourceOnDemand: no }
+  v73: { source: publisher, sourceOnDemand: no }
+  v74: { source: publisher, sourceOnDemand: no }
+  v75: { source: publisher, sourceOnDemand: no }
+  v76: { source: publisher, sourceOnDemand: no }
+  v77: { source: publisher, sourceOnDemand: no }
+  v78: { source: publisher, sourceOnDemand: no }
+  v79: { source: publisher, sourceOnDemand: no }
+  v80: { source: publisher, sourceOnDemand: no }
+  v81: { source: publisher, sourceOnDemand: no }
+  v82: { source: publisher, sourceOnDemand: no }
+  v83: { source: publisher, sourceOnDemand: no }
+  v84: { source: publisher, sourceOnDemand: no }
+  v85: { source: publisher, sourceOnDemand: no }
+  v86: { source: publisher, sourceOnDemand: no }
+  v87: { source: publisher, sourceOnDemand: no }
+  v88: { source: publisher, sourceOnDemand: no }
+  v89: { source: publisher, sourceOnDemand: no }
+  v90: { source: publisher, sourceOnDemand: no }
+  v91: { source: publisher, sourceOnDemand: no }
+  v92: { source: publisher, sourceOnDemand: no }
+  v93: { source: publisher, sourceOnDemand: no }
+  v94: { source: publisher, sourceOnDemand: no }
+  v95: { source: publisher, sourceOnDemand: no }
+  v96: { source: publisher, sourceOnDemand: no }
+  v97: { source: publisher, sourceOnDemand: no }
+  v98: { source: publisher, sourceOnDemand: no }
+  v99: { source: publisher, sourceOnDemand: no }
+  v100: { source: publisher, sourceOnDemand: no }

@@ -11,6 +11,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**
@@ -27,6 +28,7 @@ public class HLSStreamService {
 
     private static final String HLS_ROOT = "./hls"; // โฟลเดอร์ root สำหรับเก็บ HLS output
 
+    private final ConcurrentHashMap<String, String> streamLinks = new ConcurrentHashMap<>();
     /**
      * เริ่มต้นสตรีม HLS จาก RTSP
      * 
@@ -37,6 +39,10 @@ public class HLSStreamService {
     public String startHLSStream(String rtspUrl, String streamName) {
         try {
             logger.info("Starting HLS stream: " + rtspUrl + " as " + streamName);
+
+            if (streamLinks.containsKey(streamName)) {
+                return streamLinks.get(streamName);
+            }
 
             // --- Step 1: Connect to RTSP with fallback variants ---
             FFmpegFrameGrabber grabber = tryStartRtspWithFallback(rtspUrl);
@@ -54,7 +60,7 @@ public class HLSStreamService {
             String hlsOutput = outputDir.getAbsolutePath() + "/stream.m3u8";
 
             // --- Step 3: Warm-up grab few frames เพื่อหาความละเอียด ---
-            int warmupMax = 100; // limit loop ป้องกัน infinite
+            int warmupMax = 5; // limit loop ป้องกัน infinite
             int warmCount = 0;
             Frame firstVideoFrame = null;
             while (warmCount < warmupMax) {
@@ -75,6 +81,7 @@ public class HLSStreamService {
                 height = firstVideoFrame.imageHeight;
             }
             if (width <= 0 || height <= 0) {
+
                 throw new RuntimeException("Could not determine video resolution from RTSP stream");
             }
 
@@ -85,6 +92,8 @@ public class HLSStreamService {
                     height,
                     Math.max(0, grabber.getAudioChannels()) // ตรวจสอบ audio channels
             );
+           System.out.println("width: " + width);
+           System.out.println("height: " + height);
 
             // --- Video Settings ---
             recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
@@ -101,8 +110,8 @@ public class HLSStreamService {
             }
 
             // --- HLS Options ---
-            recorder.setOption("hls_time", "1"); // 1 วินาทีต่อ segment
-            recorder.setOption("hls_list_size", "6"); // playlist window เล็ก
+            recorder.setOption("hls_time", "2"); // 1 วินาทีต่อ segment
+            recorder.setOption("hls_list_size", "3"); // playlist window เล็ก
             recorder.setOption("hls_flags", "delete_segments+independent_segments+program_date_time");
             recorder.setOption("hls_segment_type", "mpegts");
             recorder.setOption("hls_allow_cache", "0");
@@ -217,23 +226,13 @@ public class HLSStreamService {
 
         Exception last = null;
         for (String cand : candidates) {
-            for (String transport : new String[] { "udp", "tcp", "http" }) {
+            for (String transport : new String[] { "tcp", "udp", "http" }) {
                 logger.info("Trying RTSP URL: " + cand + " via " + transport);
                 FFmpegFrameGrabber g = new FFmpegFrameGrabber(cand);
                 g.setFormat("rtsp");
                 g.setOption("rtsp_transport", transport);
-                if ("udp".equals(transport)) {
-                    g.setOption("fflags", "+nobuffer+genpts+igndts");
-                    g.setOption("max_delay", "0"); // ลด delay buffer
-                    g.setOption("flags", "low_delay"); // low-latency mode
-                    g.setOption("probesize", "500000"); // probe น้อยลงเพื่อเร็วขึ้น
-                    g.setOption("analyzeduration", "500000"); // analyze short duration
-                }
-                if ("tcp".equals(transport)){
+                if ("tcp".equals(transport))
                     g.setOption("rtsp_flags", "prefer_tcp");
-                    
-                }
-                
                 g.setOption("stimeout", "20000000");
                 g.setOption("rw_timeout", "20000000");
                 g.setOption("analyzeduration", "1000000");
@@ -245,6 +244,13 @@ public class HLSStreamService {
                 g.setOption("allowed_media_types", "video");
                 g.setOption("user_agent", "LibVLC/3.0.18 (LIVE555 Streaming Media v2021.06.08)");
                 g.setOption("loglevel", "info");
+                if ("udp".equals(transport)) {
+                    g.setOption("fflags", "+nobuffer+genpts+igndts");
+                    g.setOption("max_delay", "0"); // ลด delay buffer
+                    g.setOption("flags", "low_delay"); // low-latency mode
+                    g.setOption("probesize", "1000000"); // probe น้อยลงเพื่อเร็วขึ้น
+                    g.setOption("analyzeduration", "1000000"); // analyze short duration
+                }
 
                 try {
                     g.start();

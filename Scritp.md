@@ -1,7 +1,7 @@
 # PowerShell script: run50.ps1
 
 # สร้าง loop 1-20
-1..15 | ForEach-Object {
+1..30 | ForEach-Object {
     $i = $_
     Start-Job -ScriptBlock {
         param($idx)

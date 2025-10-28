@@ -1,0 +1,1683 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x00007ff8223161a4, pid=29668, tid=25416
+#
+# JRE version: OpenJDK Runtime Environment Temurin-21.0.8+9 (21.0.8+9) (build 21.0.8+9-LTS)
+# Java VM: OpenJDK 64-Bit Server VM Temurin-21.0.8+9 (21.0.8+9-LTS, mixed mode, sharing, tiered, compressed oops, compressed class ptrs, g1 gc, windows-amd64)
+# Problematic frame:
+# C  [avformat-60.dll+0x861a4]
+#
+# No core dump will be written. Minidumps are not enabled by default on client versions of Windows
+#
+# If you would like to submit a bug report, please visit:
+#   https://github.com/adoptium/adoptium-support/issues
+# The crash happened outside the Java Virtual Machine in native code.
+# See problematic frame for where to report the bug.
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -XX:+ShowCodeDetailsInExceptionMessages com.backendcam.backendcam.BackendcamApplication
+
+Host: 12th Gen Intel(R) Core(TM) i5-12400F, 12 cores, 15G,  Windows 11 , 64 bit Build 26100 (10.0.26100.6725)
+Time: Tue Oct 28 19:58:57 2025 SE Asia Standard Time elapsed time: 402.450433 seconds (0d 0h 6m 42s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x0000026eec706920):  JavaThread "HLS-Stream-13"        [_thread_in_native, id=25416, stack(0x000000b4e9d00000,0x000000b4e9e00000) (1024K)]
+
+Stack: [0x000000b4e9d00000,0x000000b4e9e00000],  sp=0x000000b4e9dfeae0,  free space=1018k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+C  [avformat-60.dll+0x861a4]
+
+Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
+j  org.bytedeco.ffmpeg.global.avformat.av_write_trailer(Lorg/bytedeco/ffmpeg/avformat/AVFormatContext;)I+0
+j  org.bytedeco.javacv.FFmpegFrameRecorder.stop()V+15
+j  com.backendcam.backendcam.HLSStreamService.cleanupStream(Ljava/lang/String;Lorg/bytedeco/javacv/FFmpegFrameGrabber;Lorg/bytedeco/javacv/FFmpegFrameRecorder;)V+5
+j  com.backendcam.backendcam.HLSStreamService.lambda$0(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;)V+250
+j  com.backendcam.backendcam.HLSStreamService$$Lambda+0x0000026e812e4cc0.run()V+20
+j  java.util.concurrent.Executors$RunnableAdapter.call()Ljava/lang/Object;+4 java.base@21.0.8
+j  java.util.concurrent.FutureTask.run()V+39 java.base@21.0.8
+j  java.util.concurrent.ThreadPoolExecutor.runWorker(Ljava/util/concurrent/ThreadPoolExecutor$Worker;)V+92 java.base@21.0.8
+j  java.util.concurrent.ThreadPoolExecutor$Worker.run()V+5 java.base@21.0.8
+j  java.lang.Thread.runWith(Ljava/lang/Object;Ljava/lang/Runnable;)V+5 java.base@21.0.8
+j  java.lang.Thread.run()V+19 java.base@21.0.8
+v  ~StubRoutines::call_stub 0x0000026ed640100d
+
+siginfo: EXCEPTION_ACCESS_VIOLATION (0xc0000005), reading address 0x0000000000002130
+
+
+Registers:
+RAX=0x00007ff822a7b840, RBX=0x0000026f22b4ac80, RCX=0x0000026f22b4ac80, RDX=0x00007ff822316190
+RSP=0x000000b4e9dfeae0, RBP=0x0000000000000000, RSI=0x0000000000000000, RDI=0x0000026ec74a8100
+R8 =0x0000000000000001, R9 =0x0000000000000000, R10=0x00007ff8281fada0, R11=0x00000000000000ac
+R12=0x0000000000000000, R13=0x0000026ee8e61f28, R14=0x000000b4e9dfec80, R15=0x0000026eec706920
+RIP=0x00007ff8223161a4, EFLAGS=0x0000000000010202
+
+XMM[0]=0x0000000000000000 0x0000000000000000
+XMM[1]=0x0000000000000000 0x0000000000000000
+XMM[2]=0x0000000000000000 0x0000000000000000
+XMM[3]=0x0000000000000000 0x0000000000000000
+XMM[4]=0x0000000000000000 0x0000000000000000
+XMM[5]=0x0000000000000000 0x0000000000000000
+XMM[6]=0x0000000000000000 0x0000000000000000
+XMM[7]=0x0000000000000000 0x0000000000000000
+XMM[8]=0x0000000000000000 0x0000000000000000
+XMM[9]=0x0000000000000000 0x0000000000000000
+XMM[10]=0x0000000000000000 0x0000000000000000
+XMM[11]=0x0000000000000000 0x0000000000000000
+XMM[12]=0x0000000000000000 0x0000000000000000
+XMM[13]=0x0000000000000000 0x0000000000000000
+XMM[14]=0x0000000000000000 0x0000000000000000
+XMM[15]=0x0000000000000000 0x0000000000000000
+  MXCSR=0x00001fa0
+
+
+Register to memory mapping:
+
+RAX=0x00007ff822a7b840 avformat-60.dll
+RBX=0x0000026f22b4ac80 points into unknown readable memory: 0x00007ff822ab1200 | 00 12 ab 22 f8 7f 00 00
+RCX=0x0000026f22b4ac80 points into unknown readable memory: 0x00007ff822ab1200 | 00 12 ab 22 f8 7f 00 00
+RDX=0x00007ff822316190 avformat-60.dll
+RSP=0x000000b4e9dfeae0 is pointing into the stack for thread: 0x0000026eec706920
+RBP=0x0 is null
+RSI=0x0 is null
+RDI=0x0000026ec74a8100 points into unknown readable memory: 0x0000000000000000 | 00 00 00 00 00 00 00 00
+R8 =0x0000000000000001 is an unknown value
+R9 =0x0 is null
+R10=0x00007ff8281fada0 jvm.dll
+R11=0x00000000000000ac is an unknown value
+R12=0x0 is null
+R13=0x0000026ee8e61f28 is pointing into metadata
+R14=0x000000b4e9dfec80 is pointing into the stack for thread: 0x0000026eec706920
+R15=0x0000026eec706920 is a thread
+
+Top of Stack: (sp=0x000000b4e9dfeae0)
+0x000000b4e9dfeae0:   000000070463af90 000000b4e9dfeb68
+0x000000b4e9dfeaf0:   000000b4e9dfeb70 0000026ed64089d2
+0x000000b4e9dfeb00:   000000b4e9dfeb70 000000b4e9dfeb38
+0x000000b4e9dfeb10:   0000000000000000 00007ff822399cf5
+0x000000b4e9dfeb20:   0000000000000000 000000b4e9dfeb18
+0x000000b4e9dfeb30:   0000026ee8737620 0000000704601fd0
+0x000000b4e9dfeb40:   0000026ee8e61c50 0000000000000000
+0x000000b4e9dfeb50:   000000b4e9dfebe8 0000026f22b4ac80
+0x000000b4e9dfeb60:   0000000000000000 0000026ec74a8100
+0x000000b4e9dfeb70:   000000b4e9dfec60 0000000000000000
+0x000000b4e9dfeb80:   0000026ee8e61f28 000000b4e9dfec80
+0x000000b4e9dfeb90:   0000026eec706920 00007ff822399e49
+0x000000b4e9dfeba0:   00000000dfb9b0bb 00007ff83416d721
+0x000000b4e9dfebb0:   00000007115e0560 0000000000000000
+0x000000b4e9dfebc0:   0000026ee8e61f30 0000000000000008
+0x000000b4e9dfebd0:   0000000000000011 000000b4e9dfec60
+0x000000b4e9dfebe0:   0000000000000000 0000026ed640ce4b
+0x000000b4e9dfebf0:   0000000704601fd0 0000000000000041
+0x000000b4e9dfec00:   0000000000000000 0000000000000041
+0x000000b4e9dfec10:   0000000000000000 000000b4e9dfec18
+0x000000b4e9dfec20:   0000000000000000 0000000000000004
+0x000000b4e9dfec30:   0000026ee8e666a0 0000000000000000
+0x000000b4e9dfec40:   0000000704600130 0000026ee8e61f30
+0x000000b4e9dfec50:   0000000000000000 000000b4e9dfec80
+0x000000b4e9dfec60:   000000b4e9dfecd0 0000026ed6408988
+0x000000b4e9dfec70:   0000000704600130 0000026ed640a3d5
+0x000000b4e9dfec80:   0000000704601fd0 000000b4e9dfec88
+0x000000b4e9dfec90:   0000026ee873982f 0000000000000003
+0x000000b4e9dfeca0:   0000026ee8ec85b0 0000000000000000
+0x000000b4e9dfecb0:   0000000703688ec0 0000026ee8739870
+0x000000b4e9dfecc0:   000000b4e9dfec80 000000b4e9dfece8
+0x000000b4e9dfecd0:   000000b4e9dfed38 0000026ed6408860 
+
+Instructions: (pc=0x00007ff8223161a4)
+0x00007ff8223160a4:   48 8b b4 24 a0 00 00 00 48 8b 8c 24 40 31 00 00
+0x00007ff8223160b4:   ba 10 00 00 00 4c 8d 05 e8 49 76 00 49 89 f1 e8
+0x00007ff8223160c4:   68 f2 11 00 48 8b 94 24 98 00 00 00 48 8b 8c 24
+0x00007ff8223160d4:   40 31 00 00 49 89 f0 e8 d0 d5 ff ff 48 8b 93 48
+0x00007ff8223160e4:   21 00 00 4c 8b 84 24 40 31 00 00 48 89 f1 e8 29
+0x00007ff8223160f4:   33 fa ff e9 3c fa ff ff 8b 93 a8 21 00 00 85 d2
+0x00007ff822316104:   75 0f 48 8d 87 68 31 00 00 45 31 d2 e9 fd fc ff
+0x00007ff822316114:   ff 8b 83 ac 21 00 00 45 31 d2 85 c0 0f 84 e0 fc
+0x00007ff822316124:   ff ff e9 1c fd ff ff 4c 8d 05 04 4a 76 00 ba 18
+0x00007ff822316134:   00 00 00 31 c9 44 8b b4 24 a8 00 00 00 e8 ea f1
+0x00007ff822316144:   11 00 48 8b 8c 24 40 31 00 00 4c 8d 05 53 4a 76
+0x00007ff822316154:   00 ba 18 00 00 00 e8 d1 f1 11 00 e9 f2 f8 ff ff
+0x00007ff822316164:   4d 89 d1 45 31 d2 e9 36 fe ff ff 44 8b b4 24 a8
+0x00007ff822316174:   00 00 00 e9 c1 f8 ff ff 44 8b b4 24 a8 00 00 00
+0x00007ff822316184:   eb c0 66 2e 0f 1f 84 00 00 00 00 00 41 57 41 56
+0x00007ff822316194:   41 55 41 54 55 57 56 53 48 83 ec 78 48 8b 69 18
+0x00007ff8223161a4:   44 8b 85 30 21 00 00 48 8d 44 24 68 49 89 cd 48
+0x00007ff8223161b4:   c7 44 24 50 00 00 00 00 4c 8d 74 24 58 48 c7 44
+0x00007ff8223161c4:   24 58 00 00 00 00 48 c7 44 24 38 00 00 00 00 c7
+0x00007ff8223161d4:   44 24 40 00 00 00 00 48 89 44 24 48 45 85 c0 0f
+0x00007ff8223161e4:   84 dd 02 00 00 0f 1f 80 00 00 00 00 48 c7 44 24
+0x00007ff8223161f4:   60 00 00 00 00 48 8b 5c 24 38 48 03 9d 28 21 00
+0x00007ff822316204:   00 4c 8b 63 48 4c 8b 7b 50 49 8b 4c 24 38 e8 19
+0x00007ff822316214:   ef 11 00 48 89 44 24 50 48 85 c0 0f 84 f5 02 00
+0x00007ff822316224:   00 48 83 bd c0 00 00 00 00 0f 84 ad 02 00 00 45
+0x00007ff822316234:   31 c9 4c 8d 83 1e 31 00 00 48 8d 15 b6 49 76 00
+0x00007ff822316244:   4c 89 f1 e8 0c f3 11 00 45 31 c9 4c 8d 83 3f 31
+0x00007ff822316254:   00 00 4c 89 f1 48 8d 15 a9 49 76 00 e8 f3 f2 11
+0x00007ff822316264:   00 49 8b 54 24 38 48 8d 0d a6 49 76 00 e8 a2 f4
+0x00007ff822316274:   11 00 48 89 44 24 60 48 85 c0 0f 84 8c 02 00 00
+0x00007ff822316284:   83 7d 48 01 0f 84 9a 02 00 00 8b 45 30 48 8d 7b
+0x00007ff822316294:   38 83 e0 01 85 c0 75 35 49 8b 4d 38 49 89 e8 4c 
+
+
+Stack slot to memory mapping:
+
+stack at sp + 0 slots: 0x000000070463af90 is an oop: java.lang.Class 
+{0x000000070463af90} - klass: 'java/lang/Class'
+ - ---- fields (total size 363 words):
+ - private volatile transient 'classRedefinedCount' 'I' @12  0 (0x00000000)
+ - injected 'klass' 'J' @16  2673638690208 (0x0000026e8148cda0)
+ - injected 'array_klass' 'J' @24  0 (0x0000000000000000)
+ - injected 'oop_size' 'I' @32  363 (0x0000016b)
+ - injected 'static_oop_field_count' 'I' @36  1 (0x00000001)
+ - private volatile transient 'cachedConstructor' 'Ljava/lang/reflect/Constructor;' @40  null (0x00000000)
+ - private transient 'name' 'Ljava/lang/String;' @44  "org.bytedeco.ffmpeg.global.avcodec"{0x0000000704786810} (0xe08f0d02)
+ - private transient 'module' 'Ljava/lang/Module;' @48  a 'java/lang/Module'{0x0000000702943620} (0xe05286c4)
+ - private final 'classLoader' 'Ljava/lang/ClassLoader;' @52  a 'jdk/internal/loader/ClassLoaders$AppClassLoader'{0x0000000702933d30} (0xe05267a6)
+ - private transient 'classData' 'Ljava/lang/Object;' @56  null (0x00000000)
+ - private transient 'packageName' 'Ljava/lang/String;' @60  "org.bytedeco.ffmpeg.global"{0x000000070462d8d0} (0xe08c5b1a)
+ - private final 'componentType' 'Ljava/lang/Class;' @64  null (0x00000000)
+ - private volatile transient 'reflectionData' 'Ljava/lang/ref/SoftReference;' @68  null (0x00000000)
+ - private volatile transient 'genericInfo' 'Lsun/reflect/generics/repository/ClassRepository;' @72  null (0x00000000)
+ - private volatile transient 'enumConstants' '[Ljava/lang/Object;' @76  null (0x00000000)
+ - private volatile transient 'enumConstantDirectory' 'Ljava/util/Map;' @80  null (0x00000000)
+ - private volatile transient 'annotationData' 'Ljava/lang/Class$AnnotationData;' @84  a 'java/lang/Class$AnnotationData'{0x0000000704432020} (0xe0886404)
+ - private volatile transient 'annotationType' 'Lsun/reflect/annotation/AnnotationType;' @88  null (0x00000000)
+ - transient 'classValueMap' 'Ljava/lang/ClassValue$ClassValueMap;' @92  null (0x00000000)
+ - injected 'protection_domain' 'Ljava/lang/Object;' @96  a 'java/security/ProtectionDomain'{0x000000070462d930} (0xe08c5b26)
+ - injected 'signers_name' 'Ljava/lang/Object;' @100  null (0x00000000)
+ - injected 'source_file' 'Ljava/lang/Object;' @104  null (0x00000000)
+ - injected '<init_lock>' 'Ljava/lang/Object;' @108  null (0x00000000)
+ - signature: Lorg/bytedeco/ffmpeg/global/avcodec;
+ - ---- static fields (1):
+ - public static final 'AV_CODEC_ID_NONE' 'I' @116  0 (0x00000000)
+ - public static final 'AV_CODEC_ID_MPEG1VIDEO' 'I' @120  1 (0x00000001)
+ - public static final 'AV_CODEC_ID_MPEG2VIDEO' 'I' @124  2 (0x00000002)
+ - public static final 'AV_CODEC_ID_H261' 'I' @128  3 (0x00000003)
+ - public static final 'AV_CODEC_ID_H263' 'I' @132  4 (0x00000004)
+ - public static final 'AV_CODEC_ID_RV10' 'I' @136  5 (0x00000005)
+ - public static final 'AV_CODEC_ID_RV20' 'I' @140  6 (0x00000006)
+ - public static final 'AV_CODEC_ID_MJPEG' 'I' @144  7 (0x00000007)
+ - public static final 'AV_CODEC_ID_MJPEGB' 'I' @148  8 (0x00000008)
+ - public static final 'AV_CODEC_ID_LJPEG' 'I' @152  9 (0x00000009)
+ - public static final 'AV_CODEC_ID_SP5X' 'I' @156  10 (0x0000000a)
+ - public static final 'AV_CODEC_ID_JPEGLS' 'I' @160  11 (0x0000000b)
+ - public static final 'AV_CODEC_ID_MPEG4' 'I' @164  12 (0x0000000c)
+ - public static final 'AV_CODEC_ID_RAWVIDEO' 'I' @168  13 (0x0000000d)
+ - public static final 'AV_CODEC_ID_MSMPEG4V1' 'I' @172  14 (0x0000000e)
+ - public static final 'AV_CODEC_ID_MSMPEG4V2' 'I' @176  15 (0x0000000f)
+ - public static final 'AV_CODEC_ID_MSMPEG4V3' 'I' @180  16 (0x00000010)
+ - public static final 'AV_CODEC_ID_WMV1' 'I' @184  17 (0x00000011)
+ - public static final 'AV_CODEC_ID_WMV2' 'I' @188  18 (0x00000012)
+ - public static final 'AV_CODEC_ID_H263P' 'I' @192  19 (0x00000013)
+ - public static final 'AV_CODEC_ID_H263I' 'I' @196  20 (0x00000014)
+ - public static final 'AV_CODEC_ID_FLV1' 'I' @200  21 (0x00000015)
+ - public static final 'AV_CODEC_ID_SVQ1' 'I' @204  22 (0x00000016)
+ - public static final 'AV_CODEC_ID_SVQ3' 'I' @208  23 (0x00000017)
+ - public static final 'AV_CODEC_ID_DVVIDEO' 'I' @212  24 (0x00000018)
+ - public static final 'AV_CODEC_ID_HUFFYUV' 'I' @216  25 (0x00000019)
+ - public static final 'AV_CODEC_ID_CYUV' 'I' @220  26 (0x0000001a)
+ - public static final 'AV_CODEC_ID_H264' 'I' @224  27 (0x0000001b)
+ - public static final 'AV_CODEC_ID_INDEO3' 'I' @228  28 (0x0000001c)
+ - public static final 'AV_CODEC_ID_VP3' 'I' @232  29 (0x0000001d)
+ - public static final 'AV_CODEC_ID_THEORA' 'I' @236  30 (0x0000001e)
+ - public static final 'AV_CODEC_ID_ASV1' 'I' @240  31 (0x0000001f)
+ - public static final 'AV_CODEC_ID_ASV2' 'I' @244  32 (0x00000020)
+ - public static final 'AV_CODEC_ID_FFV1' 'I' @248  33 (0x00000021)
+ - public static final 'AV_CODEC_ID_4XM' 'I' @252  34 (0x00000022)
+ - public static final 'AV_CODEC_ID_VCR1' 'I' @256  35 (0x00000023)
+ - public static final 'AV_CODEC_ID_CLJR' 'I' @260  36 (0x00000024)
+ - public static final 'AV_CODEC_ID_MDEC' 'I' @264  37 (0x00000025)
+ - public static final 'AV_CODEC_ID_ROQ' 'I' @268  38 (0x00000026)
+ - public static final 'AV_CODEC_ID_INTERPLAY_VIDEO' 'I' @272  39 (0x00000027)
+ - public static final 'AV_CODEC_ID_XAN_WC3' 'I' @276  40 (0x00000028)
+ - public static final 'AV_CODEC_ID_XAN_WC4' 'I' @280  41 (0x00000029)
+ - public static final 'AV_CODEC_ID_RPZA' 'I' @284  42 (0x0000002a)
+ - public static final 'AV_CODEC_ID_CINEPAK' 'I' @288  43 (0x0000002b)
+ - public static final 'AV_CODEC_ID_WS_VQA' 'I' @292  44 (0x0000002c)
+ - public static final 'AV_CODEC_ID_MSRLE' 'I' @296  45 (0x0000002d)
+ - public static final 'AV_CODEC_ID_MSVIDEO1' 'I' @300  46 (0x0000002e)
+ - public static final 'AV_CODEC_ID_IDCIN' 'I' @304  47 (0x0000002f)
+ - public static final 'AV_CODEC_ID_8BPS' 'I' @308  48 (0x00000030)
+ - public static final 'AV_CODEC_ID_SMC' 'I' @312  49 (0x00000031)
+ - public static final 'AV_CODEC_ID_FLIC' 'I' @316  50 (0x00000032)
+ - public static final 'AV_CODEC_ID_TRUEMOTION1' 'I' @320  51 (0x00000033)
+ - public static final 'AV_CODEC_ID_VMDVIDEO' 'I' @324  52 (0x00000034)
+ - public static final 'AV_CODEC_ID_MSZH' 'I' @328  53 (0x00000035)
+ - public static final 'AV_CODEC_ID_ZLIB' 'I' @332  54 (0x00000036)
+ - public static final 'AV_CODEC_ID_QTRLE' 'I' @336  55 (0x00000037)
+ - public static final 'AV_CODEC_ID_TSCC' 'I' @340  56 (0x00000038)
+ - public static final 'AV_CODEC_ID_ULTI' 'I' @344  57 (0x00000039)
+ - public static final 'AV_CODEC_ID_QDRAW' 'I' @348  58 (0x0000003a)
+ - public static final 'AV_CODEC_ID_VIXL' 'I' @352  59 (0x0000003b)
+ - public static final 'AV_CODEC_ID_QPEG' 'I' @356  60 (0x0000003c)
+ - public static final 'AV_CODEC_ID_PNG' 'I' @360  61 (0x0000003d)
+ - public static final 'AV_CODEC_ID_PPM' 'I' @364  62 (0x0000003e)
+ - public static final 'AV_CODEC_ID_PBM' 'I' @368  63 (0x0000003f)
+ - public static final 'AV_CODEC_ID_PGM' 'I' @372  64 (0x00000040)
+ - public static final 'AV_CODEC_ID_PGMYUV' 'I' @376  65 (0x00000041)
+ - public static final 'AV_CODEC_ID_PAM' 'I' @380  66 (0x00000042)
+ - public static final 'AV_CODEC_ID_FFVHUFF' 'I' @384  67 (0x00000043)
+ - public static final 'AV_CODEC_ID_RV30' 'I' @388  68 (0x00000044)
+ - public static final 'AV_CODEC_ID_RV40' 'I' @392  69 (0x00000045)
+ - public static final 'AV_CODEC_ID_VC1' 'I' @396  70 (0x00000046)
+ - public static final 'AV_CODEC_ID_WMV3' 'I' @400  71 (0x00000047)
+ - public static final 'AV_CODEC_ID_LOCO' 'I' @404  72 (0x00000048)
+ - public static final 'AV_CODEC_ID_WNV1' 'I' @408  73 (0x00000049)
+ - public static final 'AV_CODEC_ID_AASC' 'I' @412  74 (0x0000004a)
+ - public static final 'AV_CODEC_ID_INDEO2' 'I' @416  75 (0x0000004b)
+ - public static final 'AV_CODEC_ID_FRAPS' 'I' @420  76 (0x0000004c)
+ - public static final 'AV_CODEC_ID_TRUEMOTION2' 'I' @424  77 (0x0000004d)
+ - public static final 'AV_CODEC_ID_BMP' 'I' @428  78 (0x0000004e)
+ - public static final 'AV_CODEC_ID_CSCD' 'I' @432  79 (0x0000004f)
+ - public static final 'AV_CODEC_ID_MMVIDEO' 'I' @436  80 (0x00000050)
+ - public static final 'AV_CODEC_ID_ZMBV' 'I' @440  81 (0x00000051)
+ - public static final 'AV_CODEC_ID_AVS' 'I' @444  82 (0x00000052)
+ - public static final 'AV_CODEC_ID_SMACKVIDEO' 'I' @448  83 (0x00000053)
+ - public static final 'AV_CODEC_ID_NUV' 'I' @452  84 (0x00000054)
+ - public static final 'AV_CODEC_ID_KMVC' 'I' @456  85 (0x00000055)
+ - public static final 'AV_CODEC_ID_FLASHSV' 'I' @460  86 (0x00000056)
+ - public static final 'AV_CODEC_ID_CAVS' 'I' @464  87 (0x00000057)
+ - public static final 'AV_CODEC_ID_JPEG2000' 'I' @468  88 (0x00000058)
+ - public static final 'AV_CODEC_ID_VMNC' 'I' @472  89 (0x00000059)
+ - public static final 'AV_CODEC_ID_VP5' 'I' @476  90 (0x0000005a)
+ - public static final 'AV_CODEC_ID_VP6' 'I' @480  91 (0x0000005b)
+ - public static final 'AV_CODEC_ID_VP6F' 'I' @484  92 (0x0000005c)
+ - public static final 'AV_CODEC_ID_TARGA' 'I' @488  93 (0x0000005d)
+ - public static final 'AV_CODEC_ID_DSICINVIDEO' 'I' @492  94 (0x0000005e)
+ - public static final 'AV_CODEC_ID_TIERTEXSEQVIDEO' 'I' @496  95 (0x0000005f)
+ - public static final 'AV_CODEC_ID_TIFF' 'I' @500  96 (0x00000060)
+ - public static final 'AV_CODEC_ID_GIF' 'I' @504  97 (0x00000061)
+ - public static final 'AV_CODEC_ID_DXA' 'I' @508  98 (0x00000062)
+ - public static final 'AV_CODEC_ID_DNXHD' 'I' @512  99 (0x00000063)
+ - public static final 'AV_CODEC_ID_THP' 'I' @516  100 (0x00000064)
+ - public static final 'AV_CODEC_ID_SGI' 'I' @520  101 (0x00000065)
+ - public static final 'AV_CODEC_ID_C93' 'I' @524  102 (0x00000066)
+ - public static final 'AV_CODEC_ID_BETHSOFTVID' 'I' @528  103 (0x00000067)
+ - public static final 'AV_CODEC_ID_PTX' 'I' @532  104 (0x00000068)
+ - public static final 'AV_CODEC_ID_TXD' 'I' @536  105 (0x00000069)
+ - public static final 'AV_CODEC_ID_VP6A' 'I' @540  106 (0x0000006a)
+ - public static final 'AV_CODEC_ID_AMV' 'I' @544  107 (0x0000006b)
+ - public static final 'AV_CODEC_ID_VB' 'I' @548  108 (0x0000006c)
+ - public static final 'AV_CODEC_ID_PCX' 'I' @552  109 (0x0000006d)
+ - public static final 'AV_CODEC_ID_SUNRAST' 'I' @556  110 (0x0000006e)
+ - public static final 'AV_CODEC_ID_INDEO4' 'I' @560  111 (0x0000006f)
+ - public static final 'AV_CODEC_ID_INDEO5' 'I' @564  112 (0x00000070)
+ - public static final 'AV_CODEC_ID_MIMIC' 'I' @568  113 (0x00000071)
+ - public static final 'AV_CODEC_ID_RL2' 'I' @572  114 (0x00000072)
+ - public static final 'AV_CODEC_ID_ESCAPE124' 'I' @576  115 (0x00000073)
+ - public static final 'AV_CODEC_ID_DIRAC' 'I' @580  116 (0x00000074)
+ - public static final 'AV_CODEC_ID_BFI' 'I' @584  117 (0x00000075)
+ - public static final 'AV_CODEC_ID_CMV' 'I' @588  118 (0x00000076)
+ - public static final 'AV_CODEC_ID_MOTIONPIXELS' 'I' @592  119 (0x00000077)
+ - public static final 'AV_CODEC_ID_TGV' 'I' @596  120 (0x00000078)
+ - public static final 'AV_CODEC_ID_TGQ' 'I' @600  121 (0x00000079)
+ - public static final 'AV_CODEC_ID_TQI' 'I' @604  122 (0x0000007a)
+ - public static final 'AV_CODEC_ID_AURA' 'I' @608  123 (0x0000007b)
+ - public static final 'AV_CODEC_ID_AURA2' 'I' @612  124 (0x0000007c)
+ - public static final 'AV_CODEC_ID_V210X' 'I' @616  125 (0x0000007d)
+ - public static final 'AV_CODEC_ID_TMV' 'I' @620  126 (0x0000007e)
+ - public static final 'AV_CODEC_ID_V210' 'I' @624  127 (0x0000007f)
+ - public static final 'AV_CODEC_ID_DPX' 'I' @628  128 (0x00000080)
+ - public static final 'AV_CODEC_ID_MAD' 'I' @632  129 (0x00000081)
+ - public static final 'AV_CODEC_ID_FRWU' 'I' @636  130 (0x00000082)
+ - public static final 'AV_CODEC_ID_FLASHSV2' 'I' @640  131 (0x00000083)
+ - public static final 'AV_CODEC_ID_CDGRAPHICS' 'I' @644  132 (0x00000084)
+ - public static final 'AV_CODEC_ID_R210' 'I' @648  133 (0x00000085)
+ - public static final 'AV_CODEC_ID_ANM' 'I' @652  134 (0x00000086)
+ - public static final 'AV_CODEC_ID_BINKVIDEO' 'I' @656  135 (0x00000087)
+ - public static final 'AV_CODEC_ID_IFF_ILBM' 'I' @660  136 (0x00000088)
+ - public static final 'AV_CODEC_ID_IFF_BYTERUN1' 'I' @664  136 (0x00000088)
+ - public static final 'AV_CODEC_ID_KGV1' 'I' @668  137 (0x00000089)
+ - public static final 'AV_CODEC_ID_YOP' 'I' @672  138 (0x0000008a)
+ - public static final 'AV_CODEC_ID_VP8' 'I' @676  139 (0x0000008b)
+ - public static final 'AV_CODEC_ID_PICTOR' 'I' @680  140 (0x0000008c)
+ - public static final 'AV_CODEC_ID_ANSI' 'I' @684  141 (0x0000008d)
+ - public static final 'AV_CODEC_ID_A64_MULTI' 'I' @688  142 (0x0000008e)
+ - public static final 'AV_CODEC_ID_A64_MULTI5' 'I' @692  143 (0x0000008f)
+ - public static final 'AV_CODEC_ID_R10K' 'I' @696  144 (0x00000090)
+ - public static final 'AV_CODEC_ID_MXPEG' 'I' @700  145 (0x00000091)
+ - public static final 'AV_CODEC_ID_LAGARITH' 'I' @704  146 (0x00000092)
+ - public static final 'AV_CODEC_ID_PRORES' 'I' @708  147 (0x00000093)
+ - public static final 'AV_CODEC_ID_JV' 'I' @712  148 (0x00000094)
+ - public static final 'AV_CODEC_ID_DFA' 'I' @716  149 (0x00000095)
+ - public static final 'AV_CODEC_ID_WMV3IMAGE' 'I' @720  150 (0x00000096)
+ - public static final 'AV_CODEC_ID_VC1IMAGE' 'I' @724  151 (0x00000097)
+ - public static final 'AV_CODEC_ID_UTVIDEO' 'I' @728  152 (0x00000098)
+ - public static final 'AV_CODEC_ID_BMV_VIDEO' 'I' @732  153 (0x00000099)
+ - public static final 'AV_CODEC_ID_VBLE' 'I' @736  154 (0x0000009a)
+ - public static final 'AV_CODEC_ID_DXTORY' 'I' @740  155 (0x0000009b)
+ - public static final 'AV_CODEC_ID_V410' 'I' @744  156 (0x0000009c)
+ - public static final 'AV_CODEC_ID_XWD' 'I' @748  157 (0x0000009d)
+ - public static final 'AV_CODEC_ID_CDXL' 'I' @752  158 (0x0000009e)
+ - public static final 'AV_CODEC_ID_XBM' 'I' @756  159 (0x0000009f)
+ - public static final 'AV_CODEC_ID_ZEROCODEC' 'I' @760  160 (0x000000a0)
+ - public static final 'AV_CODEC_ID_MSS1' 'I' @764  161 (0x000000a1)
+ - public static final 'AV_CODEC_ID_MSA1' 'I' @768  162 (0x000000a2)
+ - public static final 'AV_CODEC_ID_TSCC2' 'I' @772  163 (0x000000a3)
+ - public static final 'AV_CODEC_ID_MTS2' 'I' @776  164 (0x000000a4)
+ - public static final 'AV_CODEC_ID_CLLC' 'I' @780  165 (0x000000a5)
+ - public static final 'AV_CODEC_ID_MSS2' 'I' @784  166 (0x000000a6)
+ - public static final 'AV_CODEC_ID_VP9' 'I' @788  167 (0x000000a7)
+ - public static final 'AV_CODEC_ID_AIC' 'I' @792  168 (0x000000a8)
+ - public static final 'AV_CODEC_ID_ESCAPE130' 'I' @796  169 (0x000000a9)
+ - public static final 'AV_CODEC_ID_G2M' 'I' @800  170 (0x000000aa)
+ - public static final 'AV_CODEC_ID_WEBP' 'I' @804  171 (0x000000ab)
+ - public static final 'AV_CODEC_ID_HNM4_VIDEO' 'I' @808  172 (0x000000ac)
+ - public static final 'AV_CODEC_ID_HEVC' 'I' @812  173 (0x000000ad)
+ - public static final 'AV_CODEC_ID_H265' 'I' @816  173 (0x000000ad)
+ - public static final 'AV_CODEC_ID_FIC' 'I' @820  174 (0x000000ae)
+ - public static final 'AV_CODEC_ID_ALIAS_PIX' 'I' @824  175 (0x000000af)
+ - public static final 'AV_CODEC_ID_BRENDER_PIX' 'I' @828  176 (0x000000b0)
+ - public static final 'AV_CODEC_ID_PAF_VIDEO' 'I' @832  177 (0x000000b1)
+ - public static final 'AV_CODEC_ID_EXR' 'I' @836  178 (0x000000b2)
+ - public static final 'AV_CODEC_ID_VP7' 'I' @840  179 (0x000000b3)
+ - public static final 'AV_CODEC_ID_SANM' 'I' @844  180 (0x000000b4)
+ - public static final 'AV_CODEC_ID_SGIRLE' 'I' @848  181 (0x000000b5)
+ - public static final 'AV_CODEC_ID_MVC1' 'I' @852  182 (0x000000b6)
+ - public static final 'AV_CODEC_ID_MVC2' 'I' @856  183 (0x000000b7)
+ - public static final 'AV_CODEC_ID_HQX' 'I' @860  184 (0x000000b8)
+ - public static final 'AV_CODEC_ID_TDSC' 'I' @864  185 (0x000000b9)
+ - public static final 'AV_CODEC_ID_HQ_HQA' 'I' @868  186 (0x000000ba)
+ - public static final 'AV_CODEC_ID_HAP' 'I' @872  187 (0x000000bb)
+ - public static final 'AV_CODEC_ID_DDS' 'I' @876  188 (0x000000bc)
+ - public static final 'AV_CODEC_ID_DXV' 'I' @880  189 (0x000000bd)
+ - public static final 'AV_CODEC_ID_SCREENPRESSO' 'I' @884  190 (0x000000be)
+ - public static final 'AV_CODEC_ID_RSCC' 'I' @888  191 (0x000000bf)
+ - public static final 'AV_CODEC_ID_AVS2' 'I' @892  192 (0x000000c0)
+ - public static final 'AV_CODEC_ID_PGX' 'I' @896  193 (0x000000c1)
+ - public static final 'AV_CODEC_ID_AVS3' 'I' @900  194 (0x000000c2)
+ - public static final 'AV_CODEC_ID_MSP2' 'I' @904  195 (0x000000c3)
+ - public static final 'AV_CODEC_ID_VVC' 'I' @908  196 (0x000000c4)
+ - public static final 'AV_CODEC_ID_H266' 'I' @912  196 (0x000000c4)
+ - public static final 'AV_CODEC_ID_Y41P' 'I' @916  197 (0x000000c5)
+ - public static final 'AV_CODEC_ID_AVRP' 'I' @920  198 (0x000000c6)
+ - public static final 'AV_CODEC_ID_012V' 'I' @924  199 (0x000000c7)
+ - public static final 'AV_CODEC_ID_AVUI' 'I' @928  200 (0x000000c8)
+ - public static final 'AV_CODEC_ID_AYUV' 'I' @932  201 (0x000000c9)
+ - public static final 'AV_CODEC_ID_TARGA_Y216' 'I' @936  202 (0x000000ca)
+ - public static final 'AV_CODEC_ID_V308' 'I' @940  203 (0x000000cb)
+ - public static final 'AV_CODEC_ID_V408' 'I' @944  204 (0x000000cc)
+ - public static final 'AV_CODEC_ID_YUV4' 'I' @948  205 (0x000000cd)
+ - public static final 'AV_CODEC_ID_AVRN' 'I' @952  206 (0x000000ce)
+ - public static final 'AV_CODEC_ID_CPIA' 'I' @956  207 (0x000000cf)
+ - public static final 'AV_CODEC_ID_XFACE' 'I' @960  208 (0x000000d0)
+ - public static final 'AV_CODEC_ID_SNOW' 'I' @964  209 (0x000000d1)
+ - public static final 'AV_CODEC_ID_SMVJPEG' 'I' @968  210 (0x000000d2)
+ - public static final 'AV_CODEC_ID_APNG' 'I' @972  211 (0x000000d3)
+ - public static final 'AV_CODEC_ID_DAALA' 'I' @976  212 (0x000000d4)
+ - public static final 'AV_CODEC_ID_CFHD' 'I' @980  213 (0x000000d5)
+ - public static final 'AV_CODEC_ID_TRUEMOTION2RT' 'I' @984  214 (0x000000d6)
+ - public static final 'AV_CODEC_ID_M101' 'I' @988  215 (0x000000d7)
+ - public static final 'AV_CODEC_ID_MAGICYUV' 'I' @992  216 (0x000000d8)
+ - public static final 'AV_CODEC_ID_SHEERVIDEO' 'I' @996  217 (0x000000d9)
+ - public static final 'AV_CODEC_ID_YLC' 'I' @1000  218 (0x000000da)
+ - public static final 'AV_CODEC_ID_PSD' 'I' @1004  219 (0x000000db)
+ - public static final 'AV_CODEC_ID_PIXLET' 'I' @1008  220 (0x000000dc)
+ - public static final 'AV_CODEC_ID_SPEEDHQ' 'I' @1012  221 (0x000000dd)
+ - public static final 'AV_CODEC_ID_FMVC' 'I' @1016  222 (0x000000de)
+ - public static final 'AV_CODEC_ID_SCPR' 'I' @1020  223 (0x000000df)
+ - public static final 'AV_CODEC_ID_CLEARVIDEO' 'I' @1024  224 (0x000000e0)
+ - public static final 'AV_CODEC_ID_XPM' 'I' @1028  225 (0x000000e1)
+ - public static final 'AV_CODEC_ID_AV1' 'I' @1032  226 (0x000000e2)
+ - public static final 'AV_CODEC_ID_BITPACKED' 'I' @1036  227 (0x000000e3)
+ - public static final 'AV_CODEC_ID_MSCC' 'I' @1040  228 (0x000000e4)
+ - public static final 'AV_CODEC_ID_SRGC' 'I' @1044  229 (0x000000e5)
+ - public static final 'AV_CODEC_ID_SVG' 'I' @1048  230 (0x000000e6)
+ - public static final 'AV_CODEC_ID_GDV' 'I' @1052  231 (0x000000e7)
+ - public static final 'AV_CODEC_ID_FITS' 'I' @1056  232 (0x000000e8)
+ - public static final 'AV_CODEC_ID_IMM4' 'I' @1060  233 (0x000000e9)
+ - public static final 'AV_CODEC_ID_PROSUMER' 'I' @1064  234 (0x000000ea)
+ - public static final 'AV_CODEC_ID_MWSC' 'I' @1068  235 (0x000000eb)
+ - public static final 'AV_CODEC_ID_WCMV' 'I' @1072  236 (0x000000ec)
+ - public static final 'AV_CODEC_ID_RASC' 'I' @1076  237 (0x000000ed)
+ - public static final 'AV_CODEC_ID_HYMT' 'I' @1080  238 (0x000000ee)
+ - public static final 'AV_CODEC_ID_ARBC' 'I' @1084  239 (0x000000ef)
+ - public static final 'AV_CODEC_ID_AGM' 'I' @1088  240 (0x000000f0)
+ - public static final 'AV_CODEC_ID_LSCR' 'I' @1092  241 (0x000000f1)
+ - public static final 'AV_CODEC_ID_VP4' 'I' @1096  242 (0x000000f2)
+ - public static final 'AV_CODEC_ID_IMM5' 'I' @1100  243 (0x000000f3)
+ - public static final 'AV_CODEC_ID_MVDV' 'I' @1104  244 (0x000000f4)
+ - public static final 'AV_CODEC_ID_MVHA' 'I' @1108  245 (0x000000f5)
+ - public static final 'AV_CODEC_ID_CDTOONS' 'I' @1112  246 (0x000000f6)
+ - public static final 'AV_CODEC_ID_MV30' 'I' @1116  247 (0x000000f7)
+ - public static final 'AV_CODEC_ID_NOTCHLC' 'I' @1120  248 (0x000000f8)
+ - public static final 'AV_CODEC_ID_PFM' 'I' @1124  249 (0x000000f9)
+ - public static final 'AV_CODEC_ID_MOBICLIP' 'I' @1128  250 (0x000000fa)
+ - public static final 'AV_CODEC_ID_PHOTOCD' 'I' @1132  251 (0x000000fb)
+ - public static final 'AV_CODEC_ID_IPU' 'I' @1136  252 (0x000000fc)
+ - public static final 'AV_CODEC_ID_ARGO' 'I' @1140  253 (0x000000fd)
+ - public static final 'AV_CODEC_ID_CRI' 'I' @1144  254 (0x000000fe)
+ - public static final 'AV_CODEC_ID_SIMBIOSIS_IMX' 'I' @1148  255 (0x000000ff)
+ - public static final 'AV_CODEC_ID_SGA_VIDEO' 'I' @1152  256 (0x00000100)
+ - public static final 'AV_CODEC_ID_GEM' 'I' @1156  257 (0x00000101)
+ - public static final 'AV_CODEC_ID_VBN' 'I' @1160  258 (0x00000102)
+ - public static final 'AV_CODEC_ID_JPEGXL' 'I' @1164  259 (0x00000103)
+ - public static final 'AV_CODEC_ID_QOI' 'I' @1168  260 (0x00000104)
+ - public static final 'AV_CODEC_ID_PHM' 'I' @1172  261 (0x00000105)
+ - public static final 'AV_CODEC_ID_RADIANCE_HDR' 'I' @1176  262 (0x00000106)
+ - public static final 'AV_CODEC_ID_WBMP' 'I' @1180  263 (0x00000107)
+ - public static final 'AV_CODEC_ID_MEDIA100' 'I' @1184  264 (0x00000108)
+ - public static final 'AV_CODEC_ID_VQC' 'I' @1188  265 (0x00000109)
+ - public static final 'AV_CODEC_ID_FIRST_AUDIO' 'I' @1192  65536 (0x00010000)
+ - public static final 'AV_CODEC_ID_PCM_S16LE' 'I' @1196  65536 (0x00010000)
+ - public static final 'AV_CODEC_ID_PCM_S16BE' 'I' @1200  65537 (0x00010001)
+ - public static final 'AV_CODEC_ID_PCM_U16LE' 'I' @1204  65538 (0x00010002)
+ - public static final 'AV_CODEC_ID_PCM_U16BE' 'I' @1208  65539 (0x00010003)
+ - public static final 'AV_CODEC_ID_PCM_S8' 'I' @1212  65540 (0x00010004)
+ - public static final 'AV_CODEC_ID_PCM_U8' 'I' @1216  65541 (0x00010005)
+ - public static final 'AV_CODEC_ID_PCM_MULAW' 'I' @1220  65542 (0x00010006)
+ - public static final 'AV_CODEC_ID_PCM_ALAW' 'I' @1224  65543 (0x00010007)
+ - public static final 'AV_CODEC_ID_PCM_S32LE' 'I' @1228  65544 (0x00010008)
+ - public static final 'AV_CODEC_ID_PCM_S32BE' 'I' @1232  65545 (0x00010009)
+ - public static final 'AV_CODEC_ID_PCM_U32LE' 'I' @1236  65546 (0x0001000a)
+ - public static final 'AV_CODEC_ID_PCM_U32BE' 'I' @1240  65547 (0x0001000b)
+ - public static final 'AV_CODEC_ID_PCM_S24LE' 'I' @1244  65548 (0x0001000c)
+ - public static final 'AV_CODEC_ID_PCM_S24BE' 'I' @1248  65549 (0x0001000d)
+ - public static final 'AV_CODEC_ID_PCM_U24LE' 'I' @1252  65550 (0x0001000e)
+ - public static final 'AV_CODEC_ID_PCM_U24BE' 'I' @1256  65551 (0x0001000f)
+ - public static final 'AV_CODEC_ID_PCM_S24DAUD' 'I' @1260  65552 (0x00010010)
+ - public static final 'AV_CODEC_ID_PCM_ZORK' 'I' @1264  65553 (0x00010011)
+ - public static final 'AV_CODEC_ID_PCM_S16LE_PLANAR' 'I' @1268  65554 (0x00010012)
+ - public static final 'AV_CODEC_ID_PCM_DVD' 'I' @1272  65555 (0x00010013)
+ - public static final 'AV_CODEC_ID_PCM_F32BE' 'I' @1276  65556 (0x00010014)
+ - public static final 'AV_CODEC_ID_PCM_F32LE' 'I' @1280  65557 (0x00010015)
+ - public static final 'AV_CODEC_ID_PCM_F64BE' 'I' @1284  65558 (0x00010016)
+ - public static final 'AV_CODEC_ID_PCM_F64LE' 'I' @1288  65559 (0x00010017)
+ - public static final 'AV_CODEC_ID_PCM_BLURAY' 'I' @1292  65560 (0x00010018)
+ - public static final 'AV_CODEC_ID_PCM_LXF' 'I' @1296  65561 (0x00010019)
+ - public static final 'AV_CODEC_ID_S302M' 'I' @1300  65562 (0x0001001a)
+ - public static final 'AV_CODEC_ID_PCM_S8_PLANAR' 'I' @1304  65563 (0x0001001b)
+ - public static final 'AV_CODEC_ID_PCM_S24LE_PLANAR' 'I' @1308  65564 (0x0001001c)
+ - public static final 'AV_CODEC_ID_PCM_S32LE_PLANAR' 'I' @1312  65565 (0x0001001d)
+ - public static final 'AV_CODEC_ID_PCM_S16BE_PLANAR' 'I' @1316  65566 (0x0001001e)
+ - public static final 'AV_CODEC_ID_PCM_S64LE' 'I' @1320  65567 (0x0001001f)
+ - public static final 'AV_CODEC_ID_PCM_S64BE' 'I' @1324  65568 (0x00010020)
+ - public static final 'AV_CODEC_ID_PCM_F16LE' 'I' @1328  65569 (0x00010021)
+ - public static final 'AV_CODEC_ID_PCM_F24LE' 'I' @1332  65570 (0x00010022)
+ - public static final 'AV_CODEC_ID_PCM_VIDC' 'I' @1336  65571 (0x00010023)
+ - public static final 'AV_CODEC_ID_PCM_SGA' 'I' @1340  65572 (0x00010024)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_QT' 'I' @1344  69632 (0x00011000)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_WAV' 'I' @1348  69633 (0x00011001)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_DK3' 'I' @1352  69634 (0x00011002)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_DK4' 'I' @1356  69635 (0x00011003)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_WS' 'I' @1360  69636 (0x00011004)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_SMJPEG' 'I' @1364  69637 (0x00011005)
+ - public static final 'AV_CODEC_ID_ADPCM_MS' 'I' @1368  69638 (0x00011006)
+ - public static final 'AV_CODEC_ID_ADPCM_4XM' 'I' @1372  69639 (0x00011007)
+ - public static final 'AV_CODEC_ID_ADPCM_XA' 'I' @1376  69640 (0x00011008)
+ - public static final 'AV_CODEC_ID_ADPCM_ADX' 'I' @1380  69641 (0x00011009)
+ - public static final 'AV_CODEC_ID_ADPCM_EA' 'I' @1384  69642 (0x0001100a)
+ - public static final 'AV_CODEC_ID_ADPCM_G726' 'I' @1388  69643 (0x0001100b)
+ - public static final 'AV_CODEC_ID_ADPCM_CT' 'I' @1392  69644 (0x0001100c)
+ - public static final 'AV_CODEC_ID_ADPCM_SWF' 'I' @1396  69645 (0x0001100d)
+ - public static final 'AV_CODEC_ID_ADPCM_YAMAHA' 'I' @1400  69646 (0x0001100e)
+ - public static final 'AV_CODEC_ID_ADPCM_SBPRO_4' 'I' @1404  69647 (0x0001100f)
+ - public static final 'AV_CODEC_ID_ADPCM_SBPRO_3' 'I' @1408  69648 (0x00011010)
+ - public static final 'AV_CODEC_ID_ADPCM_SBPRO_2' 'I' @1412  69649 (0x00011011)
+ - public static final 'AV_CODEC_ID_ADPCM_THP' 'I' @1416  69650 (0x00011012)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_AMV' 'I' @1420  69651 (0x00011013)
+ - public static final 'AV_CODEC_ID_ADPCM_EA_R1' 'I' @1424  69652 (0x00011014)
+ - public static final 'AV_CODEC_ID_ADPCM_EA_R3' 'I' @1428  69653 (0x00011015)
+ - public static final 'AV_CODEC_ID_ADPCM_EA_R2' 'I' @1432  69654 (0x00011016)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_EA_SEAD' 'I' @1436  69655 (0x00011017)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_EA_EACS' 'I' @1440  69656 (0x00011018)
+ - public static final 'AV_CODEC_ID_ADPCM_EA_XAS' 'I' @1444  69657 (0x00011019)
+ - public static final 'AV_CODEC_ID_ADPCM_EA_MAXIS_XA' 'I' @1448  69658 (0x0001101a)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_ISS' 'I' @1452  69659 (0x0001101b)
+ - public static final 'AV_CODEC_ID_ADPCM_G722' 'I' @1456  69660 (0x0001101c)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_APC' 'I' @1460  69661 (0x0001101d)
+ - public static final 'AV_CODEC_ID_ADPCM_VIMA' 'I' @1464  69662 (0x0001101e)
+ - public static final 'AV_CODEC_ID_ADPCM_AFC' 'I' @1468  69663 (0x0001101f)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_OKI' 'I' @1472  69664 (0x00011020)
+ - public static final 'AV_CODEC_ID_ADPCM_DTK' 'I' @1476  69665 (0x00011021)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_RAD' 'I' @1480  69666 (0x00011022)
+ - public static final 'AV_CODEC_ID_ADPCM_G726LE' 'I' @1484  69667 (0x00011023)
+ - public static final 'AV_CODEC_ID_ADPCM_THP_LE' 'I' @1488  69668 (0x00011024)
+ - public static final 'AV_CODEC_ID_ADPCM_PSX' 'I' @1492  69669 (0x00011025)
+ - public static final 'AV_CODEC_ID_ADPCM_AICA' 'I' @1496  69670 (0x00011026)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_DAT4' 'I' @1500  69671 (0x00011027)
+ - public static final 'AV_CODEC_ID_ADPCM_MTAF' 'I' @1504  69672 (0x00011028)
+ - public static final 'AV_CODEC_ID_ADPCM_AGM' 'I' @1508  69673 (0x00011029)
+ - public static final 'AV_CODEC_ID_ADPCM_ARGO' 'I' @1512  69674 (0x0001102a)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_SSI' 'I' @1516  69675 (0x0001102b)
+ - public static final 'AV_CODEC_ID_ADPCM_ZORK' 'I' @1520  69676 (0x0001102c)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_APM' 'I' @1524  69677 (0x0001102d)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_ALP' 'I' @1528  69678 (0x0001102e)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_MTF' 'I' @1532  69679 (0x0001102f)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_CUNNING' 'I' @1536  69680 (0x00011030)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_MOFLEX' 'I' @1540  69681 (0x00011031)
+ - public static final 'AV_CODEC_ID_ADPCM_IMA_ACORN' 'I' @1544  69682 (0x00011032)
+ - public static final 'AV_CODEC_ID_ADPCM_XMD' 'I' @1548  69683 (0x00011033)
+ - public static final 'AV_CODEC_ID_AMR_NB' 'I' @1552  73728 (0x00012000)
+ - public static final 'AV_CODEC_ID_AMR_WB' 'I' @1556  73729 (0x00012001)
+ - public static final 'AV_CODEC_ID_RA_144' 'I' @1560  77824 (0x00013000)
+ - public static final 'AV_CODEC_ID_RA_288' 'I' @1564  77825 (0x00013001)
+ - public static final 'AV_CODEC_ID_ROQ_DPCM' 'I' @1568  81920 (0x00014000)
+ - public static final 'AV_CODEC_ID_INTERPLAY_DPCM' 'I' @1572  81921 (0x00014001)
+ - public static final 'AV_CODEC_ID_XAN_DPCM' 'I' @1576  81922 (0x00014002)
+ - public static final 'AV_CODEC_ID_SOL_DPCM' 'I' @1580  81923 (0x00014003)
+ - public static final 'AV_CODEC_ID_SDX2_DPCM' 'I' @1584  81924 (0x00014004)
+ - public static final 'AV_CODEC_ID_GREMLIN_DPCM' 'I' @1588  81925 (0x00014005)
+ - public static final 'AV_CODEC_ID_DERF_DPCM' 'I' @1592  81926 (0x00014006)
+ - public static final 'AV_CODEC_ID_WADY_DPCM' 'I' @1596  81927 (0x00014007)
+ - public static final 'AV_CODEC_ID_CBD2_DPCM' 'I' @1600  81928 (0x00014008)
+ - public static final 'AV_CODEC_ID_MP2' 'I' @1604  86016 (0x00015000)
+ - public static final 'AV_CODEC_ID_MP3' 'I' @1608  86017 (0x00015001)
+ - public static final 'AV_CODEC_ID_AAC' 'I' @1612  86018 (0x00015002)
+ - public static final 'AV_CODEC_ID_AC3' 'I' @1616  86019 (0x00015003)
+ - public static final 'AV_CODEC_ID_DTS' 'I' @1620  86020 (0x00015004)
+ - public static final 'AV_CODEC_ID_VORBIS' 'I' @1624  86021 (0x00015005)
+ - public static final 'AV_CODEC_ID_DVAUDIO' 'I' @1628  86022 (0x00015006)
+ - public static final 'AV_CODEC_ID_WMAV1' 'I' @1632  86023 (0x00015007)
+ - public static final 'AV_CODEC_ID_WMAV2' 'I' @1636  86024 (0x00015008)
+ - public static final 'AV_CODEC_ID_MACE3' 'I' @1640  86025 (0x00015009)
+ - public static final 'AV_CODEC_ID_MACE6' 'I' @1644  86026 (0x0001500a)
+ - public static final 'AV_CODEC_ID_VMDAUDIO' 'I' @1648  86027 (0x0001500b)
+ - public static final 'AV_CODEC_ID_FLAC' 'I' @1652  86028 (0x0001500c)
+ - public static final 'AV_CODEC_ID_MP3ADU' 'I' @1656  86029 (0x0001500d)
+ - public static final 'AV_CODEC_ID_MP3ON4' 'I' @1660  86030 (0x0001500e)
+ - public static final 'AV_CODEC_ID_SHORTEN' 'I' @1664  86031 (0x0001500f)
+ - public static final 'AV_CODEC_ID_ALAC' 'I' @1668  86032 (0x00015010)
+ - public static final 'AV_CODEC_ID_WESTWOOD_SND1' 'I' @1672  86033 (0x00015011)
+ - public static final 'AV_CODEC_ID_GSM' 'I' @1676  86034 (0x00015012)
+ - public static final 'AV_CODEC_ID_QDM2' 'I' @1680  86035 (0x00015013)
+ - public static final 'AV_CODEC_ID_COOK' 'I' @1684  86036 (0x00015014)
+ - public static final 'AV_CODEC_ID_TRUESPEECH' 'I' @1688  86037 (0x00015015)
+ - public static final 'AV_CODEC_ID_TTA' 'I' @1692  86038 (0x00015016)
+ - public static final 'AV_CODEC_ID_SMACKAUDIO' 'I' @1696  86039 (0x00015017)
+ - public static final 'AV_CODEC_ID_QCELP' 'I' @1700  86040 (0x00015018)
+ - public static final 'AV_CODEC_ID_WAVPACK' 'I' @1704  86041 (0x00015019)
+ - public static final 'AV_CODEC_ID_DSICINAUDIO' 'I' @1708  86042 (0x0001501a)
+ - public static final 'AV_CODEC_ID_IMC' 'I' @1712  86043 (0x0001501b)
+ - public static final 'AV_CODEC_ID_MUSEPACK7' 'I' @1716  86044 (0x0001501c)
+ - public static final 'AV_CODEC_ID_MLP' 'I' @1720  86045 (0x0001501d)
+ - public static final 'AV_CODEC_ID_GSM_MS' 'I' @1724  86046 (0x0001501e)
+ - public static final 'AV_CODEC_ID_ATRAC3' 'I' @1728  86047 (0x0001501f)
+ - public static final 'AV_CODEC_ID_APE' 'I' @1732  86048 (0x00015020)
+ - public static final 'AV_CODEC_ID_NELLYMOSER' 'I' @1736  86049 (0x00015021)
+ - public static final 'AV_CODEC_ID_MUSEPACK8' 'I' @1740  86050 (0x00015022)
+ - public static final 'AV_CODEC_ID_SPEEX' 'I' @1744  86051 (0x00015023)
+ - public static final 'AV_CODEC_ID_WMAVOICE' 'I' @1748  86052 (0x00015024)
+ - public static final 'AV_CODEC_ID_WMAPRO' 'I' @1752  86053 (0x00015025)
+ - public static final 'AV_CODEC_ID_WMALOSSLESS' 'I' @1756  86054 (0x00015026)
+ - public static final 'AV_CODEC_ID_ATRAC3P' 'I' @1760  86055 (0x00015027)
+ - public static final 'AV_CODEC_ID_EAC3' 'I' @1764  86056 (0x00015028)
+ - public static final 'AV_CODEC_ID_SIPR' 'I' @1768  86057 (0x00015029)
+ - public static final 'AV_CODEC_ID_MP1' 'I' @1772  86058 (0x0001502a)
+ - public static final 'AV_CODEC_ID_TWINVQ' 'I' @1776  86059 (0x0001502b)
+ - public static final 'AV_CODEC_ID_TRUEHD' 'I' @1780  86060 (0x0001502c)
+ - public static final 'AV_CODEC_ID_MP4ALS' 'I' @1784  86061 (0x0001502d)
+ - public static final 'AV_CODEC_ID_ATRAC1' 'I' @1788  86062 (0x0001502e)
+ - public static final 'AV_CODEC_ID_BINKAUDIO_RDFT' 'I' @1792  86063 (0x0001502f)
+ - public static final 'AV_CODEC_ID_BINKAUDIO_DCT' 'I' @1796  86064 (0x00015030)
+ - public static final 'AV_CODEC_ID_AAC_LATM' 'I' @1800  86065 (0x00015031)
+ - public static final 'AV_CODEC_ID_QDMC' 'I' @1804  86066 (0x00015032)
+ - public static final 'AV_CODEC_ID_CELT' 'I' @1808  86067 (0x00015033)
+ - public static final 'AV_CODEC_ID_G723_1' 'I' @1812  86068 (0x00015034)
+ - public static final 'AV_CODEC_ID_G729' 'I' @1816  86069 (0x00015035)
+ - public static final 'AV_CODEC_ID_8SVX_EXP' 'I' @1820  86070 (0x00015036)
+ - public static final 'AV_CODEC_ID_8SVX_FIB' 'I' @1824  86071 (0x00015037)
+ - public static final 'AV_CODEC_ID_BMV_AUDIO' 'I' @1828  86072 (0x00015038)
+ - public static final 'AV_CODEC_ID_RALF' 'I' @1832  86073 (0x00015039)
+ - public static final 'AV_CODEC_ID_IAC' 'I' @1836  86074 (0x0001503a)
+ - public static final 'AV_CODEC_ID_ILBC' 'I' @1840  86075 (0x0001503b)
+ - public static final 'AV_CODEC_ID_OPUS' 'I' @1844  86076 (0x0001503c)
+ - public static final 'AV_CODEC_ID_COMFORT_NOISE' 'I' @1848  86077 (0x0001503d)
+ - public static final 'AV_CODEC_ID_TAK' 'I' @1852  86078 (0x0001503e)
+ - public static final 'AV_CODEC_ID_METASOUND' 'I' @1856  86079 (0x0001503f)
+ - public static final 'AV_CODEC_ID_PAF_AUDIO' 'I' @1860  86080 (0x00015040)
+ - public static final 'AV_CODEC_ID_ON2AVC' 'I' @1864  86081 (0x00015041)
+ - public static final 'AV_CODEC_ID_DSS_SP' 'I' @1868  86082 (0x00015042)
+ - public static final 'AV_CODEC_ID_CODEC2' 'I' @1872  86083 (0x00015043)
+ - public static final 'AV_CODEC_ID_FFWAVESYNTH' 'I' @1876  86084 (0x00015044)
+ - public static final 'AV_CODEC_ID_SONIC' 'I' @1880  86085 (0x00015045)
+ - public static final 'AV_CODEC_ID_SONIC_LS' 'I' @1884  86086 (0x00015046)
+ - public static final 'AV_CODEC_ID_EVRC' 'I' @1888  86087 (0x00015047)
+ - public static final 'AV_CODEC_ID_SMV' 'I' @1892  86088 (0x00015048)
+ - public static final 'AV_CODEC_ID_DSD_LSBF' 'I' @1896  86089 (0x00015049)
+ - public static final 'AV_CODEC_ID_DSD_MSBF' 'I' @1900  86090 (0x0001504a)
+ - public static final 'AV_CODEC_ID_DSD_LSBF_PLANAR' 'I' @1904  86091 (0x0001504b)
+ - public static final 'AV_CODEC_ID_DSD_MSBF_PLANAR' 'I' @1908  86092 (0x0001504c)
+ - public static final 'AV_CODEC_ID_4GV' 'I' @1912  86093 (0x0001504d)
+ - public static final 'AV_CODEC_ID_INTERPLAY_ACM' 'I' @1916  86094 (0x0001504e)
+ - public static final 'AV_CODEC_ID_XMA1' 'I' @1920  86095 (0x0001504f)
+ - public static final 'AV_CODEC_ID_XMA2' 'I' @1924  86096 (0x00015050)
+ - public static final 'AV_CODEC_ID_DST' 'I' @1928  86097 (0x00015051)
+ - public static final 'AV_CODEC_ID_ATRAC3AL' 'I' @1932  86098 (0x00015052)
+ - public static final 'AV_CODEC_ID_ATRAC3PAL' 'I' @1936  86099 (0x00015053)
+ - public static final 'AV_CODEC_ID_DOLBY_E' 'I' @1940  86100 (0x00015054)
+ - public static final 'AV_CODEC_ID_APTX' 'I' @1944  86101 (0x00015055)
+ - public static final 'AV_CODEC_ID_APTX_HD' 'I' @1948  86102 (0x00015056)
+ - public static final 'AV_CODEC_ID_SBC' 'I' @1952  86103 (0x00015057)
+ - public static final 'AV_CODEC_ID_ATRAC9' 'I' @1956  86104 (0x00015058)
+ - public static final 'AV_CODEC_ID_HCOM' 'I' @1960  86105 (0x00015059)
+ - public static final 'AV_CODEC_ID_ACELP_KELVIN' 'I' @1964  86106 (0x0001505a)
+ - public static final 'AV_CODEC_ID_MPEGH_3D_AUDIO' 'I' @1968  86107 (0x0001505b)
+ - public static final 'AV_CODEC_ID_SIREN' 'I' @1972  86108 (0x0001505c)
+ - public static final 'AV_CODEC_ID_HCA' 'I' @1976  86109 (0x0001505d)
+ - public static final 'AV_CODEC_ID_FASTAUDIO' 'I' @1980  86110 (0x0001505e)
+ - public static final 'AV_CODEC_ID_MSNSIREN' 'I' @1984  86111 (0x0001505f)
+ - public static final 'AV_CODEC_ID_DFPWM' 'I' @1988  86112 (0x00015060)
+ - public static final 'AV_CODEC_ID_BONK' 'I' @1992  86113 (0x00015061)
+ - public static final 'AV_CODEC_ID_MISC4' 'I' @1996  86114 (0x00015062)
+ - public static final 'AV_CODEC_ID_APAC' 'I' @2000  86115 (0x00015063)
+ - public static final 'AV_CODEC_ID_FTR' 'I' @2004  86116 (0x00015064)
+ - public static final 'AV_CODEC_ID_WAVARC' 'I' @2008  86117 (0x00015065)
+ - public static final 'AV_CODEC_ID_RKA' 'I' @2012  86118 (0x00015066)
+ - public static final 'AV_CODEC_ID_FIRST_SUBTITLE' 'I' @2016  94208 (0x00017000)
+ - public static final 'AV_CODEC_ID_DVD_SUBTITLE' 'I' @2020  94208 (0x00017000)
+ - public static final 'AV_CODEC_ID_DVB_SUBTITLE' 'I' @2024  94209 (0x00017001)
+ - public static final 'AV_CODEC_ID_TEXT' 'I' @2028  94210 (0x00017002)
+ - public static final 'AV_CODEC_ID_XSUB' 'I' @2032  94211 (0x00017003)
+ - public static final 'AV_CODEC_ID_SSA' 'I' @2036  94212 (0x00017004)
+ - public static final 'AV_CODEC_ID_MOV_TEXT' 'I' @2040  94213 (0x00017005)
+ - public static final 'AV_CODEC_ID_HDMV_PGS_SUBTITLE' 'I' @2044  94214 (0x00017006)
+ - public static final 'AV_CODEC_ID_DVB_TELETEXT' 'I' @2048  94215 (0x00017007)
+ - public static final 'AV_CODEC_ID_SRT' 'I' @2052  94216 (0x00017008)
+ - public static final 'AV_CODEC_ID_MICRODVD' 'I' @2056  94217 (0x00017009)
+ - public static final 'AV_CODEC_ID_EIA_608' 'I' @2060  94218 (0x0001700a)
+ - public static final 'AV_CODEC_ID_JACOSUB' 'I' @2064  94219 (0x0001700b)
+ - public static final 'AV_CODEC_ID_SAMI' 'I' @2068  94220 (0x0001700c)
+ - public static final 'AV_CODEC_ID_REALTEXT' 'I' @2072  94221 (0x0001700d)
+ - public static final 'AV_CODEC_ID_STL' 'I' @2076  94222 (0x0001700e)
+ - public static final 'AV_CODEC_ID_SUBVIEWER1' 'I' @2080  94223 (0x0001700f)
+ - public static final 'AV_CODEC_ID_SUBVIEWER' 'I' @2084  94224 (0x00017010)
+ - public static final 'AV_CODEC_ID_SUBRIP' 'I' @2088  94225 (0x00017011)
+ - public static final 'AV_CODEC_ID_WEBVTT' 'I' @2092  94226 (0x00017012)
+ - public static final 'AV_CODEC_ID_MPL2' 'I' @2096  94227 (0x00017013)
+ - public static final 'AV_CODEC_ID_VPLAYER' 'I' @2100  94228 (0x00017014)
+ - public static final 'AV_CODEC_ID_PJS' 'I' @2104  94229 (0x00017015)
+ - public static final 'AV_CODEC_ID_ASS' 'I' @2108  94230 (0x00017016)
+ - public static final 'AV_CODEC_ID_HDMV_TEXT_SUBTITLE' 'I' @2112  94231 (0x00017017)
+ - public static final 'AV_CODEC_ID_TTML' 'I' @2116  94232 (0x00017018)
+ - public static final 'AV_CODEC_ID_ARIB_CAPTION' 'I' @2120  94233 (0x00017019)
+ - public static final 'AV_CODEC_ID_FIRST_UNKNOWN' 'I' @2124  98304 (0x00018000)
+ - public static final 'AV_CODEC_ID_TTF' 'I' @2128  98304 (0x00018000)
+ - public static final 'AV_CODEC_ID_SCTE_35' 'I' @2132  98305 (0x00018001)
+ - public static final 'AV_CODEC_ID_EPG' 'I' @2136  98306 (0x00018002)
+ - public static final 'AV_CODEC_ID_BINTEXT' 'I' @2140  98307 (0x00018003)
+ - public static final 'AV_CODEC_ID_XBIN' 'I' @2144  98308 (0x00018004)
+ - public static final 'AV_CODEC_ID_IDF' 'I' @2148  98309 (0x00018005)
+ - public static final 'AV_CODEC_ID_OTF' 'I' @2152  98310 (0x00018006)
+ - public static final 'AV_CODEC_ID_SMPTE_KLV' 'I' @2156  98311 (0x00018007)
+ - public static final 'AV_CODEC_ID_DVD_NAV' 'I' @2160  98312 (0x00018008)
+ - public static final 'AV_CODEC_ID_TIMED_ID3' 'I' @2164  98313 (0x00018009)
+ - public static final 'AV_CODEC_ID_BIN_DATA' 'I' @2168  98314 (0x0001800a)
+ - public static final 'AV_CODEC_ID_PROBE' 'I' @2172  102400 (0x00019000)
+ - public static final 'AV_CODEC_ID_MPEG2TS' 'I' @2176  131072 (0x00020000)
+ - public static final 'AV_CODEC_ID_MPEG4SYSTEMS' 'I' @2180  131073 (0x00020001)
+ - public static final 'AV_CODEC_ID_FFMETADATA' 'I' @2184  135168 (0x00021000)
+ - public static final 'AV_CODEC_ID_WRAPPED_AVFRAME' 'I' @2188  135169 (0x00021001)
+ - public static final 'AV_CODEC_ID_VNULL' 'I' @2192  135170 (0x00021002)
+ - public static final 'AV_CODEC_ID_ANULL' 'I' @2196  135171 (0x00021003)
+ - public static final 'AV_CODEC_PROP_INTRA_ONLY' 'I' @2200  1 (0x00000001)
+ - public static final 'AV_CODEC_PROP_LOSSY' 'I' @2204  2 (0x00000002)
+ - public static final 'AV_CODEC_PROP_LOSSLESS' 'I' @2208  4 (0x00000004)
+ - public static final 'AV_CODEC_PROP_REORDER' 'I' @2212  8 (0x00000008)
+ - public static final 'AV_CODEC_PROP_BITMAP_SUB' 'I' @2216  65536 (0x00010000)
+ - public static final 'AV_CODEC_PROP_TEXT_SUB' 'I' @2220  131072 (0x00020000)
+ - public static final 'AV_FIELD_UNKNOWN' 'I' @2224  0 (0x00000000)
+ - public static final 'AV_FIELD_PROGRESSIVE' 'I' @2228  1 (0x00000001)
+ - public static final 'AV_FIELD_TT' 'I' @2232  2 (0x00000002)
+ - public static final 'AV_FIELD_BB' 'I' @2236  3 (0x00000003)
+ - public static final 'AV_FIELD_TB' 'I' @2240  4 (0x00000004)
+ - public static final 'AV_FIELD_BT' 'I' @2244  5 (0x00000005)
+ - public static final 'AV_INPUT_BUFFER_PADDING_SIZE' 'I' @2248  64 (0x00000040)
+ - public static final 'AV_EF_CRCCHECK' 'I' @2252  1 (0x00000001)
+ - public static final 'AV_EF_BITSTREAM' 'I' @2256  2 (0x00000002)
+ - public static final 'AV_EF_BUFFER' 'I' @2260  4 (0x00000004)
+ - public static final 'AV_EF_EXPLODE' 'I' @2264  8 (0x00000008)
+ - public static final 'AV_EF_IGNORE_ERR' 'I' @2268  32768 (0x00008000)
+ - public static final 'AV_EF_CAREFUL' 'I' @2272  65536 (0x00010000)
+ - public static final 'AV_EF_COMPLIANT' 'I' @2276  131072 (0x00020000)
+ - public static final 'AV_EF_AGGRESSIVE' 'I' @2280  262144 (0x00040000)
+ - public static final 'FF_COMPLIANCE_VERY_STRICT' 'I' @2284  2 (0x00000002)
+ - public static final 'FF_COMPLIANCE_STRICT' 'I' @2288  1 (0x00000001)
+ - public static final 'FF_COMPLIANCE_NORMAL' 'I' @2292  0 (0x00000000)
+ - public static final 'FF_COMPLIANCE_UNOFFICIAL' 'I' @2296  -1 (0xffffffff)
+ - public static final 'FF_COMPLIANCE_EXPERIMENTAL' 'I' @2300  -2 (0xfffffffe)
+ - public static final 'AVDISCARD_NONE' 'I' @2304  -16 (0xfffffff0)
+ - public static final 'AVDISCARD_DEFAULT' 'I' @2308  0 (0x00000000)
+ - public static final 'AVDISCARD_NONREF' 'I' @2312  8 (0x00000008)
+ - public static final 'AVDISCARD_BIDIR' 'I' @2316  16 (0x00000010)
+ - public static final 'AVDISCARD_NONINTRA' 'I' @2320  24 (0x00000018)
+ - public static final 'AVDISCARD_NONKEY' 'I' @2324  32 (0x00000020)
+ - public static final 'AVDISCARD_ALL' 'I' @2328  48 (0x00000030)
+ - public static final 'AV_AUDIO_SERVICE_TYPE_MAIN' 'I' @2332  0 (0x00000000)
+ - public static final 'AV_AUDIO_SERVICE_TYPE_EFFECTS' 'I' @2336  1 (0x00000001)
+ - public static final 'AV_AUDIO_SERVICE_TYPE_VISUALLY_IMPAIRED' 'I' @2340  2 (0x00000002)
+ - public static final 'AV_AUDIO_SERVICE_TYPE_HEARING_IMPAIRED' 'I' @2344  3 (0x00000003)
+ - public static final 'AV_AUDIO_SERVICE_TYPE_DIALOGUE' 'I' @2348  4 (0x00000004)
+ - public static final 'AV_AUDIO_SERVICE_TYPE_COMMENTARY' 'I' @2352  5 (0x00000005)
+ - public static final 'AV_AUDIO_SERVICE_TYPE_EMERGENCY' 'I' @2356  6 (0x00000006)
+ - public static final 'AV_AUDIO_SERVICE_TYPE_VOICE_OVER' 'I' @2360  7 (0x00000007)
+ - public static final 'AV_AUDIO_SERVICE_TYPE_KARAOKE' 'I' @2364  8 (0x00000008)
+ - public static final 'AV_AUDIO_SERVICE_TYPE_NB' 'I' @2368  9 (0x00000009)
+ - public static final 'AV_PKT_DATA_PALETTE' 'I' @2372  0 (0x00000000)
+ - public static final 'AV_PKT_DATA_NEW_EXTRADATA' 'I' @2376  1 (0x00000001)
+ - public static final 'AV_PKT_DATA_PARAM_CHANGE' 'I' @2380  2 (0x00000002)
+ - public static final 'AV_PKT_DATA_H263_MB_INFO' 'I' @2384  3 (0x00000003)
+ - public static final 'AV_PKT_DATA_REPLAYGAIN' 'I' @2388  4 (0x00000004)
+ - public static final 'AV_PKT_DATA_DISPLAYMATRIX' 'I' @2392  5 (0x00000005)
+ - public static final 'AV_PKT_DATA_STEREO3D' 'I' @2396  6 (0x00000006)
+ - public static final 'AV_PKT_DATA_AUDIO_SERVICE_TYPE' 'I' @2400  7 (0x00000007)
+ - public static final 'AV_PKT_DATA_QUALITY_STATS' 'I' @2404  8 (0x00000008)
+ - public static final 'AV_PKT_DATA_FALLBACK_TRACK' 'I' @2408  9 (0x00000009)
+ - public static final 'AV_PKT_DATA_CPB_PROPERTIES' 'I' @2412  10 (0x0000000a)
+ - public static final 'AV_PKT_DATA_SKIP_SAMPLES' 'I' @2416  11 (0x0000000b)
+ - public static final 'AV_PKT_DATA_JP_DUALMONO' 'I' @2420  12 (0x0000000c)
+ - public static final 'AV_PKT_DATA_STRINGS_METADATA' 'I' @2424  13 (0x0000000d)
+ - public static final 'AV_PKT_DATA_SUBTITLE_POSITION' 'I' @2428  14 (0x0000000e)
+ - public static final 'AV_PKT_DATA_MATROSKA_BLOCKADDITIONAL' 'I' @2432  15 (0x0000000f)
+ - public static final 'AV_PKT_DATA_WEBVTT_IDENTIFIER' 'I' @2436  16 (0x00000010)
+ - public static final 'AV_PKT_DATA_WEBVTT_SETTINGS' 'I' @2440  17 (0x00000011)
+ - public static final 'AV_PKT_DATA_METADATA_UPDATE' 'I' @2444  18 (0x00000012)
+ - public static final 'AV_PKT_DATA_MPEGTS_STREAM_ID' 'I' @2448  19 (0x00000013)
+ - public static final 'AV_PKT_DATA_MASTERING_DISPLAY_METADATA' 'I' @2452  20 (0x00000014)
+ - public static final 'AV_PKT_DATA_SPHERICAL' 'I' @2456  21 (0x00000015)
+ - public static final 'AV_PKT_DATA_CONTENT_LIGHT_LEVEL' 'I' @2460  22 (0x00000016)
+ - public static final 'AV_PKT_DATA_A53_CC' 'I' @2464  23 (0x00000017)
+ - public static final 'AV_PKT_DATA_ENCRYPTION_INIT_INFO' 'I' @2468  24 (0x00000018)
+ - public static final 'AV_PKT_DATA_ENCRYPTION_INFO' 'I' @2472  25 (0x00000019)
+ - public static final 'AV_PKT_DATA_AFD' 'I' @2476  26 (0x0000001a)
+ - public static final 'AV_PKT_DATA_PRFT' 'I' @2480  27 (0x0000001b)
+ - public static final 'AV_PKT_DATA_ICC_PROFILE' 'I' @2484  28 (0x0000001c)
+ - public static final 'AV_PKT_DATA_DOVI_CONF' 'I' @2488  29 (0x0000001d)
+ - public static final 'AV_PKT_DATA_S12M_TIMECODE' 'I' @2492  30 (0x0000001e)
+ - public static final 'AV_PKT_DATA_DYNAMIC_HDR10_PLUS' 'I' @2496  31 (0x0000001f)
+ - public static final 'AV_PKT_DATA_NB' 'I' @2500  32 (0x00000020)
+ - public static final 'AV_PKT_DATA_QUALITY_FACTOR' 'I' @2504  8 (0x00000008)
+ - public static final 'AV_PKT_FLAG_KEY' 'I' @2508  1 (0x00000001)
+ - public static final 'AV_PKT_FLAG_CORRUPT' 'I' @2512  2 (0x00000002)
+ - public static final 'AV_PKT_FLAG_DISCARD' 'I' @2516  4 (0x00000004)
+ - public static final 'AV_PKT_FLAG_TRUSTED' 'I' @2520  8 (0x00000008)
+ - public static final 'AV_PKT_FLAG_DISPOSABLE' 'I' @2524  16 (0x00000010)
+ - public static final 'AV_SIDE_DATA_PARAM_CHANGE_CHANNEL_COUNT' 'I' @2528  1 (0x00000001)
+ - public static final 'AV_SIDE_DATA_PARAM_CHANGE_CHANNEL_LAYOUT' 'I' @2532  2 (0x00000002)
+ - public static final 'AV_SIDE_DATA_PARAM_CHANGE_SAMPLE_RATE' 'I' @2536  4 (0x00000004)
+ - public static final 'AV_SIDE_DATA_PARAM_CHANGE_DIMENSIONS' 'I' @2540  8 (0x00000008)
+ - public static final 'AV_CODEC_CAP_DRAW_HORIZ_BAND' 'I' @2544  1 (0x00000001)
+ - public static final 'AV_CODEC_CAP_DR1' 'I' @2548  2 (0x00000002)
+ - public static final 'AV_CODEC_CAP_DELAY' 'I' @2552  32 (0x00000020)
+ - public static final 'AV_CODEC_CAP_SMALL_LAST_FRAME' 'I' @2556  64 (0x00000040)
+ - public static final 'AV_CODEC_CAP_SUBFRAMES' 'I' @2560  256 (0x00000100)
+ - public static final 'AV_CODEC_CAP_EXPERIMENTAL' 'I' @2564  512 (0x00000200)
+ - public static final 'AV_CODEC_CAP_CHANNEL_CONF' 'I' @2568  1024 (0x00000400)
+ - public static final 'AV_CODEC_CAP_FRAME_THREADS' 'I' @2572  4096 (0x00001000)
+ - public static final 'AV_CODEC_CAP_SLICE_THREADS' 'I' @2576  8192 (0x00002000)
+ - public static final 'AV_CODEC_CAP_PARAM_CHANGE' 'I' @2580  16384 (0x00004000)
+ - public static final 'AV_CODEC_CAP_OTHER_THREADS' 'I' @2584  32768 (0x00008000)
+ - public static final 'AV_CODEC_CAP_VARIABLE_FRAME_SIZE' 'I' @2588  65536 (0x00010000)
+ - public static final 'AV_CODEC_CAP_AVOID_PROBING' 'I' @2592  131072 (0x00020000)
+ - public static final 'AV_CODEC_CAP_HARDWARE' 'I' @2596  262144 (0x00040000)
+ - public static final 'AV_CODEC_CAP_HYBRID' 'I' @2600  524288 (0x00080000)
+ - public static final 'AV_CODEC_CAP_ENCODER_REORDERED_OPAQUE' 'I' @2604  1048576 (0x00100000)
+ - public static final 'AV_CODEC_CAP_ENCODER_FLUSH' 'I' @2608  2097152 (0x00200000)
+ - public static final 'AV_CODEC_CAP_ENCODER_RECON_FRAME' 'I' @2612  4194304 (0x00400000)
+ - public static final 'AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX' 'I' @2616  1 (0x00000001)
+ - public static final 'AV_CODEC_HW_CONFIG_METHOD_HW_FRAMES_CTX' 'I' @2620  2 (0x00000002)
+ - public static final 'AV_CODEC_HW_CONFIG_METHOD_INTERNAL' 'I' @2624  4 (0x00000004)
+ - public static final 'AV_CODEC_HW_CONFIG_METHOD_AD_HOC' 'I' @2628  8 (0x00000008)
+ - public static final 'AV_INPUT_BUFFER_MIN_SIZE' 'I' @2632  16384 (0x00004000)
+ - public static final 'AV_CODEC_FLAG_UNALIGNED' 'I' @2636  1 (0x00000001)
+ - public static final 'AV_CODEC_FLAG_QSCALE' 'I' @2640  2 (0x00000002)
+ - public static final 'AV_CODEC_FLAG_4MV' 'I' @2644  4 (0x00000004)
+ - public static final 'AV_CODEC_FLAG_OUTPUT_CORRUPT' 'I' @2648  8 (0x00000008)
+ - public static final 'AV_CODEC_FLAG_QPEL' 'I' @2652  16 (0x00000010)
+ - public static final 'AV_CODEC_FLAG_DROPCHANGED' 'I' @2656  32 (0x00000020)
+ - public static final 'AV_CODEC_FLAG_RECON_FRAME' 'I' @2660  64 (0x00000040)
+ - public static final 'AV_CODEC_FLAG_COPY_OPAQUE' 'I' @2664  128 (0x00000080)
+ - public static final 'AV_CODEC_FLAG_FRAME_DURATION' 'I' @2668  256 (0x00000100)
+ - public static final 'AV_CODEC_FLAG_PASS1' 'I' @2672  512 (0x00000200)
+ - public static final 'AV_CODEC_FLAG_PASS2' 'I' @2676  1024 (0x00000400)
+ - public static final 'AV_CODEC_FLAG_LOOP_FILTER' 'I' @2680  2048 (0x00000800)
+ - public static final 'AV_CODEC_FLAG_GRAY' 'I' @2684  8192 (0x00002000)
+ - public static final 'AV_CODEC_FLAG_PSNR' 'I' @2688  32768 (0x00008000)
+ - public static final 'AV_CODEC_FLAG_INTERLACED_DCT' 'I' @2692  262144 (0x00040000)
+ - public static final 'AV_CODEC_FLAG_LOW_DELAY' 'I' @2696  524288 (0x00080000)
+ - public static final 'AV_CODEC_FLAG_GLOBAL_HEADER' 'I' @2700  4194304 (0x00400000)
+ - public static final 'AV_CODEC_FLAG_BITEXACT' 'I' @2704  8388608 (0x00800000)
+ - public static final 'AV_CODEC_FLAG_AC_PRED' 'I' @2708  16777216 (0x01000000)
+ - public static final 'AV_CODEC_FLAG_INTERLACED_ME' 'I' @2712  536870912 (0x20000000)
+ - public static final 'AV_CODEC_FLAG_CLOSED_GOP' 'I' @2716  -2147483648 (0x80000000)
+ - public static final 'AV_CODEC_FLAG2_FAST' 'I' @2720  1 (0x00000001)
+ - public static final 'AV_CODEC_FLAG2_NO_OUTPUT' 'I' @2724  4 (0x00000004)
+ - public static final 'AV_CODEC_FLAG2_LOCAL_HEADER' 'I' @2728  8 (0x00000008)
+ - public static final 'AV_CODEC_FLAG2_CHUNKS' 'I' @2732  32768 (0x00008000)
+ - public static final 'AV_CODEC_FLAG2_IGNORE_CROP' 'I' @2736  65536 (0x00010000)
+ - public static final 'AV_CODEC_FLAG2_SHOW_ALL' 'I' @2740  4194304 (0x00400000)
+ - public static final 'AV_CODEC_FLAG2_EXPORT_MVS' 'I' @2744  268435456 (0x10000000)
+ - public static final 'AV_CODEC_FLAG2_SKIP_MANUAL' 'I' @2748  536870912 (0x20000000)
+ - public static final 'AV_CODEC_FLAG2_RO_FLUSH_NOOP' 'I' @2752  1073741824 (0x40000000)
+ - public static final 'AV_CODEC_FLAG2_ICC_PROFILES' 'I' @2756  -2147483648 (0x80000000)
+ - public static final 'AV_CODEC_EXPORT_DATA_MVS' 'I' @2760  1 (0x00000001)
+ - public static final 'AV_CODEC_EXPORT_DATA_PRFT' 'I' @2764  2 (0x00000002)
+ - public static final 'AV_CODEC_EXPORT_DATA_VIDEO_ENC_PARAMS' 'I' @2768  4 (0x00000004)
+ - public static final 'AV_CODEC_EXPORT_DATA_FILM_GRAIN' 'I' @2772  8 (0x00000008)
+ - public static final 'AV_GET_BUFFER_FLAG_REF' 'I' @2776  1 (0x00000001)
+ - public static final 'AV_GET_ENCODE_BUFFER_FLAG_REF' 'I' @2780  1 (0x00000001)
+ - public static final 'AV_HWACCEL_CODEC_CAP_EXPERIMENTAL' 'I' @2784  512 (0x00000200)
+ - public static final 'AV_HWACCEL_FLAG_IGNORE_LEVEL' 'I' @2788  1 (0x00000001)
+ - public static final 'AV_HWACCEL_FLAG_ALLOW_HIGH_DEPTH' 'I' @2792  2 (0x00000002)
+ - public static final 'AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH' 'I' @2796  4 (0x00000004)
+ - public static final 'AV_HWACCEL_FLAG_UNSAFE_OUTPUT' 'I' @2800  8 (0x00000008)
+ - public static final 'SUBTITLE_NONE' 'I' @2804  0 (0x00000000)
+ - public static final 'SUBTITLE_BITMAP' 'I' @2808  1 (0x00000001)
+ - public static final 'SUBTITLE_TEXT' 'I' @2812  2 (0x00000002)
+ - public static final 'SUBTITLE_ASS' 'I' @2816  3 (0x00000003)
+ - public static final 'AV_SUBTITLE_FLAG_FORCED' 'I' @2820  1 (0x00000001)
+ - public static final 'AV_PICTURE_STRUCTURE_UNKNOWN' 'I' @2824  0 (0x00000000)
+ - public static final 'AV_PICTURE_STRUCTURE_TOP_FIELD' 'I' @2828  1 (0x00000001)
+ - public static final 'AV_PICTURE_STRUCTURE_BOTTOM_FIELD' 'I' @2832  2 (0x00000002)
+ - public static final 'AV_PICTURE_STRUCTURE_FRAME' 'I' @2836  3 (0x00000003)
+ - public static final 'DFT_R2C' 'I' @2840  0 (0x00000000)
+ - public static final 'IDFT_C2R' 'I' @2844  1 (0x00000001)
+ - public static final 'IDFT_R2C' 'I' @2848  2 (0x00000002)
+ - public static final 'DFT_C2R' 'I' @2852  3 (0x00000003)
+ - public static final 'DCT_II' 'I' @2856  0 (0x00000000)
+ - public static final 'DCT_III' 'I' @2860  1 (0x00000001)
+ - public static final 'DCT_I' 'I' @2864  2 (0x00000002)
+ - public static final 'DST_I' 'I' @2868  3 (0x00000003)
+ - public static final 'LIBAVCODEC_VERSION_MAJOR' 'I' @2872  60 (0x0000003c)
+ - public static final 'FF_API_INIT_PACKET' 'Z' @2892  true (0x01)
+ - public static final 'FF_API_IDCT_NONE' 'Z' @2893  true (0x01)
+ - public static final 'FF_API_SVTAV1_OPTS' 'Z' @2894  true (0x01)
+ - public static final 'FF_API_AYUV_CODECID' 'Z' @2895  true (0x01)
+ - public static final 'FF_API_VT_OUTPUT_CALLBACK' 'Z' @2896  true (0x01)
+ - public static final 'FF_API_AVCODEC_CHROMA_POS' 'Z' @2897  true (0x01)
+ - public static final 'FF_API_VT_HWACCEL_CONTEXT' 'Z' @2898  true (0x01)
+ - public static final 'FF_API_AVCTX_FRAME_NUMBER' 'Z' @2899  true (0x01)
+ - public static final 'FF_CODEC_CRYSTAL_HD' 'Z' @2900  true (0x01)
+ - public static final 'LIBAVCODEC_VERSION_MINOR' 'I' @2876  3 (0x00000003)
+ - public static final 'LIBAVCODEC_VERSION_MICRO' 'I' @2880  100 (0x00000064)
+ - public static final 'LIBAVCODEC_VERSION_INT' 'I' @2884  3933028 (0x003c0364)
+ - public static final 'LIBAVCODEC_BUILD' 'I' @2888  3933028 (0x003c0364)
+ - public static final 'LIBAVCODEC_IDENT' 'Ljava/lang/String;' @112  "Lavc60.3.100"{0x0000000704786860} (0xe08f0d0c)
+stack at sp + 1 slots: 0x000000b4e9dfeb68 is pointing into the stack for thread: 0x0000026eec706920
+stack at sp + 2 slots: 0x000000b4e9dfeb70 is pointing into the stack for thread: 0x0000026eec706920
+stack at sp + 3 slots: 0x0000026ed64089d2 is at code_begin+1554 in an Interpreter codelet
+return entry points  [0x0000026ed64083c0, 0x0000026ed6408f60]  2976 bytes
+stack at sp + 4 slots: 0x000000b4e9dfeb70 is pointing into the stack for thread: 0x0000026eec706920
+stack at sp + 5 slots: 0x000000b4e9dfeb38 is pointing into the stack for thread: 0x0000026eec706920
+stack at sp + 6 slots: 0x0 is null
+stack at sp + 7 slots: 0x00007ff822399cf5 avformat-60.dll
+
+
+---------------  P R O C E S S  ---------------
+
+Threads class SMR info:
+_java_thread_list=0x0000026ee652a6e0, length=48, elements={
+0x0000026ee6044180, 0x0000026ee6046be0, 0x0000026ee604bd70, 0x0000026ee604ca40,
+0x0000026ee604e4a0, 0x0000026ee6058f10, 0x0000026ee606e540, 0x0000026ee607a3f0,
+0x0000026ee62a2f50, 0x0000026ee62a07f0, 0x0000026ee62a1ba0, 0x0000026ee62a2230,
+0x0000026ee62a28c0, 0x0000026eed56cfc0, 0x0000026eed571e80, 0x0000026eed572510,
+0x0000026eed573f50, 0x0000026eed573230, 0x0000026ee62a0e80, 0x0000026ee62a1510,
+0x0000026eec703b30, 0x0000026eec701a60, 0x0000026eec702780, 0x0000026eec7034a0,
+0x0000026eec7013d0, 0x0000026eec7020f0, 0x0000026eec700d40, 0x0000026eec702e10,
+0x0000026eec7006b0, 0x0000026eec707640, 0x0000026eec7041c0, 0x0000026eec706290,
+0x0000026eec707cd0, 0x0000026eec706920, 0x0000026eec705c00, 0x0000026eec706fb0,
+0x0000026eec705570, 0x0000026eec704850, 0x0000026eec704ee0, 0x0000026eeb921030,
+0x0000026eeb923e20, 0x0000026eeb9216c0, 0x0000026eeb9244b0, 0x0000026eeb922a70,
+0x0000026eeb923790, 0x0000026eeb924b40, 0x0000026eeb9251d0, 0x0000026eeb923100
+}
+
+Java Threads: ( => current thread )
+  0x0000026ee6044180 JavaThread "Reference Handler"          daemon [_thread_blocked, id=20996, stack(0x000000b4e0e00000,0x000000b4e0f00000) (1024K)]
+  0x0000026ee6046be0 JavaThread "Finalizer"                  daemon [_thread_blocked, id=1284, stack(0x000000b4e0f00000,0x000000b4e1000000) (1024K)]
+  0x0000026ee604bd70 JavaThread "Signal Dispatcher"          daemon [_thread_blocked, id=10724, stack(0x000000b4e1000000,0x000000b4e1100000) (1024K)]
+  0x0000026ee604ca40 JavaThread "Attach Listener"            daemon [_thread_blocked, id=10336, stack(0x000000b4e1100000,0x000000b4e1200000) (1024K)]
+  0x0000026ee604e4a0 JavaThread "Service Thread"             daemon [_thread_blocked, id=34272, stack(0x000000b4e1200000,0x000000b4e1300000) (1024K)]
+  0x0000026ee6058f10 JavaThread "Monitor Deflation Thread"   daemon [_thread_blocked, id=36456, stack(0x000000b4e1300000,0x000000b4e1400000) (1024K)]
+  0x0000026ee606e540 JavaThread "C2 CompilerThread0"         daemon [_thread_blocked, id=23488, stack(0x000000b4e1400000,0x000000b4e1500000) (1024K)]
+  0x0000026ee607a3f0 JavaThread "C1 CompilerThread0"         daemon [_thread_blocked, id=5248, stack(0x000000b4e1500000,0x000000b4e1600000) (1024K)]
+  0x0000026ee62a2f50 JavaThread "Notification Thread"        daemon [_thread_blocked, id=35912, stack(0x000000b4e1600000,0x000000b4e1700000) (1024K)]
+  0x0000026ee62a07f0 JavaThread "Common-Cleaner"             daemon [_thread_blocked, id=15676, stack(0x000000b4e1700000,0x000000b4e1800000) (1024K)]
+  0x0000026ee62a1ba0 JavaThread "Catalina-utility-1"                [_thread_blocked, id=28544, stack(0x000000b4e2700000,0x000000b4e2800000) (1024K)]
+  0x0000026ee62a2230 JavaThread "Catalina-utility-2"                [_thread_blocked, id=36616, stack(0x000000b4e2800000,0x000000b4e2900000) (1024K)]
+  0x0000026ee62a28c0 JavaThread "container-0"                       [_thread_blocked, id=37028, stack(0x000000b4e2900000,0x000000b4e2a00000) (1024K)]
+  0x0000026eed56cfc0 JavaThread "Live Reload Server"         daemon [_thread_in_native, id=20384, stack(0x000000b4e2c00000,0x000000b4e2d00000) (1024K)]
+  0x0000026eed571e80 JavaThread "DestroyJavaVM"                     [_thread_blocked, id=19636, stack(0x000000b4e0600000,0x000000b4e0700000) (1024K)]
+  0x0000026eed572510 JavaThread "HLS-Stream-0"                      [_thread_in_native, id=17220, stack(0x000000b4e1800000,0x000000b4e1900000) (1024K)]
+  0x0000026eed573f50 JavaThread "JavaCPP Deallocator"        daemon [_thread_blocked, id=33424, stack(0x000000b4e1e00000,0x000000b4e1f00000) (1024K)]
+  0x0000026eed573230 JavaThread "HLS-Stream-1"                      [_thread_in_native, id=13732, stack(0x000000b4e1f00000,0x000000b4e2000000) (1024K)]
+  0x0000026ee62a0e80 JavaThread "HLS-Stream-2"                      [_thread_in_native, id=8292, stack(0x000000b4e4500000,0x000000b4e4600000) (1024K)]
+  0x0000026ee62a1510 JavaThread "JavaCPP Thread ID 19036"    daemon [_thread_in_native, id=19036, stack(0x000000b4e5300000,0x000000b4e5400000) (1024K)]
+  0x0000026eec703b30 JavaThread "JavaCPP Thread ID 5544"     daemon [_thread_in_native, id=5544, stack(0x000000b4e5400000,0x000000b4e5500000) (1024K)]
+  0x0000026eec701a60 JavaThread "HLS-Stream-3"                      [_thread_in_native, id=35716, stack(0x000000b4e6000000,0x000000b4e6100000) (1024K)]
+  0x0000026eec702780 JavaThread "HLS-Stream-4"                      [_thread_in_native, id=5212, stack(0x000000b4e6100000,0x000000b4e6200000) (1024K)]
+  0x0000026eec7034a0 JavaThread "JavaCPP Thread ID 30236"    daemon [_thread_in_native, id=30236, stack(0x000000b4e6200000,0x000000b4e6300000) (1024K)]
+  0x0000026eec7013d0 JavaThread "JavaCPP Thread ID 8200"     daemon [_thread_in_native, id=8200, stack(0x000000b4e6300000,0x000000b4e6400000) (1024K)]
+  0x0000026eec7020f0 JavaThread "HLS-Stream-5"                      [_thread_in_native, id=36848, stack(0x000000b4e7e00000,0x000000b4e7f00000) (1024K)]
+  0x0000026eec700d40 JavaThread "HLS-Stream-6"                      [_thread_in_native, id=30608, stack(0x000000b4e8900000,0x000000b4e8a00000) (1024K)]
+  0x0000026eec702e10 JavaThread "HLS-Stream-7"                      [_thread_in_native, id=27548, stack(0x000000b4e9700000,0x000000b4e9800000) (1024K)]
+  0x0000026eec7006b0 JavaThread "HLS-Stream-8"                      [_thread_in_native, id=27592, stack(0x000000b4e9800000,0x000000b4e9900000) (1024K)]
+  0x0000026eec707640 JavaThread "HLS-Stream-9"                      [_thread_in_native, id=36340, stack(0x000000b4e9900000,0x000000b4e9a00000) (1024K)]
+  0x0000026eec7041c0 JavaThread "HLS-Stream-10"                     [_thread_in_native, id=28940, stack(0x000000b4e9a00000,0x000000b4e9b00000) (1024K)]
+  0x0000026eec706290 JavaThread "HLS-Stream-11"                     [_thread_in_native, id=12280, stack(0x000000b4e9b00000,0x000000b4e9c00000) (1024K)]
+  0x0000026eec707cd0 JavaThread "HLS-Stream-12"                     [_thread_in_native, id=15648, stack(0x000000b4e9c00000,0x000000b4e9d00000) (1024K)]
+=>0x0000026eec706920 JavaThread "HLS-Stream-13"                     [_thread_in_native, id=25416, stack(0x000000b4e9d00000,0x000000b4e9e00000) (1024K)]
+  0x0000026eec705c00 JavaThread "HLS-Stream-14"                     [_thread_in_native, id=27220, stack(0x000000b4e9e00000,0x000000b4e9f00000) (1024K)]
+  0x0000026eec706fb0 JavaThread "HLS-Stream-15"                     [_thread_in_native, id=27056, stack(0x000000b4e9f00000,0x000000b4ea000000) (1024K)]
+  0x0000026eec705570 JavaThread "HLS-Stream-16"                     [_thread_in_native, id=36968, stack(0x000000b4ea000000,0x000000b4ea100000) (1024K)]
+  0x0000026eec704850 JavaThread "HLS-Stream-17"                     [_thread_in_native, id=5060, stack(0x000000b4ea100000,0x000000b4ea200000) (1024K)]
+  0x0000026eec704ee0 JavaThread "HLS-Stream-18"                     [_thread_in_native, id=21816, stack(0x000000b4ea200000,0x000000b4ea300000) (1024K)]
+  0x0000026eeb921030 JavaThread "HLS-Stream-19"                     [_thread_in_native, id=28372, stack(0x000000b4ea300000,0x000000b4ea400000) (1024K)]
+  0x0000026eeb923e20 JavaThread "JavaCPP Thread ID 10260"    daemon [_thread_in_native, id=10260, stack(0x000000b4eb100000,0x000000b4eb200000) (1024K)]
+  0x0000026eeb9216c0 JavaThread "JavaCPP Thread ID 14544"    daemon [_thread_in_native, id=14544, stack(0x000000b4eb200000,0x000000b4eb300000) (1024K)]
+  0x0000026eeb9244b0 JavaThread "JavaCPP Thread ID 34716"    daemon [_thread_in_native, id=34716, stack(0x000000b4eb300000,0x000000b4eb400000) (1024K)]
+  0x0000026eeb922a70 JavaThread "JavaCPP Thread ID 37312"    daemon [_thread_in_native, id=37312, stack(0x000000b4ecb00000,0x000000b4ecc00000) (1024K)]
+  0x0000026eeb923790 JavaThread "JavaCPP Thread ID 33856"    daemon [_thread_in_native, id=33856, stack(0x000000b4ecc00000,0x000000b4ecd00000) (1024K)]
+  0x0000026eeb924b40 JavaThread "JavaCPP Thread ID 29756"    daemon [_thread_in_native, id=29756, stack(0x000000b4eff00000,0x000000b4f0000000) (1024K)]
+  0x0000026eeb9251d0 JavaThread "SIGINT handler"             daemon [_thread_blocked, id=20388, stack(0x000000b4e2000000,0x000000b4e2100000) (1024K)]
+  0x0000026eeb923100 JavaThread "SpringApplicationShutdownHook"        [_thread_blocked, id=39892, stack(0x000000b4f4f00000,0x000000b4f5000000) (1024K)]
+Total: 48
+
+Other Threads:
+  0x0000026ee357e890 VMThread "VM Thread"                           [id=24356, stack(0x000000b4e0d00000,0x000000b4e0e00000) (1024K)]
+  0x0000026ee35771c0 WatcherThread "VM Periodic Task Thread"        [id=28156, stack(0x000000b4e0c00000,0x000000b4e0d00000) (1024K)]
+  0x0000026ecbd6bc40 WorkerThread "GC Thread#0"                     [id=24944, stack(0x000000b4e0700000,0x000000b4e0800000) (1024K)]
+  0x0000026eeb01c660 WorkerThread "GC Thread#1"                     [id=12336, stack(0x000000b4e1900000,0x000000b4e1a00000) (1024K)]
+  0x0000026eeb01ca00 WorkerThread "GC Thread#2"                     [id=39036, stack(0x000000b4e1a00000,0x000000b4e1b00000) (1024K)]
+  0x0000026ee6ae3b20 WorkerThread "GC Thread#3"                     [id=22148, stack(0x000000b4e1b00000,0x000000b4e1c00000) (1024K)]
+  0x0000026ee6ae3ec0 WorkerThread "GC Thread#4"                     [id=35692, stack(0x000000b4e1c00000,0x000000b4e1d00000) (1024K)]
+  0x0000026ee6ae4260 WorkerThread "GC Thread#5"                     [id=22548, stack(0x000000b4e1d00000,0x000000b4e1e00000) (1024K)]
+  0x0000026eebb74f30 WorkerThread "GC Thread#6"                     [id=5520, stack(0x000000b4e2200000,0x000000b4e2300000) (1024K)]
+  0x0000026eeba26be0 WorkerThread "GC Thread#7"                     [id=19692, stack(0x000000b4e2300000,0x000000b4e2400000) (1024K)]
+  0x0000026eedfe41a0 WorkerThread "GC Thread#8"                     [id=32428, stack(0x000000b4e2100000,0x000000b4e2200000) (1024K)]
+  0x0000026eedfe5020 WorkerThread "GC Thread#9"                     [id=34652, stack(0x000000b4e2400000,0x000000b4e2500000) (1024K)]
+  0x0000026ecbd798a0 ConcurrentGCThread "G1 Main Marker"            [id=21080, stack(0x000000b4e0800000,0x000000b4e0900000) (1024K)]
+  0x0000026ee33c2ba0 WorkerThread "G1 Conc#0"                       [id=30508, stack(0x000000b4e0900000,0x000000b4e0a00000) (1024K)]
+  0x0000026eedfe4540 WorkerThread "G1 Conc#1"                       [id=39664, stack(0x000000b4e2500000,0x000000b4e2600000) (1024K)]
+  0x0000026eedfe48e0 WorkerThread "G1 Conc#2"                       [id=18772, stack(0x000000b4e2600000,0x000000b4e2700000) (1024K)]
+  0x0000026ee34294e0 ConcurrentGCThread "G1 Refine#0"               [id=33216, stack(0x000000b4e0a00000,0x000000b4e0b00000) (1024K)]
+  0x0000026ee342ae10 ConcurrentGCThread "G1 Service"                [id=27088, stack(0x000000b4e0b00000,0x000000b4e0c00000) (1024K)]
+Total: 18
+
+Threads with active compile tasks:
+Total: 0
+
+VM state: not at safepoint (normal execution)
+
+VM Mutex/Monitor currently owned by a thread: None
+
+Heap address: 0x0000000702600000, size: 4058 MB, Compressed Oops mode: Zero based, Oop shift amount: 3
+
+CDS archive(s) mapped at: [0x0000026e80000000-0x0000026e80ba0000-0x0000026e80ba0000), size 12189696, SharedBaseAddress: 0x0000026e80000000, ArchiveRelocationMode: 1.
+Compressed class space mapped at: 0x0000026e81000000-0x0000026ec1000000, reserved size: 1073741824
+Narrow klass base: 0x0000026e80000000, Narrow klass shift: 0, Narrow klass range: 0x100000000
+
+GC Precious Log:
+ CardTable entry size: 512
+ Card Set container configuration: InlinePtr #cards 4 size 8 Array Of Cards #cards 16 size 48 Howl #buckets 8 coarsen threshold 3686 Howl Bitmap #cards 512 size 80 coarsen threshold 460 Card regions per heap region 1 cards per card region 4096
+ CPUs: 12 total, 12 available
+ Memory: 16225M
+ Large Page Support: Disabled
+ NUMA Support: Disabled
+ Compressed Oops: Enabled (Zero based)
+ Heap Region Size: 2M
+ Heap Min Capacity: 8M
+ Heap Initial Capacity: 254M
+ Heap Max Capacity: 4058M
+ Pre-touch: Disabled
+ Parallel Workers: 10
+ Concurrent Workers: 3
+ Concurrent Refinement Workers: 10
+ Periodic GC: Disabled
+
+Heap:
+ garbage-first heap   total 65536K, used 24900K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 5 young (10240K), 2 survivors (4096K)
+ Metaspace       used 35726K, committed 36352K, reserved 1114112K
+  class space    used 4509K, committed 4800K, reserved 1048576K
+
+Heap Regions: E=young(eden), S=young(survivor), O=old, HS=humongous(starts), HC=humongous(continues), CS=collection set, F=free, TAMS=top-at-mark-start, PB=parsable bottom
+|   0|0x0000000702600000, 0x0000000702800000, 0x0000000702800000|100%| O|  |TAMS 0x0000000702600000| PB 0x0000000702600000| Untracked 
+|   1|0x0000000702800000, 0x0000000702a00000, 0x0000000702a00000|100%| O|  |TAMS 0x0000000702800000| PB 0x0000000702800000| Untracked 
+|   2|0x0000000702a00000, 0x0000000702c00000, 0x0000000702c00000|100%| O|  |TAMS 0x0000000702a00000| PB 0x0000000702a00000| Untracked 
+|   3|0x0000000702c00000, 0x0000000702e00000, 0x0000000702e00000|100%| O|  |TAMS 0x0000000702c00000| PB 0x0000000702c00000| Untracked 
+|   4|0x0000000702e00000, 0x0000000703000000, 0x0000000703000000|100%| O|  |TAMS 0x0000000702e00000| PB 0x0000000702e00000| Untracked 
+|   5|0x0000000703000000, 0x0000000703200000, 0x0000000703200000|100%| O|  |TAMS 0x0000000703000000| PB 0x0000000703000000| Untracked 
+|   6|0x0000000703200000, 0x0000000703400000, 0x0000000703400000|100%| O|  |TAMS 0x0000000703200000| PB 0x0000000703200000| Untracked 
+|   7|0x0000000703400000, 0x0000000703400000, 0x0000000703600000|  0%| F|  |TAMS 0x0000000703400000| PB 0x0000000703400000| Untracked 
+|   8|0x0000000703600000, 0x0000000703800000, 0x0000000703800000|100%| O|  |TAMS 0x0000000703600000| PB 0x0000000703600000| Untracked 
+|   9|0x0000000703800000, 0x0000000703a00000, 0x0000000703a00000|100%| O|  |TAMS 0x0000000703800000| PB 0x0000000703800000| Untracked 
+|  10|0x0000000703a00000, 0x0000000703a064d0, 0x0000000703c00000|  1%| O|  |TAMS 0x0000000703a00000| PB 0x0000000703a00000| Untracked 
+|  11|0x0000000703c00000, 0x0000000703c00000, 0x0000000703e00000|  0%| F|  |TAMS 0x0000000703c00000| PB 0x0000000703c00000| Untracked 
+|  12|0x0000000703e00000, 0x0000000703e00000, 0x0000000704000000|  0%| F|  |TAMS 0x0000000703e00000| PB 0x0000000703e00000| Untracked 
+|  13|0x0000000704000000, 0x0000000704000000, 0x0000000704200000|  0%| F|  |TAMS 0x0000000704000000| PB 0x0000000704000000| Untracked 
+|  14|0x0000000704200000, 0x0000000704200000, 0x0000000704400000|  0%| F|  |TAMS 0x0000000704200000| PB 0x0000000704200000| Untracked 
+|  15|0x0000000704400000, 0x000000070444aee8, 0x0000000704600000| 14%| S|CS|TAMS 0x0000000704400000| PB 0x0000000704400000| Complete 
+|  16|0x0000000704600000, 0x0000000704800000, 0x0000000704800000|100%| S|CS|TAMS 0x0000000704600000| PB 0x0000000704600000| Complete 
+|  17|0x0000000704800000, 0x0000000704800000, 0x0000000704a00000|  0%| F|  |TAMS 0x0000000704800000| PB 0x0000000704800000| Untracked 
+|  18|0x0000000704a00000, 0x0000000704a00000, 0x0000000704c00000|  0%| F|  |TAMS 0x0000000704a00000| PB 0x0000000704a00000| Untracked 
+|  19|0x0000000704c00000, 0x0000000704c00000, 0x0000000704e00000|  0%| F|  |TAMS 0x0000000704c00000| PB 0x0000000704c00000| Untracked 
+|  20|0x0000000704e00000, 0x0000000704e00000, 0x0000000705000000|  0%| F|  |TAMS 0x0000000704e00000| PB 0x0000000704e00000| Untracked 
+|  21|0x0000000705000000, 0x0000000705000000, 0x0000000705200000|  0%| F|  |TAMS 0x0000000705000000| PB 0x0000000705000000| Untracked 
+|  22|0x0000000705200000, 0x0000000705200000, 0x0000000705400000|  0%| F|  |TAMS 0x0000000705200000| PB 0x0000000705200000| Untracked 
+|  23|0x0000000705400000, 0x0000000705400000, 0x0000000705600000|  0%| F|  |TAMS 0x0000000705400000| PB 0x0000000705400000| Untracked 
+|  24|0x0000000705600000, 0x0000000705600000, 0x0000000705800000|  0%| F|  |TAMS 0x0000000705600000| PB 0x0000000705600000| Untracked 
+|  25|0x0000000705800000, 0x0000000705800000, 0x0000000705a00000|  0%| F|  |TAMS 0x0000000705800000| PB 0x0000000705800000| Untracked 
+|  26|0x0000000705a00000, 0x0000000705a00000, 0x0000000705c00000|  0%| F|  |TAMS 0x0000000705a00000| PB 0x0000000705a00000| Untracked 
+| 116|0x0000000710e00000, 0x0000000710e00000, 0x0000000711000000|  0%| F|  |TAMS 0x0000000710e00000| PB 0x0000000710e00000| Untracked 
+| 117|0x0000000711000000, 0x0000000711000000, 0x0000000711200000|  0%| F|  |TAMS 0x0000000711000000| PB 0x0000000711000000| Untracked 
+| 118|0x0000000711200000, 0x000000071120edd8, 0x0000000711400000|  2%| E|  |TAMS 0x0000000711200000| PB 0x0000000711200000| Complete 
+| 119|0x0000000711400000, 0x0000000711600000, 0x0000000711600000|100%| E|CS|TAMS 0x0000000711400000| PB 0x0000000711400000| Complete 
+| 126|0x0000000712200000, 0x0000000712400000, 0x0000000712400000|100%| E|CS|TAMS 0x0000000712200000| PB 0x0000000712200000| Complete 
+
+Card table byte_map: [0x0000026edec20000,0x0000026edf410000] _byte_map_base: 0x0000026edb40d000
+
+Marking Bits: (CMBitMap*) 0x0000026ecbd6c250
+ Bits: [0x0000026edf410000, 0x0000026ee3378000)
+
+Polling page: 0x0000026ec9880000
+
+Metaspace:
+
+Usage:
+  Non-class:     30.49 MB used.
+      Class:      4.40 MB used.
+       Both:     34.89 MB used.
+
+Virtual space:
+  Non-class space:       64.00 MB reserved,      30.81 MB ( 48%) committed,  1 nodes.
+      Class space:        1.00 GB reserved,       4.69 MB ( <1%) committed,  1 nodes.
+             Both:        1.06 GB reserved,      35.50 MB (  3%) committed. 
+
+Chunk freelists:
+   Non-Class:  908.00 KB
+       Class:  11.28 MB
+        Both:  12.17 MB
+
+MaxMetaspaceSize: unlimited
+CompressedClassSpaceSize: 1.00 GB
+Initial GC threshold: 21.00 MB
+Current GC threshold: 58.88 MB
+CDS: on
+ - commit_granule_bytes: 65536.
+ - commit_granule_words: 8192.
+ - virtual_space_node_default_size: 8388608.
+ - enlarge_chunks_in_place: 1.
+ - use_allocation_guard: 0.
+
+
+Internal statistics:
+
+num_allocs_failed_limit: 6.
+num_arena_births: 822.
+num_arena_deaths: 0.
+num_vsnodes_births: 2.
+num_vsnodes_deaths: 0.
+num_space_committed: 568.
+num_space_uncommitted: 0.
+num_chunks_returned_to_freelist: 6.
+num_chunks_taken_from_freelist: 2193.
+num_chunk_merges: 3.
+num_chunk_splits: 1450.
+num_chunks_enlarged: 977.
+num_inconsistent_stats: 0.
+
+CodeHeap 'non-profiled nmethods': size=120000Kb used=3214Kb max_used=3232Kb free=116785Kb
+ bounds [0x0000026ed69a0000, 0x0000026ed6ce0000, 0x0000026edded0000]
+CodeHeap 'profiled nmethods': size=120000Kb used=10516Kb max_used=11133Kb free=109484Kb
+ bounds [0x0000026eceed0000, 0x0000026ecf9b0000, 0x0000026ed6400000]
+CodeHeap 'non-nmethods': size=5760Kb used=1563Kb max_used=1623Kb free=4196Kb
+ bounds [0x0000026ed6400000, 0x0000026ed6670000, 0x0000026ed69a0000]
+CodeCache: size=245760Kb, used=15293Kb, max_used=15988Kb, free=230465Kb
+ total_blobs=5653, nmethods=5025, adapters=532, full_count=0
+Compilation: enabled, stopped_count=0, restarted_count=0
+
+Compilation events (20 events):
+Event: 401.465 Thread 0x0000026ee607a3f0 5468       3       java.lang.invoke.MethodHandles$Lookup::linkMethodHandleConstant (223 bytes)
+Event: 401.466 Thread 0x0000026ee607a3f0 nmethod 5468 0x0000026ecf03fd90 code [0x0000026ecf040180, 0x0000026ecf041a50]
+Event: 401.467 Thread 0x0000026ee606e540 5469       4       java.util.Collections$SetFromMap::add (22 bytes)
+Event: 401.468 Thread 0x0000026ee606e540 nmethod 5469 0x0000026ed6a82b10 code [0x0000026ed6a82cc0, 0x0000026ed6a82dd8]
+Event: 401.732 Thread 0x0000026ee607a3f0 5470       3       java.lang.String::rangeCheck (10 bytes)
+Event: 401.732 Thread 0x0000026ee607a3f0 nmethod 5470 0x0000026ecf1ef890 code [0x0000026ecf1efa60, 0x0000026ecf1efcd0]
+Event: 402.302 Thread 0x0000026ee607a3f0 5471       3       java.util.concurrent.ConcurrentHashMap::sumCount (60 bytes)
+Event: 402.302 Thread 0x0000026ee607a3f0 nmethod 5471 0x0000026ecf1ef390 code [0x0000026ecf1ef540, 0x0000026ecf1ef788]
+Event: 402.309 Thread 0x0000026ee606e540 5472       4       java.lang.ThreadLocal$ThreadLocalMap::getEntry (42 bytes)
+Event: 402.311 Thread 0x0000026ee606e540 nmethod 5472 0x0000026ed6a6dd90 code [0x0000026ed6a6df20, 0x0000026ed6a6e068]
+Event: 402.315 Thread 0x0000026ee607a3f0 5473       1       org.apache.coyote.Request::getRequestProcessor (5 bytes)
+Event: 402.315 Thread 0x0000026ee607a3f0 nmethod 5473 0x0000026ed6a6da90 code [0x0000026ed6a6dc20, 0x0000026ed6a6dcf0]
+Event: 402.315 Thread 0x0000026ee607a3f0 5474       3       org.apache.coyote.AbstractProtocol$ConnectionHandler::getLog (8 bytes)
+Event: 402.315 Thread 0x0000026ee607a3f0 nmethod 5474 0x0000026ecf1eec90 code [0x0000026ecf1eee40, 0x0000026ecf1eeff8]
+Event: 402.318 Thread 0x0000026ee606e540 5475       4       java.util.concurrent.ConcurrentHashMap$EntryIterator::next (5 bytes)
+Event: 402.326 Thread 0x0000026ee606e540 nmethod 5475 0x0000026ed6a6d110 code [0x0000026ed6a6d2c0, 0x0000026ed6a6d808]
+Event: 402.402 Thread 0x0000026ee606e540 5476       4       org.bytedeco.javacpp.BytePointer::<init> (78 bytes)
+Event: 402.410 Thread 0x0000026ee606e540 nmethod 5476 0x0000026ed6a13290 code [0x0000026ed6a13460, 0x0000026ed6a13d18]
+Event: 402.420 Thread 0x0000026ee606e540 5477       4       java.lang.String::valueOf (15 bytes)
+Event: 402.421 Thread 0x0000026ee606e540 nmethod 5477 0x0000026ed6a6ce10 code [0x0000026ed6a6cfa0, 0x0000026ed6a6d050]
+
+GC Heap History (20 events):
+Event: 84.932 GC heap before
+{Heap before GC invocations=9 (full 0):
+ garbage-first heap   total 65536K, used 52927K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 18 young (36864K), 2 survivors (4096K)
+ Metaspace       used 35343K, committed 36032K, reserved 1114112K
+  class space    used 4490K, committed 4800K, reserved 1048576K
+}
+Event: 84.937 GC heap after
+{Heap after GC invocations=10 (full 0):
+ garbage-first heap   total 65536K, used 21126K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 2 young (4096K), 2 survivors (4096K)
+ Metaspace       used 35343K, committed 36032K, reserved 1114112K
+  class space    used 4490K, committed 4800K, reserved 1048576K
+}
+Event: 94.948 GC heap before
+{Heap before GC invocations=10 (full 0):
+ garbage-first heap   total 65536K, used 25222K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 5 young (10240K), 2 survivors (4096K)
+ Metaspace       used 35487K, committed 36096K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 94.950 GC heap after
+{Heap after GC invocations=11 (full 0):
+ garbage-first heap   total 65536K, used 21068K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 2 young (4096K), 2 survivors (4096K)
+ Metaspace       used 35487K, committed 36096K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 140.856 GC heap before
+{Heap before GC invocations=12 (full 0):
+ garbage-first heap   total 65536K, used 51788K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 17 young (34816K), 2 survivors (4096K)
+ Metaspace       used 35567K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 140.857 GC heap after
+{Heap after GC invocations=13 (full 0):
+ garbage-first heap   total 65536K, used 21097K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 2 young (4096K), 2 survivors (4096K)
+ Metaspace       used 35567K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 174.989 GC heap before
+{Heap before GC invocations=13 (full 0):
+ garbage-first heap   total 65536K, used 51817K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 17 young (34816K), 2 survivors (4096K)
+ Metaspace       used 35584K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 174.991 GC heap after
+{Heap after GC invocations=14 (full 0):
+ garbage-first heap   total 65536K, used 20860K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 2 young (4096K), 2 survivors (4096K)
+ Metaspace       used 35584K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 208.644 GC heap before
+{Heap before GC invocations=14 (full 0):
+ garbage-first heap   total 65536K, used 51580K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 17 young (34816K), 2 survivors (4096K)
+ Metaspace       used 35605K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 208.645 GC heap after
+{Heap after GC invocations=15 (full 0):
+ garbage-first heap   total 65536K, used 20876K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 2 young (4096K), 2 survivors (4096K)
+ Metaspace       used 35605K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 249.160 GC heap before
+{Heap before GC invocations=15 (full 0):
+ garbage-first heap   total 65536K, used 51596K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 17 young (34816K), 2 survivors (4096K)
+ Metaspace       used 35605K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 249.162 GC heap after
+{Heap after GC invocations=16 (full 0):
+ garbage-first heap   total 65536K, used 20862K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 2 young (4096K), 2 survivors (4096K)
+ Metaspace       used 35605K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 286.425 GC heap before
+{Heap before GC invocations=16 (full 0):
+ garbage-first heap   total 65536K, used 51582K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 17 young (34816K), 2 survivors (4096K)
+ Metaspace       used 35623K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 286.426 GC heap after
+{Heap after GC invocations=17 (full 0):
+ garbage-first heap   total 65536K, used 20909K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 2 young (4096K), 2 survivors (4096K)
+ Metaspace       used 35623K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 322.964 GC heap before
+{Heap before GC invocations=17 (full 0):
+ garbage-first heap   total 65536K, used 51629K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 17 young (34816K), 2 survivors (4096K)
+ Metaspace       used 35631K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 322.966 GC heap after
+{Heap after GC invocations=18 (full 0):
+ garbage-first heap   total 65536K, used 20814K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 2 young (4096K), 2 survivors (4096K)
+ Metaspace       used 35631K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 361.249 GC heap before
+{Heap before GC invocations=18 (full 0):
+ garbage-first heap   total 65536K, used 51534K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 17 young (34816K), 2 survivors (4096K)
+ Metaspace       used 35632K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 361.251 GC heap after
+{Heap after GC invocations=19 (full 0):
+ garbage-first heap   total 65536K, used 20838K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 2 young (4096K), 2 survivors (4096K)
+ Metaspace       used 35632K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 400.001 GC heap before
+{Heap before GC invocations=19 (full 0):
+ garbage-first heap   total 65536K, used 51558K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 17 young (34816K), 2 survivors (4096K)
+ Metaspace       used 35632K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+Event: 400.003 GC heap after
+{Heap after GC invocations=20 (full 0):
+ garbage-first heap   total 65536K, used 20804K [0x0000000702600000, 0x0000000800000000)
+  region size 2048K, 2 young (4096K), 2 survivors (4096K)
+ Metaspace       used 35632K, committed 36288K, reserved 1114112K
+  class space    used 4491K, committed 4800K, reserved 1048576K
+}
+
+Dll operation events (20 events):
+Event: 27.482 Loaded shared library C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\vcruntime140_1.dll
+Event: 27.494 Loaded shared library C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\msvcp140.dll
+Event: 27.501 Loaded shared library C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\msvcp140_1.dll
+Event: 27.511 Loaded shared library C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\concrt140.dll
+Event: 27.519 Loaded shared library C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\vcomp140.dll
+Event: 27.529 Loaded shared library C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\jnijavacpp.dll
+Event: 27.588 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\avutil-58.dll
+Event: 27.622 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniavutil.dll
+Event: 27.731 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\swresample-4.dll
+Event: 27.755 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniswresample.dll
+Event: 27.818 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\avcodec-60.dll
+Event: 27.850 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniavcodec.dll
+Event: 27.913 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\avformat-60.dll
+Event: 27.939 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniavformat.dll
+Event: 27.981 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\swscale-7.dll
+Event: 28.009 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniswscale.dll
+Event: 28.124 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\avfilter-9.dll
+Event: 28.162 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniavfilter.dll
+Event: 28.241 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\avdevice-60.dll
+Event: 28.290 Loaded shared library C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniavdevice.dll
+
+Deoptimization events (20 events):
+Event: 402.276 Thread 0x0000026eeb921d50 Uncommon trap: trap_request=0xffffff45 fr.pc=0x0000026ed6a31454 relative=0x00000000000007d4
+Event: 402.276 Thread 0x0000026eeb921d50 Uncommon trap: reason=unstable_if action=reinterpret pc=0x0000026ed6a31454 method=ch.qos.logback.core.pattern.FormattingConverter.write(Ljava/lang/StringBuilder;Ljava/lang/Object;)V @ 114 c2
+Event: 402.276 Thread 0x0000026eeb921d50 DEOPT PACKING pc=0x0000026ed6a31454 sp=0x000000b4f50feaa0
+Event: 402.276 Thread 0x0000026eeb921d50 DEOPT UNPACKING pc=0x0000026ed64546a2 sp=0x000000b4f50fea40 mode 2
+Event: 402.308 Thread 0x0000026eed56d650 Uncommon trap: trap_request=0xffffff45 fr.pc=0x0000026ed6cba1f8 relative=0x0000000000000058
+Event: 402.308 Thread 0x0000026eed56d650 Uncommon trap: reason=unstable_if action=reinterpret pc=0x0000026ed6cba1f8 method=java.lang.Thread.getAndClearInterrupt()Z @ 6 c2
+Event: 402.308 Thread 0x0000026eed56d650 DEOPT PACKING pc=0x0000026ed6cba1f8 sp=0x000000b4e2dfefc0
+Event: 402.308 Thread 0x0000026eed56d650 DEOPT UNPACKING pc=0x0000026ed64546a2 sp=0x000000b4e2dfeef8 mode 2
+Event: 402.322 Thread 0x0000026eeb923100 Uncommon trap: trap_request=0xffffff45 fr.pc=0x0000026ed6caf91c relative=0x00000000000038bc
+Event: 402.322 Thread 0x0000026eeb923100 Uncommon trap: reason=unstable_if action=reinterpret pc=0x0000026ed6caf91c method=org.bytedeco.javacv.FFmpegFrameRecorder.recordImage(IIIIII[Ljava/nio/Buffer;)Z @ 50 c2
+Event: 402.323 Thread 0x0000026eeb923100 DEOPT PACKING pc=0x0000026ed6caf91c sp=0x000000b4f4ffe470
+Event: 402.323 Thread 0x0000026eeb923100 DEOPT UNPACKING pc=0x0000026ed64546a2 sp=0x000000b4f4ffe468 mode 2
+Event: 402.416 Thread 0x0000026eec706920 Uncommon trap: trap_request=0xffffff45 fr.pc=0x0000026ed6aadfd8 relative=0x00000000000000b8
+Event: 402.416 Thread 0x0000026eec706920 Uncommon trap: reason=unstable_if action=reinterpret pc=0x0000026ed6aadfd8 method=java.lang.Integer.stringSize(I)I @ 3 c2
+Event: 402.416 Thread 0x0000026eec706920 DEOPT PACKING pc=0x0000026ed6aadfd8 sp=0x000000b4e9dfe930
+Event: 402.416 Thread 0x0000026eec706920 DEOPT UNPACKING pc=0x0000026ed64546a2 sp=0x000000b4e9dfe8b0 mode 2
+Event: 402.416 Thread 0x0000026eec706920 Uncommon trap: trap_request=0xffffff45 fr.pc=0x0000026ed6aae4b0 relative=0x00000000000001f0
+Event: 402.416 Thread 0x0000026eec706920 Uncommon trap: reason=unstable_if action=reinterpret pc=0x0000026ed6aae4b0 method=java.lang.Integer.getChars(II[B)I @ 4 c2
+Event: 402.416 Thread 0x0000026eec706920 DEOPT PACKING pc=0x0000026ed6aae4b0 sp=0x000000b4e9dfe920
+Event: 402.416 Thread 0x0000026eec706920 DEOPT UNPACKING pc=0x0000026ed64546a2 sp=0x000000b4e9dfe898 mode 2
+
+Classes loaded (20 events):
+Event: 401.730 Loading class java/net/ProxySelector
+Event: 401.730 Loading class java/net/ProxySelector done
+Event: 401.730 Loading class sun/net/spi/DefaultProxySelector
+Event: 401.731 Loading class sun/net/spi/DefaultProxySelector done
+Event: 401.731 Loading class java/net/Proxy
+Event: 401.731 Loading class java/net/Proxy done
+Event: 401.731 Loading class java/net/Proxy$Type
+Event: 401.731 Loading class java/net/Proxy$Type done
+Event: 401.731 Loading class sun/net/spi/DefaultProxySelector$1
+Event: 401.731 Loading class sun/net/spi/DefaultProxySelector$1 done
+Event: 401.732 Loading class sun/net/spi/DefaultProxySelector$NonProxyInfo
+Event: 401.732 Loading class sun/net/spi/DefaultProxySelector$NonProxyInfo done
+Event: 401.732 Loading class sun/net/spi/DefaultProxySelector$3
+Event: 401.733 Loading class sun/net/spi/DefaultProxySelector$3 done
+Event: 402.277 Loading class java/nio/channels/AsynchronousCloseException
+Event: 402.277 Loading class java/nio/channels/AsynchronousCloseException done
+Event: 402.370 Loading class java/lang/Throwable$WrappedPrintStream
+Event: 402.370 Loading class java/lang/Throwable$PrintStreamOrWriter
+Event: 402.371 Loading class java/lang/Throwable$PrintStreamOrWriter done
+Event: 402.371 Loading class java/lang/Throwable$WrappedPrintStream done
+
+Classes unloaded (0 events):
+No events
+
+Classes redefined (0 events):
+No events
+
+Internal exceptions (20 events):
+Event: 85.250 Thread 0x0000026eed571160 Exception <a 'sun/net/ConnectionResetException'{0x00000007122d82b8}: Connection reset> (0x00000007122d82b8) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 85.304 Thread 0x0000026eed56d650 Exception <a 'sun/net/ConnectionResetException'{0x00000007122edb78}: Connection reset> (0x00000007122edb78) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 85.347 Thread 0x0000026eed570440 Exception <a 'sun/net/ConnectionResetException'{0x00000007123a5598}: Connection reset> (0x00000007123a5598) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 85.348 Thread 0x0000026eed570ad0 Exception <a 'sun/net/ConnectionResetException'{0x00000007123941f8}: Connection reset> (0x00000007123941f8) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 85.496 Thread 0x0000026eed56f720 Exception <a 'sun/net/ConnectionResetException'{0x00000007122d2d48}: Connection reset> (0x00000007122d2d48) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 85.571 Thread 0x0000026eed56fdb0 Exception <a 'sun/net/ConnectionResetException'{0x00000007123c40e8}: Connection reset> (0x00000007123c40e8) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 85.582 Thread 0x0000026eed56ea00 Exception <a 'sun/net/ConnectionResetException'{0x0000000712371348}: Connection reset> (0x0000000712371348) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 85.739 Thread 0x0000026eed571160 Exception <a 'sun/net/ConnectionResetException'{0x00000007122d8928}: Connection reset> (0x00000007122d8928) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 85.795 Thread 0x0000026eed56d650 Exception <a 'sun/net/ConnectionResetException'{0x00000007123e9378}: Connection reset> (0x00000007123e9378) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 85.802 Thread 0x0000026eed570440 Exception <a 'sun/net/ConnectionResetException'{0x00000007123a5c08}: Connection reset> (0x00000007123a5c08) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 85.927 Thread 0x0000026eed570ad0 Exception <a 'sun/net/ConnectionResetException'{0x0000000712394868}: Connection reset> (0x0000000712394868) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 87.133 Thread 0x0000026eed56fdb0 Exception <a 'sun/net/ConnectionResetException'{0x00000007123c4758}: Connection reset> (0x00000007123c4758) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 87.193 Thread 0x0000026eed56ea00 Exception <a 'sun/net/ConnectionResetException'{0x00000007123719b8}: Connection reset> (0x00000007123719b8) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 87.499 Thread 0x0000026eed56dce0 Exception <a 'sun/net/ConnectionResetException'{0x000000071231bd28}: Connection reset> (0x000000071231bd28) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 87.985 Thread 0x0000026eed570440 Exception <a 'sun/net/ConnectionResetException'{0x00000007123a6278}: Connection reset> (0x00000007123a6278) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 88.064 Thread 0x0000026eed570ad0 Exception <a 'sun/net/ConnectionResetException'{0x0000000712394ed8}: Connection reset> (0x0000000712394ed8) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 89.034 Thread 0x0000026eed5717f0 Exception <a 'sun/net/ConnectionResetException'{0x000000071146e078}: Connection reset> (0x000000071146e078) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 539]
+Event: 402.277 Thread 0x0000026eed572ba0 Exception <a 'java/io/IOException'{0x00000007114e4480}> (0x00000007114e4480) 
+thrown [s\src\hotspot\share\prims\jni.cpp, line 520]
+Event: 402.318 Thread 0x0000026eed56c930 Exception <a 'java/lang/InterruptedException'{0x000000071236b790}: sleep interrupted> (0x000000071236b790) 
+thrown [s\src\hotspot\share\prims\jvm.cpp, line 3074]
+Event: 402.322 Thread 0x0000026eeb923100 Implicit null exception at 0x0000026ed6cac457 to 0x0000026ed6caf8fc
+
+ZGC Phase Switch (0 events):
+No events
+
+VM Operations (20 events):
+Event: 306.503 Executing VM operation: Cleanup
+Event: 306.503 Executing VM operation: Cleanup done
+Event: 322.964 Executing VM operation: G1CollectForAllocation (G1 Evacuation Pause)
+Event: 322.966 Executing VM operation: G1CollectForAllocation (G1 Evacuation Pause) done
+Event: 324.985 Executing VM operation: Cleanup
+Event: 324.985 Executing VM operation: Cleanup done
+Event: 327.005 Executing VM operation: Cleanup
+Event: 327.005 Executing VM operation: Cleanup done
+Event: 360.617 Executing VM operation: HandshakeAllThreads (HandshakeForDeflation)
+Event: 360.617 Executing VM operation: HandshakeAllThreads (HandshakeForDeflation) done
+Event: 360.617 Executing VM operation: RendezvousGCThreads
+Event: 360.617 Executing VM operation: RendezvousGCThreads done
+Event: 361.249 Executing VM operation: G1CollectForAllocation (G1 Evacuation Pause)
+Event: 361.251 Executing VM operation: G1CollectForAllocation (G1 Evacuation Pause) done
+Event: 366.311 Executing VM operation: Cleanup
+Event: 366.311 Executing VM operation: Cleanup done
+Event: 400.001 Executing VM operation: G1CollectForAllocation (G1 Evacuation Pause)
+Event: 400.003 Executing VM operation: G1CollectForAllocation (G1 Evacuation Pause) done
+Event: 402.012 Executing VM operation: Cleanup
+Event: 402.013 Executing VM operation: Cleanup done
+
+Memory protections (0 events):
+No events
+
+Nmethod flushes (20 events):
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecef28890
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecef28c90
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecef29510
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf01b110
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf01c110
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf01da90
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf050f10
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf118990
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf157890
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf157c10
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf160f90
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf277f10
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf2e8d10
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf2ea290
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf314f90
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf317710
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf46d690
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf46e210
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf471910
+Event: 94.961 Thread 0x0000026ee357e890 flushing  nmethod 0x0000026ecf471d90
+
+Events (20 events):
+Event: 94.984 Thread 0x0000026eeb924b40 Thread added: 0x0000026eeb924b40
+Event: 401.463 Thread 0x0000026ee604bd70 Thread added: 0x0000026eeb9251d0
+Event: 401.464 Thread 0x0000026eeb9251d0 Thread added: 0x0000026eeb923100
+Event: 401.464 Thread 0x0000026eeb9251d0 Thread added: 0x0000026eeb921d50
+Event: 401.465 Thread 0x0000026eeb921d50 Thread exited: 0x0000026eeb921d50
+Event: 401.471 Thread 0x0000026eeb923100 Thread added: 0x0000026eeb921d50
+Event: 402.277 Thread 0x0000026eed572ba0 Thread exited: 0x0000026eed572ba0
+Event: 402.292 Thread 0x0000026eeb921d50 Thread exited: 0x0000026eeb921d50
+Event: 402.303 Thread 0x0000026eed56f090 Thread exited: 0x0000026eed56f090
+Event: 402.308 Thread 0x0000026eed56d650 Thread exited: 0x0000026eed56d650
+Event: 402.309 Thread 0x0000026eed571160 Thread exited: 0x0000026eed571160
+Event: 402.309 Thread 0x0000026eed56e370 Thread exited: 0x0000026eed56e370
+Event: 402.309 Thread 0x0000026eed570ad0 Thread exited: 0x0000026eed570ad0
+Event: 402.310 Thread 0x0000026eed570440 Thread exited: 0x0000026eed570440
+Event: 402.310 Thread 0x0000026eed56fdb0 Thread exited: 0x0000026eed56fdb0
+Event: 402.314 Thread 0x0000026eed56ea00 Thread exited: 0x0000026eed56ea00
+Event: 402.314 Thread 0x0000026eed56f720 Thread exited: 0x0000026eed56f720
+Event: 402.314 Thread 0x0000026eed5717f0 Thread exited: 0x0000026eed5717f0
+Event: 402.315 Thread 0x0000026eed56dce0 Thread exited: 0x0000026eed56dce0
+Event: 402.318 Thread 0x0000026eed56c930 Thread exited: 0x0000026eed56c930
+
+
+Dynamic libraries:
+0x00007ff6ea0e0000 - 0x00007ff6ea0ee000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\java.exe
+0x00007ff88a560000 - 0x00007ff88a7c8000 	C:\WINDOWS\SYSTEM32\ntdll.dll
+0x00007ff851760000 - 0x00007ff851780000 	C:\Program Files\Avast Software\Avast\aswhook.dll
+0x00007ff888d50000 - 0x00007ff888e19000 	C:\WINDOWS\System32\KERNEL32.DLL
+0x00007ff887c70000 - 0x00007ff888062000 	C:\WINDOWS\System32\KERNELBASE.dll
+0x00007ff887870000 - 0x00007ff8879bb000 	C:\WINDOWS\System32\ucrtbase.dll
+0x00007ff85af70000 - 0x00007ff85af8e000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\VCRUNTIME140.dll
+0x00007ff85a190000 - 0x00007ff85a1a8000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\jli.dll
+0x00007ff8899a0000 - 0x00007ff889b65000 	C:\WINDOWS\System32\USER32.dll
+0x00007ff86b830000 - 0x00007ff86bac3000 	C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.26100.6899_none_3e0efeeae32e88c1\COMCTL32.dll
+0x00007ff888130000 - 0x00007ff888157000 	C:\WINDOWS\System32\win32u.dll
+0x00007ff889780000 - 0x00007ff889829000 	C:\WINDOWS\System32\msvcrt.dll
+0x00007ff88a420000 - 0x00007ff88a44b000 	C:\WINDOWS\System32\GDI32.dll
+0x00007ff888200000 - 0x00007ff88832d000 	C:\WINDOWS\System32\gdi32full.dll
+0x00007ff887a50000 - 0x00007ff887af3000 	C:\WINDOWS\System32\msvcp_win.dll
+0x00007ff88a180000 - 0x00007ff88a1af000 	C:\WINDOWS\System32\IMM32.DLL
+0x00007ff86bb00000 - 0x00007ff86bb0c000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\vcruntime140_1.dll
+0x00007ff83d9c0000 - 0x00007ff83da4d000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\msvcp140.dll
+0x00007ff827540000 - 0x00007ff8282d7000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\server\jvm.dll
+0x00007ff888b20000 - 0x00007ff888bd4000 	C:\WINDOWS\System32\ADVAPI32.dll
+0x00007ff888ca0000 - 0x00007ff888d46000 	C:\WINDOWS\System32\sechost.dll
+0x00007ff889660000 - 0x00007ff889778000 	C:\WINDOWS\System32\RPCRT4.dll
+0x00007ff889830000 - 0x00007ff8898a4000 	C:\WINDOWS\System32\WS2_32.dll
+0x00007ff8873b0000 - 0x00007ff88740e000 	C:\WINDOWS\SYSTEM32\POWRPROF.dll
+0x00007ff8819f0000 - 0x00007ff8819fb000 	C:\WINDOWS\SYSTEM32\VERSION.dll
+0x00007ff87f250000 - 0x00007ff87f285000 	C:\WINDOWS\SYSTEM32\WINMM.dll
+0x00007ff887390000 - 0x00007ff8873a4000 	C:\WINDOWS\SYSTEM32\UMPDC.dll
+0x00007ff886480000 - 0x00007ff88649b000 	C:\WINDOWS\SYSTEM32\kernel.appcore.dll
+0x00007ff867840000 - 0x00007ff86784a000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\jimage.dll
+0x00007ff878840000 - 0x00007ff878a82000 	C:\WINDOWS\SYSTEM32\DBGHELP.DLL
+0x00007ff888630000 - 0x00007ff8889ab000 	C:\WINDOWS\System32\combase.dll
+0x00007ff8898c0000 - 0x00007ff889997000 	C:\WINDOWS\System32\OLEAUT32.dll
+0x00007ff878700000 - 0x00007ff87873c000 	C:\WINDOWS\SYSTEM32\dbgcore.DLL
+0x00007ff888160000 - 0x00007ff8881f8000 	C:\WINDOWS\System32\bcryptPrimitives.dll
+0x00007ff854e80000 - 0x00007ff854e9f000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\java.dll
+0x00007ff888e80000 - 0x00007ff8895cd000 	C:\WINDOWS\System32\SHELL32.dll
+0x00007ff887b00000 - 0x00007ff887c6b000 	C:\WINDOWS\System32\wintypes.dll
+0x00007ff885320000 - 0x00007ff885b7d000 	C:\WINDOWS\SYSTEM32\windows.storage.dll
+0x00007ff88a080000 - 0x00007ff88a172000 	C:\WINDOWS\System32\SHCORE.dll
+0x00007ff8895f0000 - 0x00007ff889652000 	C:\WINDOWS\System32\shlwapi.dll
+0x00007ff887610000 - 0x00007ff887639000 	C:\WINDOWS\SYSTEM32\profapi.dll
+0x00007ff8543a0000 - 0x00007ff8543b8000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\zip.dll
+0x00007ff866470000 - 0x00007ff866480000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\net.dll
+0x00007ff8815c0000 - 0x00007ff8816df000 	C:\WINDOWS\SYSTEM32\WINHTTP.dll
+0x00007ff8869d0000 - 0x00007ff886a3b000 	C:\WINDOWS\system32\mswsock.dll
+0x00007ff852fa0000 - 0x00007ff852fb6000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\nio.dll
+0x00007ff8643c0000 - 0x00007ff8643ca000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\management.dll
+0x00007ff862f30000 - 0x00007ff862f3b000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\management_ext.dll
+0x00007ff8898b0000 - 0x00007ff8898b8000 	C:\WINDOWS\System32\PSAPI.DLL
+0x00007ff860c20000 - 0x00007ff860c2e000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\sunmscapi.dll
+0x00007ff8876f0000 - 0x00007ff887867000 	C:\WINDOWS\System32\CRYPT32.dll
+0x00007ff886f00000 - 0x00007ff886f30000 	C:\WINDOWS\SYSTEM32\ncrypt.dll
+0x00007ff886eb0000 - 0x00007ff886eef000 	C:\WINDOWS\SYSTEM32\NTASN1.dll
+0x00007ff886db0000 - 0x00007ff886dcb000 	C:\WINDOWS\SYSTEM32\CRYPTSP.dll
+0x00007ff8863e0000 - 0x00007ff88641b000 	C:\WINDOWS\system32\rsaenh.dll
+0x00007ff886a70000 - 0x00007ff886a9b000 	C:\WINDOWS\SYSTEM32\USERENV.dll
+0x00007ff8875e0000 - 0x00007ff887606000 	C:\WINDOWS\SYSTEM32\bcrypt.dll
+0x00007ff886c10000 - 0x00007ff886c1c000 	C:\WINDOWS\SYSTEM32\CRYPTBASE.dll
+0x00007ff885e80000 - 0x00007ff885eb4000 	C:\WINDOWS\SYSTEM32\IPHLPAPI.DLL
+0x00007ff88a510000 - 0x00007ff88a51a000 	C:\WINDOWS\System32\NSI.dll
+0x00007ff85f860000 - 0x00007ff85f869000 	C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\extnet.dll
+0x00007ff83da50000 - 0x00007ff83da58000 	C:\WINDOWS\system32\wshunix.dll
+0x0000026ecbbf0000 - 0x0000026ecbbf4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-locale-l1-1-0.dll
+0x0000026ecbc00000 - 0x0000026ecbc05000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-string-l1-1-0.dll
+0x0000026ecbc10000 - 0x0000026ecbc15000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-stdio-l1-1-0.dll
+0x0000026ecbc20000 - 0x0000026ecbc26000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-math-l1-1-0.dll
+0x0000026ecbc30000 - 0x0000026ecbc34000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-heap-l1-1-0.dll
+0x0000026ecbc40000 - 0x0000026ecbc45000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-runtime-l1-1-0.dll
+0x0000026ecbc50000 - 0x0000026ecbc55000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-convert-l1-1-0.dll
+0x0000026ecbc60000 - 0x0000026ecbc64000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-environment-l1-1-0.dll
+0x0000026ecbc70000 - 0x0000026ecbc74000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-time-l1-1-0.dll
+0x0000026ecbc80000 - 0x0000026ecbc84000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-filesystem-l1-1-0.dll
+0x0000026ecbc90000 - 0x0000026ecbc94000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-utility-l1-1-0.dll
+0x0000026ee6e80000 - 0x0000026ee6e86000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-multibyte-l1-1-0.dll
+0x0000026ee6e90000 - 0x0000026ee6e94000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-conio-l1-1-0.dll
+0x0000026ee6ea0000 - 0x0000026ee6eb1000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-private-l1-1-0.dll
+0x0000026ee6ec0000 - 0x0000026ee6ec4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-crt-process-l1-1-0.dll
+0x0000026ee6ed0000 - 0x0000026ee6ed4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-console-l1-2-0.dll
+0x0000026ee6ee0000 - 0x0000026ee6ee4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-string-l1-1-0.dll
+0x0000026ee6ef0000 - 0x0000026ee6ef4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-errorhandling-l1-1-0.dll
+0x0000026ee6f00000 - 0x0000026ee6f04000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-timezone-l1-1-0.dll
+0x0000026ee6f10000 - 0x0000026ee6f15000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-file-l1-1-0.dll
+0x0000026ee6f20000 - 0x0000026ee6f24000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-namedpipe-l1-1-0.dll
+0x0000026ee6f30000 - 0x0000026ee6f34000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-handle-l1-1-0.dll
+0x0000026ee6f40000 - 0x0000026ee6f44000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-file-l2-1-0.dll
+0x0000026ee6f50000 - 0x0000026ee6f54000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-heap-l1-1-0.dll
+0x0000026ee6f60000 - 0x0000026ee6f64000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-libraryloader-l1-1-0.dll
+0x0000026ee6f70000 - 0x0000026ee6f74000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-synch-l1-1-0.dll
+0x0000026ee6f80000 - 0x0000026ee6f84000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-processthreads-l1-1-0.dll
+0x0000026ee6f90000 - 0x0000026ee6f94000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-processenvironment-l1-1-0.dll
+0x0000026ee6fa0000 - 0x0000026ee6fa4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-datetime-l1-1-0.dll
+0x0000026ee6fb0000 - 0x0000026ee6fb4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-localization-l1-2-0.dll
+0x0000026ee6fc0000 - 0x0000026ee6fc4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-sysinfo-l1-1-0.dll
+0x0000026ee6fd0000 - 0x0000026ee6fd4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-synch-l1-2-0.dll
+0x0000026ee6fe0000 - 0x0000026ee6fe4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-console-l1-1-0.dll
+0x0000026ee6ff0000 - 0x0000026ee6ff4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-debug-l1-1-0.dll
+0x0000026eecfa0000 - 0x0000026eecfa4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-rtlsupport-l1-1-0.dll
+0x0000026eecfb0000 - 0x0000026eecfb4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-processthreads-l1-1-1.dll
+0x0000026eecfc0000 - 0x0000026eecfc4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-file-l1-2-0.dll
+0x0000026eecfd0000 - 0x0000026eecfd4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-profile-l1-1-0.dll
+0x0000026eecfe0000 - 0x0000026eecfe4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-memory-l1-1-0.dll
+0x0000026eecff0000 - 0x0000026eecff4000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-util-l1-1-0.dll
+0x0000026eed000000 - 0x0000026eed004000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\api-ms-win-core-interlocked-l1-1-0.dll
+0x00007ff832be0000 - 0x00007ff832cf1000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\ucrtbase.dll
+0x00007ff864640000 - 0x00007ff86465b000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\vcruntime140.dll
+0x00007ff86c260000 - 0x00007ff86c26c000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\vcruntime140_1.dll
+0x00007ff83b870000 - 0x00007ff83b8fd000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\msvcp140.dll
+0x00007ff86b210000 - 0x00007ff86b219000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\msvcp140_1.dll
+0x00007ff84e420000 - 0x00007ff84e46e000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\concrt140.dll
+0x00007ff84e370000 - 0x00007ff84e3a1000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\vcomp140.dll
+0x00007ff86b090000 - 0x00007ff86b09f000 	C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64\jnijavacpp.dll
+0x00007ff832560000 - 0x00007ff832792000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\avutil-58.dll
+0x00007ff888490000 - 0x00007ff888628000 	C:\WINDOWS\System32\ole32.dll
+0x00007ff832ac0000 - 0x00007ff832be0000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniavutil.dll
+0x00007ff84dfb0000 - 0x00007ff84dfd8000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\swresample-4.dll
+0x00007ff84dec0000 - 0x00007ff84def6000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniswresample.dll
+0x00007fffa5680000 - 0x00007fffa8141000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\avcodec-60.dll
+0x00007ff8362b0000 - 0x00007ff836365000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniavcodec.dll
+0x00007ff822290000 - 0x00007ff822ca2000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\avformat-60.dll
+0x00007ff834140000 - 0x00007ff8341e3000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniavformat.dll
+0x00007ff8324b0000 - 0x00007ff832556000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\swscale-7.dll
+0x00007ff849830000 - 0x00007ff84986b000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniswscale.dll
+0x00007ffffb140000 - 0x00007ffffb607000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\avfilter-9.dll
+0x00007ff839ee0000 - 0x00007ff839f42000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniavfilter.dll
+0x00007ff84d4b0000 - 0x00007ff84d4db000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\avdevice-60.dll
+0x00007ff8654f0000 - 0x00007ff86550b000 	C:\WINDOWS\SYSTEM32\AVICAP32.dll
+0x00007ff8645f0000 - 0x00007ff86461c000 	C:\WINDOWS\SYSTEM32\MSVFW32.dll
+0x00007ff8446a0000 - 0x00007ff8446d8000 	C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64\jniavdevice.dll
+
+JVMTI agents: none
+
+dbghelp: loaded successfully - version: 4.0.5 - missing functions: none
+symbol engine: initialized successfully - sym options: 0x614 - pdb path: .;C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin;C:\WINDOWS\SYSTEM32;C:\Program Files\Avast Software\Avast;C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.26100.6899_none_3e0efeeae32e88c1;C:\Users\pc\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64\bin\server;C:\Users\pc\.javacpp\cache\javacpp-1.5.9-windows-x86_64.jar\org\bytedeco\javacpp\windows-x86_64;C:\Users\pc\.javacpp\cache\ffmpeg-6.0-1.5.9-windows-x86_64.jar\org\bytedeco\ffmpeg\windows-x86_64
+
+VM Arguments:
+jvm_args: -XX:+ShowCodeDetailsInExceptionMessages 
+java_command: com.backendcam.backendcam.BackendcamApplication
+java_class_path (initial): C:\Users\pc\Desktop\Backend cam\Camera\target\classes;C:\Users\pc\.m2\repository\org\springframework\boot\spring-boot-starter\3.5.6\spring-boot-starter-3.5.6.jar;C:\Users\pc\.m2\repository\org\springframework\boot\spring-boot\3.5.6\spring-boot-3.5.6.jar;C:\Users\pc\.m2\repository\org\springframework\spring-context\6.2.11\spring-context-6.2.11.jar;C:\Users\pc\.m2\repository\org\springframework\boot\spring-boot-autoconfigure\3.5.6\spring-boot-autoconfigure-3.5.6.jar;C:\Users\pc\.m2\repository\org\springframework\boot\spring-boot-starter-logging\3.5.6\spring-boot-starter-logging-3.5.6.jar;C:\Users\pc\.m2\repository\ch\qos\logback\logback-classic\1.5.18\logback-classic-1.5.18.jar;C:\Users\pc\.m2\repository\ch\qos\logback\logback-core\1.5.18\logback-core-1.5.18.jar;C:\Users\pc\.m2\repository\org\apache\logging\log4j\log4j-to-slf4j\2.24.3\log4j-to-slf4j-2.24.3.jar;C:\Users\pc\.m2\repository\org\apache\logging\log4j\log4j-api\2.24.3\log4j-api-2.24.3.jar;C:\Users\pc\.m2\repository\org\slf4j\jul-to-slf4j\2.0.17\jul-to-slf4j-2.0.17.jar;C:\Users\pc\.m2\repository\org\springframework\spring-core\6.2.11\spring-core-6.2.11.jar;C:\Users\pc\.m2\repository\org\springframework\spring-jcl\6.2.11\spring-jcl-6.2.11.jar;C:\Users\pc\.m2\repository\org\yaml\snakeyaml\2.4\snakeyaml-2.4.jar;C:\Users\pc\.m2\repository\jakarta\annotation\jakarta.annotation-api\2.1.1\jakarta.annotation-api-2.1.1.jar;C:\Users\pc\.m2\repository\org\slf4j\slf4j-api\2.0.17\slf4j-api-2.0.17.jar;C:\Users\pc\.m2\repository\org\springframework\boot\spring-boot-devtools\3.5.6\spring-boot-devtools-3.5.6.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacv-platform\1.5.9\javacv-platform-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacv\1.5.9\javacv-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\flycapture\2.13.3.31-1.5.9\flycapture-2.13.3.31-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\libdc1394\2.2.6-1.5.9\libdc1394-2.2.6-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect\0.5.7-1.5.9\libfreenect-0.5.7-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect2\0.2.0-1.5.9\libfreenect2-0.2.0-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense\1.12.4-1.5.9\librealsense-1.12.4-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense2\2.53.1-1.5.9\librealsense2-2.53.1-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\videoinput\0.200-1.5.9\videoinput-0.200-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas-platform\0.3.23-1.5.9\openblas-platform-0.3.23-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp-platform\1.5.9\javacpp-platform-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-android-arm.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-android-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-android-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-android-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-ios-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-ios-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-linux-armhf.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-linux-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-linux-ppc64le.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-macosx-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-macosx-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\javacpp\1.5.9\javacpp-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-android-arm.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-android-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-android-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-android-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-ios-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-ios-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-linux-armhf.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-linux-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-linux-ppc64le.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-macosx-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-macosx-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\openblas\0.3.23-1.5.9\openblas-0.3.23-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv-platform\4.7.0-1.5.9\opencv-platform-4.7.0-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-android-arm.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-android-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-android-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-android-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-ios-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-ios-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-linux-armhf.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-linux-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-linux-ppc64le.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-macosx-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-macosx-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\opencv\4.7.0-1.5.9\opencv-4.7.0-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg-platform\6.0-1.5.9\ffmpeg-platform-6.0-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-android-arm.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-android-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-android-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-android-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-linux-armhf.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-linux-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-linux-ppc64le.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-macosx-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-macosx-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\ffmpeg\6.0-1.5.9\ffmpeg-6.0-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\flycapture-platform\2.13.3.31-1.5.9\flycapture-platform-2.13.3.31-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\flycapture\2.13.3.31-1.5.9\flycapture-2.13.3.31-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\flycapture\2.13.3.31-1.5.9\flycapture-2.13.3.31-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\flycapture\2.13.3.31-1.5.9\flycapture-2.13.3.31-1.5.9-linux-armhf.jar;C:\Users\pc\.m2\repository\org\bytedeco\flycapture\2.13.3.31-1.5.9\flycapture-2.13.3.31-1.5.9-linux-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\flycapture\2.13.3.31-1.5.9\flycapture-2.13.3.31-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\flycapture\2.13.3.31-1.5.9\flycapture-2.13.3.31-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\libdc1394-platform\2.2.6-1.5.9\libdc1394-platform-2.2.6-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\libdc1394\2.2.6-1.5.9\libdc1394-2.2.6-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\libdc1394\2.2.6-1.5.9\libdc1394-2.2.6-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\libdc1394\2.2.6-1.5.9\libdc1394-2.2.6-1.5.9-linux-armhf.jar;C:\Users\pc\.m2\repository\org\bytedeco\libdc1394\2.2.6-1.5.9\libdc1394-2.2.6-1.5.9-linux-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\libdc1394\2.2.6-1.5.9\libdc1394-2.2.6-1.5.9-linux-ppc64le.jar;C:\Users\pc\.m2\repository\org\bytedeco\libdc1394\2.2.6-1.5.9\libdc1394-2.2.6-1.5.9-macosx-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\libdc1394\2.2.6-1.5.9\libdc1394-2.2.6-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\libdc1394\2.2.6-1.5.9\libdc1394-2.2.6-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect-platform\0.5.7-1.5.9\libfreenect-platform-0.5.7-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect\0.5.7-1.5.9\libfreenect-0.5.7-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect\0.5.7-1.5.9\libfreenect-0.5.7-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect\0.5.7-1.5.9\libfreenect-0.5.7-1.5.9-linux-armhf.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect\0.5.7-1.5.9\libfreenect-0.5.7-1.5.9-linux-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect\0.5.7-1.5.9\libfreenect-0.5.7-1.5.9-linux-ppc64le.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect\0.5.7-1.5.9\libfreenect-0.5.7-1.5.9-macosx-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect\0.5.7-1.5.9\libfreenect-0.5.7-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect\0.5.7-1.5.9\libfreenect-0.5.7-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect2-platform\0.2.0-1.5.9\libfreenect2-platform-0.2.0-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect2\0.2.0-1.5.9\libfreenect2-0.2.0-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect2\0.2.0-1.5.9\libfreenect2-0.2.0-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect2\0.2.0-1.5.9\libfreenect2-0.2.0-1.5.9-macosx-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\libfreenect2\0.2.0-1.5.9\libfreenect2-0.2.0-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense-platform\1.12.4-1.5.9\librealsense-platform-1.12.4-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense\1.12.4-1.5.9\librealsense-1.12.4-1.5.9-linux-armhf.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense\1.12.4-1.5.9\librealsense-1.12.4-1.5.9-linux-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense\1.12.4-1.5.9\librealsense-1.12.4-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense\1.12.4-1.5.9\librealsense-1.12.4-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense\1.12.4-1.5.9\librealsense-1.12.4-1.5.9-macosx-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense\1.12.4-1.5.9\librealsense-1.12.4-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense\1.12.4-1.5.9\librealsense-1.12.4-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense2-platform\2.53.1-1.5.9\librealsense2-platform-2.53.1-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense2\2.53.1-1.5.9\librealsense2-2.53.1-1.5.9-linux-armhf.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense2\2.53.1-1.5.9\librealsense2-2.53.1-1.5.9-linux-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense2\2.53.1-1.5.9\librealsense2-2.53.1-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense2\2.53.1-1.5.9\librealsense2-2.53.1-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense2\2.53.1-1.5.9\librealsense2-2.53.1-1.5.9-macosx-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense2\2.53.1-1.5.9\librealsense2-2.53.1-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\librealsense2\2.53.1-1.5.9\librealsense2-2.53.1-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\videoinput-platform\0.200-1.5.9\videoinput-platform-0.200-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\videoinput\0.200-1.5.9\videoinput-0.200-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\videoinput\0.200-1.5.9\videoinput-0.200-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus-platform\2.3.1-1.5.9\artoolkitplus-platform-2.3.1-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9-android-arm.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9-android-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9-android-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9-android-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9-linux-armhf.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9-linux-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9-linux-ppc64le.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9-macosx-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\artoolkitplus\2.3.1-1.5.9\artoolkitplus-2.3.1-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica-platform\1.83.0-1.5.9\leptonica-platform-1.83.0-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-android-arm.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-android-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-android-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-android-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-linux-armhf.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-linux-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-linux-ppc64le.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-macosx-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-macosx-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\leptonica\1.83.0-1.5.9\leptonica-1.83.0-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract-platform\5.3.1-1.5.9\tesseract-platform-5.3.1-1.5.9.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-android-arm.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-android-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-android-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-android-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-linux-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-linux-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-linux-armhf.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-linux-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-linux-ppc64le.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-macosx-arm64.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-macosx-x86_64.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-windows-x86.jar;C:\Users\pc\.m2\repository\org\bytedeco\tesseract\5.3.1-1.5.9\tesseract-5.3.1-1.5.9-windows-x86_64.jar;C:\Users\pc\.m2\repository\org\springframework\boot\spring-boot-starter-web\3.5.6\spring-boot-starter-web-3.5.6.jar;C:\Users\pc\.m2\repository\org\springframework\boot\spring-boot-starter-json\3.5.6\spring-boot-starter-json-3.5.6.jar;C:\Users\pc\.m2\repository\com\fasterxml\jackson\core\jackson-databind\2.19.2\jackson-databind-2.19.2.jar;C:\Users\pc\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.19.2\jackson-annotations-2.19.2.jar;C:\Users\pc\.m2\repository\com\fasterxml\jackson\core\jackson-core\2.19.2\jackson-core-2.19.2.jar;C:\Users\pc\.m2\repository\com\fasterxml\jackson\datatype\jackson-datatype-jdk8\2.19.2\jackson-datatype-jdk8-2.19.2.jar;C:\Users\pc\.m2\repository\com\fasterxml\jackson\datatype\jackson-datatype-jsr310\2.19.2\jackson-datatype-jsr310-2.19.2.jar;C:\Users\pc\.m2\repository\com\fasterxml\jackson\module\jackson-module-parameter-names\2.19.2\jackson-module-parameter-names-2.19.2.jar;C:\Users\pc\.m2\repository\org\springframework\boot\spring-boot-starter-tomcat\3.5.6\spring-boot-starter-tomcat-3.5.6.jar;C:\Users\pc\.m2\repository\org\apache\tomcat\embed\tomcat-embed-core\10.1.46\tomcat-embed-core-10.1.46.jar;C:\Users\pc\.m2\repository\org\apache\tomcat\embed\tomcat-embed-el\10.1.46\tomcat-embed-el-10.1.46.jar;C:\Users\pc\.m2\repository\org\apache\tomcat\embed\tomcat-embed-websocket\10.1.46\tomcat-embed-websocket-10.1.46.jar;C:\Users\pc\.m2\repository\org\springframework\spring-web\6.2.11\spring-web-6.2.11.jar;C:\Users\pc\.m2\repository\org\springframework\spring-beans\6.2.11\spring-beans-6.2.11.jar;C:\Users\pc\.m2\repository\io\micrometer\micrometer-observation\1.15.4\micrometer-observation-1.15.4.jar;C:\Users\pc\.m2\repository\io\micrometer\micrometer-commons\1.15.4\micrometer-commons-1.15.4.jar;C:\Users\pc\.m2\repository\org\springframework\spring-webmvc\6.2.11\spring-webmvc-6.2.11.jar;C:\Users\pc\.m2\repository\org\springframework\spring-aop\6.2.11\spring-aop-6.2.11.jar;C:\Users\pc\.m2\repository\org\springframework\spring-expression\6.2.11\spring-expression-6.2.11.jar
+Launcher Type: SUN_STANDARD
+
+[Global flags]
+     intx CICompilerCount                          = 4                                         {product} {ergonomic}
+     uint ConcGCThreads                            = 3                                         {product} {ergonomic}
+     uint G1ConcRefinementThreads                  = 10                                        {product} {ergonomic}
+   size_t G1HeapRegionSize                         = 2097152                                   {product} {ergonomic}
+    uintx GCDrainStackTargetSize                   = 64                                        {product} {ergonomic}
+   size_t InitialHeapSize                          = 266338304                                 {product} {ergonomic}
+   size_t MarkStackSize                            = 4194304                                   {product} {ergonomic}
+   size_t MaxHeapSize                              = 4255121408                                {product} {ergonomic}
+   size_t MaxNewSize                               = 2552233984                                {product} {ergonomic}
+   size_t MinHeapDeltaBytes                        = 2097152                                   {product} {ergonomic}
+   size_t MinHeapSize                              = 8388608                                   {product} {ergonomic}
+    uintx NonNMethodCodeHeapSize                   = 5839372                                {pd product} {ergonomic}
+    uintx NonProfiledCodeHeapSize                  = 122909434                              {pd product} {ergonomic}
+    uintx ProfiledCodeHeapSize                     = 122909434                              {pd product} {ergonomic}
+    uintx ReservedCodeCacheSize                    = 251658240                              {pd product} {ergonomic}
+     bool SegmentedCodeCache                       = true                                      {product} {ergonomic}
+     bool ShowCodeDetailsInExceptionMessages       = true                                   {manageable} {command line}
+   size_t SoftMaxHeapSize                          = 4255121408                             {manageable} {ergonomic}
+     bool UseCompressedOops                        = true                           {product lp64_product} {ergonomic}
+     bool UseG1GC                                  = true                                      {product} {ergonomic}
+     bool UseLargePagesIndividualAllocation        = false                                  {pd product} {ergonomic}
+
+Logging:
+Log output configuration:
+ #0: stdout all=warning uptime,level,tags foldmultilines=false
+ #1: stderr all=off uptime,level,tags foldmultilines=false
+
+Environment Variables:
+PATH=C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Common Files\Oracle\Java\java8path;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\ProgramData\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\dotnet\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\Microsoft SQL Server\160\Tools\Binn\;C:\Program Files\Microsoft SQL Server\160\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files\Microsoft SQL Server\160\DTS\Binn\;C:\Program Files (x86)\Microsoft SQL Server\160\DTS\Binn\;C:\Program Files\apache-maven-3.9.9\bin;C:\Program Files (x86)\Git\cmd;C:\Program Files\NVIDIA Corporation\NVIDIA app\NvDLISR;C:\Program Files\nodejs\;C:\Program Files\Docker\Docker\resources\bin;C:\Users\pc\ffmpeg-2025-10-12-git-0bc54cddb1-full_build\bin;C:\Users\pc\AppData\Local\pnpm;C:\Users\pc\.local\bin;C:\Users\pc\AppData\Local\flutter\bin;C:\Users\pc\AppData\Local\Programs\cursor\resources\app\bin;C:\Users\pc\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\pc\AppData\Roaming\npm;c:\Users\pc\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\debugCommand
+USERNAME=pc
+LANG=en_US.UTF-8
+OS=Windows_NT
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 151 Stepping 5, GenuineIntel
+TMP=C:\Users\pc\AppData\Local\Temp
+TEMP=C:\Users\pc\AppData\Local\Temp
+
+
+
+
+Periodic native trim disabled
+
+---------------  S Y S T E M  ---------------
+
+OS:
+ Windows 11 , 64 bit Build 26100 (10.0.26100.6725)
+OS uptime: 4 days 8:41 hours
+Hyper-V role detected
+
+CPU: total 12 (initial active 12) (6 cores per cpu, 2 threads per core) family 6 model 151 stepping 5 microcode 0x1a, cx8, cmov, fxsr, ht, mmx, 3dnowpref, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, lzcnt, tsc, tscinvbit, avx, avx2, aes, erms, clmul, bmi1, bmi2, adx, sha, fma, vzeroupper, clflush, clflushopt, clwb, hv, serialize, rdtscp, rdpid, fsrm, f16c, cet_ibt, cet_ss
+Processor Information for the first 12 processors :
+  Max Mhz: 2500, Current Mhz: 2500, Mhz Limit: 2500
+
+Memory: 4k page, system-wide physical 16225M (2391M free)
+TotalPageFile size 32450M (AvailPageFile size 9024M)
+current process WorkingSet (physical memory assigned to process): 1368M, peak: 1400M
+current process commit charge ("private bytes"): 1535M, peak: 1574M
+
+vm_info: OpenJDK 64-Bit Server VM (21.0.8+9-LTS) for windows-amd64 JRE (21.0.8+9-LTS), built on 2025-07-15T00:00:00Z by "admin" with MS VC++ 17.7 (VS2022)
+
+END.

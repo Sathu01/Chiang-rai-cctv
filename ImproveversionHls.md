@@ -7,7 +7,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FFmpegLogCallback;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PreDestroy;
+import javax.annotation.PreDestroy;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
