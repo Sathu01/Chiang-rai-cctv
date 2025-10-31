@@ -3,11 +3,10 @@ package com.backendcam.backendcam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.backendcam.backendcam.StreamRequest;
-import com.backendcam.backendcam.HLSStreamService;
 
 @RestController
 @RequestMapping("/api/stream")
+@CrossOrigin(origins = "*")
 public class StreamController {
 
     @Autowired
@@ -22,10 +21,16 @@ public class StreamController {
         return ResponseEntity.ok(hlsUrl);
     }
 
-    @PostMapping("/hls/stop")
-    public ResponseEntity<Void> stopHLS(@RequestParam String streamName) {
+    @PostMapping("/hls/stop/{streamName}")
+    public ResponseEntity<String> stopHLS(@PathVariable String streamName) {
         hlsService.stopHLSStream(streamName);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Stream stopped: " + streamName);
     }
+    
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("OK");
+    }
+
     
 }

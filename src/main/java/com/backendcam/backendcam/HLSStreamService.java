@@ -15,258 +15,260 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
-/**
- * HLSStreamService with Thread Pool
- *
- * Improved version that uses ExecutorService for managing multiple concurrent streams
- * - Supports up to 100 concurrent RTSP to HLS conversions
- * - One thread per stream for optimal parallelization
- * - Proper resource management and cleanup
- */
 @Service
 public class HLSStreamService {
 
     private static final Logger logger = Logger.getLogger(HLSStreamService.class.getName());
     private static final String HLS_ROOT = "./hls";
     
-    // Thread pool configuration
+    // Thread pool - optimized for 100 streams
     private static final int MAX_STREAMS = 100;
-    private static final int CORE_POOL_SIZE = 20; // Keep 20 threads always alive
-    private static final int KEEP_ALIVE_TIME = 60; // seconds
+    private static final int CORE_POOL_SIZE = 100;
+    private static final int KEEP_ALIVE_TIME = 300;
     
-    // Thread pool for managing streams
     private final ExecutorService streamExecutor;
     
-    // Track active streams and their futures
     private final ConcurrentHashMap<String, String> streamLinks = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Future<?>> streamTasks = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, StreamResources> streamResources = new ConcurrentHashMap<>();
 
     public HLSStreamService() {
-        // Create thread pool with capacity for 100 streams
         this.streamExecutor = new ThreadPoolExecutor(
             CORE_POOL_SIZE,
             MAX_STREAMS,
             KEEP_ALIVE_TIME,
             TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(),
+            new LinkedBlockingQueue<>(20),
             new ThreadFactory() {
-                private int counter = 0;
+                private final java.util.concurrent.atomic.AtomicInteger counter = 
+                    new java.util.concurrent.atomic.AtomicInteger(0);
                 @Override
                 public Thread newThread(Runnable r) {
-                    Thread t = new Thread(r, "HLS-Stream-" + counter++);
-                    t.setDaemon(false); // Don't make daemon so streams complete properly
+                    Thread t = new Thread(r, "HLS-" + counter.getAndIncrement());
+                    t.setDaemon(false);
+                    t.setPriority(Thread.NORM_PRIORITY - 1);
                     return t;
                 }
             },
-            new ThreadPoolExecutor.CallerRunsPolicy() // If pool is full, run in caller thread
+            new ThreadPoolExecutor.CallerRunsPolicy()
         );
         
-        logger.info("HLS Stream Service initialized with thread pool (max: " + MAX_STREAMS + " streams)");
+        ((ThreadPoolExecutor) streamExecutor).prestartAllCoreThreads();
+        
+        logger.info("HLS Service: core=" + CORE_POOL_SIZE + ", max=" + MAX_STREAMS);
     }
 
-    /**
-     * Start HLS stream from RTSP with thread pool management
-     */
     public String startHLSStream(String rtspUrl, String streamName) {
-        // Check if stream already exists
         if (streamLinks.containsKey(streamName)) {
-            logger.info("Stream already exists: " + streamName);
+            logger.info("Exists: " + streamName);
             return streamLinks.get(streamName);
         }
 
-        // Check if we've reached maximum capacity
         if (streamTasks.size() >= MAX_STREAMS) {
-            throw new RuntimeException("Maximum stream capacity reached (" + MAX_STREAMS + " streams)");
+            throw new RuntimeException("Max capacity: " + MAX_STREAMS);
         }
 
+        String playlistPath = "/hls/" + streamName + "/stream.m3u8";
+        streamLinks.put(streamName, playlistPath);
+
         try {
-            logger.info("Starting HLS stream: " + rtspUrl + " as " + streamName);
+            logger.info("Starting: " + streamName);
 
-            // Create output directory
-            File outputDir = new File(HLS_ROOT + "/" + streamName);
-            if (!outputDir.exists()) {
-                boolean created = outputDir.mkdirs();
-                logger.info("Created folder: " + outputDir.getAbsolutePath() + " - Success: " + created);
-            }
-
-            String hlsOutput = outputDir.getAbsolutePath() + "/stream.m3u8";
-            String playlistPath = "/hls/" + streamName + "/stream.m3u8";
-            
-            // Store the playlist path immediately
-            streamLinks.put(streamName, playlistPath);
-
-            // Submit stream task to thread pool
             Future<?> future = streamExecutor.submit(() -> {
                 FFmpegFrameGrabber grabber = null;
                 FFmpegFrameRecorder recorder = null;
                 
                 try {
-                    // Step 1: Connect to RTSP
-                    grabber = tryStartRtspWithFallback(rtspUrl);
-                    logger.info("Grabber started for " + streamName + ". Resolution: "
-                            + grabber.getImageWidth() + "x" + grabber.getImageHeight());
-
-                    // Step 2: Warm-up to determine resolution
-                    int warmupMax = 5;
-                    int warmCount = 0;
-                    Frame firstVideoFrame = null;
-                    while (warmCount < warmupMax) {
-                        Frame f = grabber.grab();
-                        if (f == null) break;
-                        if (f.image != null) {
-                            firstVideoFrame = f;
-                            break;
-                        }
-                        warmCount++;
+                    File outputDir = new File(HLS_ROOT, streamName);
+                    if (!outputDir.exists()) {
+                        outputDir.mkdirs();
                     }
 
+                    String hlsOutput = outputDir.getAbsolutePath() + "/stream.m3u8";
+                    
+                    grabber = connectRtsp(rtspUrl);
+                    logger.info("Connected: " + streamName);
+
+                    // Get resolution - no warmup frames
                     int width = grabber.getImageWidth();
                     int height = grabber.getImageHeight();
-                    if ((width <= 0 || height <= 0) && firstVideoFrame != null) {
-                        width = firstVideoFrame.imageWidth;
-                        height = firstVideoFrame.imageHeight;
-                    }
+                    
                     if (width <= 0 || height <= 0) {
-                        throw new RuntimeException("Could not determine video resolution from RTSP stream");
+                        throw new RuntimeException("Invalid resolution");
                     }
 
-                    // Step 3: Setup recorder
                     recorder = setupRecorder(grabber, hlsOutput, outputDir, width, height);
                     recorder.start();
-                    logger.info("Recorder started for " + streamName + " at " + hlsOutput + 
-                               " with size " + width + "x" + height);
+                    logger.info("Recording: " + streamName + " " + width + "x" + height);
 
-                    // Store resources for cleanup
                     streamResources.put(streamName, new StreamResources(grabber, recorder));
 
-                    // Step 4: Stream frames
                     streamFrames(grabber, recorder, streamName);
 
                 } catch (Exception e) {
-                    logger.severe("Error in stream " + streamName + ": " + e.getMessage());
-                    e.printStackTrace();
+                    logger.severe("Error: " + streamName + " - " + e.getMessage());
+                    streamLinks.remove(streamName);
                 } finally {
-                    // Cleanup resources
                     cleanupStream(streamName, grabber, recorder);
                 }
             });
 
-            // Store the future for tracking
             streamTasks.put(streamName, future);
-
             return playlistPath;
 
         } catch (Exception e) {
-            // Cleanup on failure
             streamLinks.remove(streamName);
-            logger.severe("Failed to start HLS stream: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Failed to start HLS stream", e);
+            logger.severe("Failed: " + streamName);
+            throw new RuntimeException("Failed to start", e);
         }
     }
 
-    /**
-     * Setup FFmpegFrameRecorder with optimal settings
-     */
-    private FFmpegFrameRecorder setupRecorder(FFmpegFrameGrabber grabber, String hlsOutput, 
-                                             File outputDir, int width, int height) throws Exception {
+    private FFmpegFrameRecorder setupRecorder(FFmpegFrameGrabber grabber, 
+                                             String hlsOutput, 
+                                             File outputDir, 
+                                             int width, 
+                                             int height) throws Exception {
+        
+        // CRITICAL: Scale down aggressively - 480p max for 100 streams
+        int targetWidth = width;
+        int targetHeight = height;
+        
+        // Scale to 480p max (was 720p)
+        if (height > 480) {
+            double aspectRatio = (double) width / height;
+            targetHeight = 480;
+            targetWidth = (int) (targetHeight * aspectRatio);
+            // Ensure even dimensions
+            targetWidth = (targetWidth / 2) * 2;
+            targetHeight = (targetHeight / 2) * 2;
+            logger.info("Scale: " + width + "x" + height + " → " + targetWidth + "x" + targetHeight);
+        }
+        
         FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(
-            hlsOutput,
-            width,
-            height,
-            Math.max(0, grabber.getAudioChannels())
+            hlsOutput, targetWidth, targetHeight, 0
         );
 
-        // Video settings
         recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
         recorder.setFormat("hls");
-        int fps = Math.max(15, grabber.getFrameRate() > 0 ? (int) Math.round(grabber.getFrameRate()) : 25);
+        
+        // CRITICAL: Reduce FPS to 8 (was 10)
+        int fps = 8;
         recorder.setFrameRate(fps);
-        recorder.setGopSize(2 * fps);
+        recorder.setGopSize(fps * 2);
 
-        // Audio settings
-        if (grabber.getAudioChannels() > 0) {
-            recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
-            recorder.setSampleRate(grabber.getSampleRate() > 0 ? grabber.getSampleRate() : 8000);
-            recorder.setAudioBitrate(128000);
-        }
-
-        // HLS options
-        recorder.setOption("hls_time", "2");
-        recorder.setOption("hls_list_size", "3");
-        recorder.setOption("hls_flags", "delete_segments+independent_segments+program_date_time");
+        // HLS settings
+        recorder.setOption("hls_time", "3"); // 3s segments (was 2s)
+        recorder.setOption("hls_list_size", "2"); // Only 2 segments (was 3)
+        recorder.setOption("hls_flags", "delete_segments");
         recorder.setOption("hls_segment_type", "mpegts");
         recorder.setOption("hls_allow_cache", "0");
-        String segPath = outputDir.getAbsolutePath().replace('\\', '/') + "/seg%05d.ts";
+        
+        String segPath = outputDir.getAbsolutePath().replace('\\', '/') + "/s%d.ts";
         recorder.setOption("hls_segment_filename", segPath);
-        recorder.setOption("reset_timestamps", "1");
 
-        // Encoding optimization
+        // CRITICAL: Single-threaded encoding - absolute minimum CPU
+        recorder.setOption("threads", "1");
+        recorder.setOption("thread_type", "slice");
+        
+        // EXTREME performance mode - sacrifice quality for CPU
         recorder.setOption("preset", "ultrafast");
         recorder.setOption("tune", "zerolatency");
-        recorder.setOption("crf", "23");
-        recorder.setOption("maxrate", "2M");
-        recorder.setOption("bufsize", "4M");
-        recorder.setOption("fflags", "+genpts+igndts");
-        recorder.setOption("avoid_negative_ts", "make_zero");
+        recorder.setOption("crf", "35"); // Very low quality (was 30)
+        recorder.setOption("maxrate", "400k"); // Very low bitrate (was 600k)
+        recorder.setOption("bufsize", "800k");
+        
+        // Disable ALL expensive encoding features
+        recorder.setOption("sc_threshold", "0"); // No scene detection
+        recorder.setOption("me_method", "dia"); // Fastest motion estimation
+        recorder.setOption("subq", "0"); // No subpixel refinement
+        recorder.setOption("trellis", "0"); // No trellis quantization
+        recorder.setOption("aq-mode", "0"); // No adaptive quantization
+        recorder.setOption("refs", "1"); // Single reference frame
+        recorder.setOption("bf", "0"); // No B-frames
+        recorder.setOption("g", String.valueOf(fps * 2)); // Keyframe interval
+        recorder.setOption("keyint_min", String.valueOf(fps)); // Min keyframe interval
+        
+        // Fast flags
+        recorder.setOption("fast-pskip", "1");
+        recorder.setOption("no-dct-decimate", "1");
+        recorder.setOption("cabac", "0"); // Disable CABAC (faster)
+        recorder.setOption("partitions", "none");
+        
+        recorder.setOption("fflags", "+genpts");
         recorder.setOption("fps_mode", "cfr");
 
         return recorder;
     }
 
-    /**
-     * Stream frames from grabber to recorder
-     */
-    private void streamFrames(FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder, String streamName) throws Exception {
+    private void streamFrames(FFmpegFrameGrabber grabber, 
+                             FFmpegFrameRecorder recorder, 
+                             String streamName) throws Exception {
         Frame frame;
         int count = 0;
+        int skipped = 0;
+        long lastTime = System.currentTimeMillis();
+        
+        // Target 8 FPS = 125ms per frame
+        final long TARGET_INTERVAL = 125;
+        
         while ((frame = grabber.grab()) != null) {
-            recorder.record(frame);
-            count++;
-            if (count % 100 == 0) {
-                logger.info("Stream " + streamName + " processed " + count + " frames");
+            long now = System.currentTimeMillis();
+            long elapsed = now - lastTime;
+            
+            // Skip frames to maintain target FPS
+            if (elapsed < TARGET_INTERVAL - 10) {
+                skipped++;
+                continue;
+            }
+            
+            // Only encode video frames
+            if (frame.image != null) {
+                try {
+                    recorder.record(frame);
+                    count++;
+                    lastTime = now;
+                } catch (Exception e) {
+                    logger.warning(streamName + ": encode error");
+                    break;
+                }
+            }
+            
+            // Log less frequently - every 1000 frames
+            if (count % 1000 == 0 && count > 0) {
+                logger.info(streamName + ": " + count + " (skip:" + skipped + ")");
             }
         }
-        logger.info("Stream " + streamName + " ended normally after " + count + " frames");
+        logger.info(streamName + ": ended - " + count + " frames");
     }
 
-    /**
-     * Stop a specific HLS stream
-     */
     public void stopHLSStream(String streamName) {
-        logger.info("Stopping stream: " + streamName);
+        logger.info("Stopping: " + streamName);
         
-        // Cancel the task if it's still running
         Future<?> future = streamTasks.remove(streamName);
         if (future != null && !future.isDone()) {
             future.cancel(true);
         }
 
-        // Remove from tracking
         streamLinks.remove(streamName);
         
-        // Cleanup resources
         StreamResources resources = streamResources.remove(streamName);
         if (resources != null) {
             cleanupStream(streamName, resources.grabber, resources.recorder);
         }
 
-        // Delete output files
         deleteStreamFiles(streamName);
     }
 
-    /**
-     * Cleanup stream resources
-     */
-    private void cleanupStream(String streamName, FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder) {
+    private void cleanupStream(String streamName, 
+                              FFmpegFrameGrabber grabber, 
+                              FFmpegFrameRecorder recorder) {
         try {
             if (recorder != null) {
                 recorder.stop();
                 recorder.release();
             }
         } catch (Exception e) {
-            logger.warning("Error stopping recorder for " + streamName + ": " + e.getMessage());
+            // Ignore
         }
 
         try {
@@ -275,7 +277,7 @@ public class HLSStreamService {
                 grabber.release();
             }
         } catch (Exception e) {
-            logger.warning("Error stopping grabber for " + streamName + ": " + e.getMessage());
+            // Ignore
         }
 
         streamResources.remove(streamName);
@@ -283,73 +285,61 @@ public class HLSStreamService {
         streamTasks.remove(streamName);
     }
 
-    /**
-     * Delete HLS output files for a stream
-     */
     private void deleteStreamFiles(String streamName) {
-        File dir = new File(HLS_ROOT + "/" + streamName);
+        File dir = new File(HLS_ROOT, streamName);
         if (dir.exists()) {
             File[] files = dir.listFiles();
             if (files != null) {
                 for (File f : files) {
-                    if (!f.delete()) {
-                        logger.warning("Failed to delete file: " + f.getAbsolutePath());
-                    }
+                    f.delete();
                 }
             }
-            if (!dir.delete()) {
-                logger.warning("Failed to delete directory: " + dir.getAbsolutePath());
-            }
+            dir.delete();
         }
     }
 
-    /**
-     * Get list of active streams
-     */
     public List<String> getActiveStreams() {
         return new ArrayList<>(streamLinks.keySet());
     }
 
-    /**
-     * Get number of active streams
-     */
     public int getActiveStreamCount() {
         return streamLinks.size();
     }
 
-    /**
-     * Shutdown hook - cleanup all streams when service stops
-     */
+    public boolean isStreamReady(String streamName) {
+        return streamResources.containsKey(streamName);
+    }
+
+    public String getStreamStatus(String streamName) {
+        if (!streamLinks.containsKey(streamName)) return "NOT_FOUND";
+        if (streamResources.containsKey(streamName)) return "RUNNING";
+        Future<?> future = streamTasks.get(streamName);
+        if (future != null && !future.isDone()) return "STARTING";
+        return "STOPPED";
+    }
+
     @PreDestroy
     public void shutdown() {
-        logger.info("Shutting down HLS Stream Service...");
+        logger.info("Shutting down...");
         
-        // Stop all active streams
         for (String streamName : new ArrayList<>(streamLinks.keySet())) {
             stopHLSStream(streamName);
         }
 
-        // Shutdown thread pool
         streamExecutor.shutdown();
         try {
             if (!streamExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
                 streamExecutor.shutdownNow();
-                if (!streamExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
-                    logger.warning("Thread pool did not terminate");
-                }
             }
         } catch (InterruptedException e) {
             streamExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
         
-        logger.info("HLS Stream Service shut down complete");
+        logger.info("Shutdown complete");
     }
 
-    /**
-     * Connect to RTSP with fallback variants
-     */
-    private FFmpegFrameGrabber tryStartRtspWithFallback(String rtspUrl) throws Exception {
+    private FFmpegFrameGrabber connectRtsp(String rtspUrl) throws Exception {
         FFmpegLogCallback.set();
 
         List<String> candidates = new ArrayList<>();
@@ -358,78 +348,63 @@ public class HLSStreamService {
         try {
             URI u = new URI(rtspUrl);
             String userInfo = u.getUserInfo();
-            String base = u.getScheme() + "://" + (userInfo != null ? userInfo + "@" : "") + u.getHost()
-                    + (u.getPort() > 0 ? ":" + u.getPort() : "");
+            String base = u.getScheme() + "://" + 
+                         (userInfo != null ? userInfo + "@" : "") + 
+                         u.getHost() + 
+                         (u.getPort() > 0 ? ":" + u.getPort() : "");
             String path = u.getPath() != null ? u.getPath() : "/";
 
             if (path.matches("/.+/.*")) {
                 candidates.add(base + "/Streaming/Channels/101");
-                candidates.add(base + "/Streaming/Channels/102");
-                candidates.add(base + "/cam/realmonitor?channel=1&subtype=0");
                 candidates.add(base + "/live");
-                candidates.add(base + "/live.sdp");
-                candidates.add(base + "/h264");
-                candidates.add(base + "/ch1-s1");
-                candidates.add(base + "/unicast/c1/s0/live");
-                candidates.add(base + "/avstream/channel=1/stream=0.sdp");
             }
-
-            candidates.add(base + path + (path.endsWith("/") ? "" : "/") + "trackID=0");
-            candidates.add(base + path + (path.endsWith("/") ? "" : "/") + "trackID=1");
-
         } catch (Exception ignore) {
         }
 
         Exception last = null;
         for (String cand : candidates) {
-            for (String transport : new String[] { "tcp", "udp", "http" }) {
-                logger.info("Trying RTSP URL: " + cand + " via " + transport);
-                FFmpegFrameGrabber g = new FFmpegFrameGrabber(cand);
-                g.setFormat("rtsp");
-                g.setOption("rtsp_transport", transport);
-                if ("tcp".equals(transport))
-                    g.setOption("rtsp_flags", "prefer_tcp");
-                g.setOption("stimeout", "20000000");
-                g.setOption("rw_timeout", "20000000");
-                g.setOption("analyzeduration", "1000000");
-                g.setOption("probesize", "1000000");
-                g.setOption("fflags", "+nobuffer+genpts+igndts");
-                g.setOption("max_delay", "0");
-                g.setOption("reorder_queue_size", "0");
-                g.setOption("use_wallclock_as_timestamps", "1");
-                g.setOption("allowed_media_types", "video");
-                g.setOption("user_agent", "LibVLC/3.0.18 (LIVE555 Streaming Media v2021.06.08)");
-                g.setOption("loglevel", "info");
-                if ("udp".equals(transport)) {
-                    g.setOption("fflags", "+nobuffer+genpts+igndts");
-                    g.setOption("max_delay", "0");
-                    g.setOption("flags", "low_delay");
-                    g.setOption("probesize", "1000000");
-                    g.setOption("analyzeduration", "1000000");
-                }
+            FFmpegFrameGrabber g = new FFmpegFrameGrabber(cand);
+            g.setFormat("rtsp");
+            g.setOption("rtsp_transport", "tcp");
+            g.setOption("rtsp_flags", "prefer_tcp");
+            
+            // CRITICAL: Single-threaded decoding - minimum CPU
+            g.setOption("threads", "1");
+            g.setOption("thread_type", "slice");
+            
+            // Fast connection
+            g.setOption("stimeout", "10000000"); // 10s
+            g.setOption("timeout", "10000000");
+            
+            // Minimal analysis
+            g.setOption("analyzeduration", "500000"); // 0.5s
+            g.setOption("probesize", "500000"); // 500KB
+            
+            // Performance flags
+            g.setOption("fflags", "nobuffer+fastseek");
+            g.setOption("flags", "low_delay");
+            g.setOption("max_delay", "0");
+            g.setOption("allowed_media_types", "video");
+            g.setOption("skip_loop_filter", "48"); // Skip loop filter
+            g.setOption("skip_frame", "0"); // Don't skip frames on decode
+            g.setOption("loglevel", "error");
 
+            try {
+                g.start();
+                logger.info("Connected: " + cand);
+                return g;
+            } catch (Exception e) {
+                last = e;
                 try {
-                    g.start();
-                    logger.info("Connected to RTSP: " + cand + ", size=" + g.getImageWidth() + "x" + g.getImageHeight());
-                    return g;
-                } catch (Exception e) {
-                    last = e;
-                    logger.warning("Failed URL/transport: " + cand + " (" + transport + ") - " + e.getMessage());
-                    try {
-                        g.release();
-                    } catch (Exception ignore) {
-                    }
+                    g.release();
+                } catch (Exception ignore) {
                 }
             }
         }
-        if (last != null)
-            throw last;
-        throw new RuntimeException("RTSP connection failed for all candidates");
+        
+        throw last != null ? last : new RuntimeException("RTSP failed");
     }
 
-    /**
-     * Helper class to store stream resources
-     */
     private static class StreamResources {
         final FFmpegFrameGrabber grabber;
         final FFmpegFrameRecorder recorder;

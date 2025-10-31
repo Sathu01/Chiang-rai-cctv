@@ -3,7 +3,7 @@
 
 param(
     [int]$StreamCount = 50,
-    [string]$VideoPath = "C:\Users\pc\Videos\Captures\VALORANT   2025-04-30 23-27-59.mp4",
+    [string]$VideoPath = "C:\Users\pc\Videos\Captures\VALORANT.mp4",
     [string]$MediaMTXHost = "127.0.0.1",
     [int]$MediaMTXPort = 8554
 )
@@ -28,7 +28,7 @@ Get-Process ffmpeg -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Seconds 2
 
 # Create logs directory
-$logDir = ".\stream_logs"
+$logDir = Join-Path -Path $PSScriptRoot -ChildPath "stream_logs"
 if (-not (Test-Path $logDir)) {
     New-Item -ItemType Directory -Path $logDir | Out-Null
 }
@@ -36,22 +36,23 @@ if (-not (Test-Path $logDir)) {
 Write-Host "Starting $StreamCount streams..." -ForegroundColor Green
 Write-Host "This will take a few moments...`n" -ForegroundColor Gray
 
-# Array to store jobs
-$jobs = @()
+# Array to store process objects
+$processes = @()
 
 # Start publishing streams
 for ($i = 1; $i -le $StreamCount; $i++) {
     $streamName = "v$i"
     $rtspUrl = "rtsp://${MediaMTXHost}:${MediaMTXPort}/${streamName}"
-    $logFile = "$logDir\stream_$i.log"
+    $logFile = Join-Path -Path $logDir -ChildPath "stream_$i.log"
     
     Write-Host "[$i/$StreamCount] Starting stream: $streamName" -ForegroundColor Cyan
     
-    # Create FFmpeg command with optimized settings
+    # Start FFmpeg process using Start-Process
+    $ffmpegCommand = "ffmpeg"
     $ffmpegArgs = @(
         "-stream_loop", "-1",
         "-re",
-        "-i", "`"$VideoPath`"",
+        "-i", $VideoPath,
         "-f", "lavfi",
         "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
         "-map", "0:v",
@@ -75,32 +76,17 @@ for ($i = 1; $i -le $StreamCount; $i++) {
         "-fflags", "+genpts",
         "-use_wallclock_as_timestamps", "1",
         "-f", "rtsp",
-        "$rtspUrl"
+        $rtspUrl
     )
     
-    # Start FFmpeg as background job
-    $job = Start-Job -ScriptBlock {
-        param($ffmpegArgs, $logFile)
-        $processInfo = New-Object System.Diagnostics.ProcessStartInfo
-        $processInfo.FileName = "ffmpeg"
-        $processInfo.Arguments = $ffmpegArgs -join " "
-        $processInfo.RedirectStandardOutput = $true
-        $processInfo.RedirectStandardError = $true
-        $processInfo.UseShellExecute = $false
-        $processInfo.CreateNoWindow = $true
-        
-        $process = New-Object System.Diagnostics.Process
-        $process.StartInfo = $processInfo
-        $process.Start() | Out-Null
-        
-        # Log output
-        $output = $process.StandardError.ReadToEnd()
-        $output | Out-File -FilePath $logFile
-        
-        $process.WaitForExit()
-    } -ArgumentList ($ffmpegArgs -join " "), $logFile
+    # Start process in background
+    $process = Start-Process -FilePath $ffmpegCommand `
+                             -ArgumentList $ffmpegArgs `
+                             -WindowStyle Hidden `
+                             -PassThru `
+                             -RedirectStandardError $logFile
     
-    $jobs += $job
+    $processes += $process
     
     # Small delay to avoid overwhelming the system
     Start-Sleep -Milliseconds 200
@@ -118,27 +104,30 @@ Write-Host "  rtsp://${MediaMTXHost}:${MediaMTXPort}/v${StreamCount}" -Foregroun
 Write-Host ""
 Write-Host "Logs directory: $logDir" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "Press Ctrl+C to stop all streams" -ForegroundColor Red
+Write-Host "Streams are now running in background." -ForegroundColor Cyan
+Write-Host "To stop streams, run: .\4-stop-all.ps1 -StreamCount $StreamCount" -ForegroundColor Yellow
 Write-Host ""
 
-# Wait for user interrupt
-try {
-    Write-Host "Streams are running... (monitoring)" -ForegroundColor Cyan
-    while ($true) {
-        Start-Sleep -Seconds 5
-        $runningJobs = ($jobs | Where-Object { $_.State -eq 'Running' }).Count
-        Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Active streams: $runningJobs/$StreamCount" -ForegroundColor Gray
-        
-        if ($runningJobs -eq 0) {
-            Write-Host "All streams have stopped!" -ForegroundColor Red
-            break
-        }
-    }
+# Wait a moment to verify processes started
+Start-Sleep -Seconds 3
+$activeCount = (Get-Process ffmpeg -ErrorAction SilentlyContinue).Count
+Write-Host "Active FFmpeg processes: $activeCount" -ForegroundColor $(if ($activeCount -gt 0) { "Green" } else { "Red" })
+
+if ($activeCount -eq 0) {
+    Write-Host ""
+    Write-Host "WARNING: No FFmpeg processes are running!" -ForegroundColor Red
+    Write-Host "Check the logs in: $logDir" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Common issues:" -ForegroundColor Yellow
+    Write-Host "  1. MediaMTX is not running (run: docker-compose up -d)" -ForegroundColor Gray
+    Write-Host "  2. Video file path is incorrect" -ForegroundColor Gray
+    Write-Host "  3. FFmpeg is not installed or not in PATH" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "To debug, check the first log file:" -ForegroundColor Yellow
+    Write-Host "  Get-Content '$logDir\stream_1.log'" -ForegroundColor Gray
+} else {
+    Write-Host ""
+    Write-Host "Success! Streams are running in background." -ForegroundColor Green
 }
-finally {
-    Write-Host "`nStopping all streams..." -ForegroundColor Yellow
-    $jobs | Stop-Job
-    $jobs | Remove-Job -Force
-    Get-Process ffmpeg -ErrorAction SilentlyContinue | Stop-Process -Force
-    Write-Host "All streams stopped." -ForegroundColor Green
-}
+
+Write-Host ""

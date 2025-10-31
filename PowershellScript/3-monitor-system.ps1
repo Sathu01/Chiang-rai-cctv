@@ -3,8 +3,18 @@
 
 param(
     [int]$IntervalSeconds = 5,
-    [string]$OutputFile = ".\test_results\system_monitor_$(Get-Date -Format 'yyyyMMdd_HHmmss').csv"
+    [string]$OutputFile = ""
 )
+
+# Set default output file if not provided
+if ([string]::IsNullOrEmpty($OutputFile)) {
+    $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    $resultsDir = Join-Path -Path $PSScriptRoot -ChildPath "test_results"
+    if (-not (Test-Path $resultsDir)) {
+        New-Item -ItemType Directory -Path $resultsDir | Out-Null
+    }
+    $OutputFile = Join-Path -Path $resultsDir -ChildPath "system_monitor_$timestamp.csv"
+}
 
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "System Resource Monitor" -ForegroundColor Cyan
@@ -33,7 +43,8 @@ try {
         $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         
         # Get CPU usage
-        $cpu = (Get-Counter '\Processor(_Total)\% Processor Time').CounterSamples.CookedValue
+        $cpu = (Get-Counter '\Processor(_Total)\% Processor Time' -ErrorAction SilentlyContinue).CounterSamples.CookedValue
+        if ($null -eq $cpu) { $cpu = 0 }
         
         # Get Memory usage
         $os = Get-CimInstance Win32_OperatingSystem

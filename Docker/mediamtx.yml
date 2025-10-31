@@ -17,13 +17,13 @@ metricsAddress: :9998
 # Performance Tuning
 readTimeout: 20s
 writeTimeout: 20s
-readBufferCount: 2048  # Increased for multiple streams
-writeQueueSize: 1024   # Increased queue size
+readBufferCount: 2048
+writeQueueSize: 1024
 
 # RTSP Server Settings
 rtspDisable: no
 protocols: [tcp, udp]
-encryption: no
+encryption: "no"
 rtspAddress: :8554
 rtspsAddress: :8555
 rtpAddress: :8000
@@ -32,9 +32,8 @@ multicastIPRange: 224.1.0.0/16
 multicastRTPPort: 8002
 multicastRTCPPort: 8003
 
-# Server Resource Limits - Critical for 100 streams
-serverUDPMaxPayloadSize: 1472
-serverTCPMaxConnections: 200  # Allow 200 connections (100 publishers + 100 your app)
+# UDP/RTP Settings
+udpMaxPayloadSize: 1472
 
 # Path Defaults - Applied to all streams
 pathDefaults:
@@ -71,15 +70,6 @@ pathDefaults:
   # Override with publisher
   overridePublisher: yes
   
-  # SRT
-  srtPublishPassphrase: ""
-  
-  # Raspberry Pi Camera
-  rpiCameraCamID: 0
-  rpiCameraWidth: 1920
-  rpiCameraHeight: 1080
-  rpiCameraFPS: 30
-  
   # Run on init/demand
   runOnInit: ""
   runOnInitRestart: no
@@ -97,147 +87,127 @@ paths:
   # Stream 1-10
   v1:
     source: publisher
-    sourceOnDemand: no
   v2:
     source: publisher
-    sourceOnDemand: no
   v3:
     source: publisher
-    sourceOnDemand: no
   v4:
     source: publisher
-    sourceOnDemand: no
   v5:
     source: publisher
-    sourceOnDemand: no
   v6:
     source: publisher
-    sourceOnDemand: no
   v7:
     source: publisher
-    sourceOnDemand: no
   v8:
     source: publisher
-    sourceOnDemand: no
   v9:
     source: publisher
-    sourceOnDemand: no
   v10:
     source: publisher
-    sourceOnDemand: no
   
   # Stream 11-20
   v11:
     source: publisher
-    sourceOnDemand: no
   v12:
     source: publisher
-    sourceOnDemand: no
   v13:
     source: publisher
-    sourceOnDemand: no
   v14:
     source: publisher
-    sourceOnDemand: no
   v15:
     source: publisher
-    sourceOnDemand: no
   v16:
     source: publisher
-    sourceOnDemand: no
   v17:
     source: publisher
-    sourceOnDemand: no
   v18:
     source: publisher
-    sourceOnDemand: no
   v19:
     source: publisher
-    sourceOnDemand: no
   v20:
     source: publisher
-    sourceOnDemand: no
   
   # Stream 21-50
-  v21: { source: publisher, sourceOnDemand: no }
-  v22: { source: publisher, sourceOnDemand: no }
-  v23: { source: publisher, sourceOnDemand: no }
-  v24: { source: publisher, sourceOnDemand: no }
-  v25: { source: publisher, sourceOnDemand: no }
-  v26: { source: publisher, sourceOnDemand: no }
-  v27: { source: publisher, sourceOnDemand: no }
-  v28: { source: publisher, sourceOnDemand: no }
-  v29: { source: publisher, sourceOnDemand: no }
-  v30: { source: publisher, sourceOnDemand: no }
-  v31: { source: publisher, sourceOnDemand: no }
-  v32: { source: publisher, sourceOnDemand: no }
-  v33: { source: publisher, sourceOnDemand: no }
-  v34: { source: publisher, sourceOnDemand: no }
-  v35: { source: publisher, sourceOnDemand: no }
-  v36: { source: publisher, sourceOnDemand: no }
-  v37: { source: publisher, sourceOnDemand: no }
-  v38: { source: publisher, sourceOnDemand: no }
-  v39: { source: publisher, sourceOnDemand: no }
-  v40: { source: publisher, sourceOnDemand: no }
-  v41: { source: publisher, sourceOnDemand: no }
-  v42: { source: publisher, sourceOnDemand: no }
-  v43: { source: publisher, sourceOnDemand: no }
-  v44: { source: publisher, sourceOnDemand: no }
-  v45: { source: publisher, sourceOnDemand: no }
-  v46: { source: publisher, sourceOnDemand: no }
-  v47: { source: publisher, sourceOnDemand: no }
-  v48: { source: publisher, sourceOnDemand: no }
-  v49: { source: publisher, sourceOnDemand: no }
-  v50: { source: publisher, sourceOnDemand: no }
+  v21: { source: publisher }
+  v22: { source: publisher }
+  v23: { source: publisher }
+  v24: { source: publisher }
+  v25: { source: publisher }
+  v26: { source: publisher }
+  v27: { source: publisher }
+  v28: { source: publisher }
+  v29: { source: publisher }
+  v30: { source: publisher }
+  v31: { source: publisher }
+  v32: { source: publisher }
+  v33: { source: publisher }
+  v34: { source: publisher }
+  v35: { source: publisher }
+  v36: { source: publisher }
+  v37: { source: publisher }
+  v38: { source: publisher }
+  v39: { source: publisher }
+  v40: { source: publisher }
+  v41: { source: publisher }
+  v42: { source: publisher }
+  v43: { source: publisher }
+  v44: { source: publisher }
+  v45: { source: publisher }
+  v46: { source: publisher }
+  v47: { source: publisher }
+  v48: { source: publisher }
+  v49: { source: publisher }
+  v50: { source: publisher }
   
   # Stream 51-100
-  v51: { source: publisher, sourceOnDemand: no }
-  v52: { source: publisher, sourceOnDemand: no }
-  v53: { source: publisher, sourceOnDemand: no }
-  v54: { source: publisher, sourceOnDemand: no }
-  v55: { source: publisher, sourceOnDemand: no }
-  v56: { source: publisher, sourceOnDemand: no }
-  v57: { source: publisher, sourceOnDemand: no }
-  v58: { source: publisher, sourceOnDemand: no }
-  v59: { source: publisher, sourceOnDemand: no }
-  v60: { source: publisher, sourceOnDemand: no }
-  v61: { source: publisher, sourceOnDemand: no }
-  v62: { source: publisher, sourceOnDemand: no }
-  v63: { source: publisher, sourceOnDemand: no }
-  v64: { source: publisher, sourceOnDemand: no }
-  v65: { source: publisher, sourceOnDemand: no }
-  v66: { source: publisher, sourceOnDemand: no }
-  v67: { source: publisher, sourceOnDemand: no }
-  v68: { source: publisher, sourceOnDemand: no }
-  v69: { source: publisher, sourceOnDemand: no }
-  v70: { source: publisher, sourceOnDemand: no }
-  v71: { source: publisher, sourceOnDemand: no }
-  v72: { source: publisher, sourceOnDemand: no }
-  v73: { source: publisher, sourceOnDemand: no }
-  v74: { source: publisher, sourceOnDemand: no }
-  v75: { source: publisher, sourceOnDemand: no }
-  v76: { source: publisher, sourceOnDemand: no }
-  v77: { source: publisher, sourceOnDemand: no }
-  v78: { source: publisher, sourceOnDemand: no }
-  v79: { source: publisher, sourceOnDemand: no }
-  v80: { source: publisher, sourceOnDemand: no }
-  v81: { source: publisher, sourceOnDemand: no }
-  v82: { source: publisher, sourceOnDemand: no }
-  v83: { source: publisher, sourceOnDemand: no }
-  v84: { source: publisher, sourceOnDemand: no }
-  v85: { source: publisher, sourceOnDemand: no }
-  v86: { source: publisher, sourceOnDemand: no }
-  v87: { source: publisher, sourceOnDemand: no }
-  v88: { source: publisher, sourceOnDemand: no }
-  v89: { source: publisher, sourceOnDemand: no }
-  v90: { source: publisher, sourceOnDemand: no }
-  v91: { source: publisher, sourceOnDemand: no }
-  v92: { source: publisher, sourceOnDemand: no }
-  v93: { source: publisher, sourceOnDemand: no }
-  v94: { source: publisher, sourceOnDemand: no }
-  v95: { source: publisher, sourceOnDemand: no }
-  v96: { source: publisher, sourceOnDemand: no }
-  v97: { source: publisher, sourceOnDemand: no }
-  v98: { source: publisher, sourceOnDemand: no }
-  v99: { source: publisher, sourceOnDemand: no }
-  v100: { source: publisher, sourceOnDemand: no }
+  v51: { source: publisher }
+  v52: { source: publisher }
+  v53: { source: publisher }
+  v54: { source: publisher }
+  v55: { source: publisher }
+  v56: { source: publisher }
+  v57: { source: publisher }
+  v58: { source: publisher }
+  v59: { source: publisher }
+  v60: { source: publisher }
+  v61: { source: publisher }
+  v62: { source: publisher }
+  v63: { source: publisher }
+  v64: { source: publisher }
+  v65: { source: publisher }
+  v66: { source: publisher }
+  v67: { source: publisher }
+  v68: { source: publisher }
+  v69: { source: publisher }
+  v70: { source: publisher }
+  v71: { source: publisher }
+  v72: { source: publisher }
+  v73: { source: publisher }
+  v74: { source: publisher }
+  v75: { source: publisher }
+  v76: { source: publisher }
+  v77: { source: publisher }
+  v78: { source: publisher }
+  v79: { source: publisher }
+  v80: { source: publisher }
+  v81: { source: publisher }
+  v82: { source: publisher }
+  v83: { source: publisher }
+  v84: { source: publisher }
+  v85: { source: publisher }
+  v86: { source: publisher }
+  v87: { source: publisher }
+  v88: { source: publisher }
+  v89: { source: publisher }
+  v90: { source: publisher }
+  v91: { source: publisher }
+  v92: { source: publisher }
+  v93: { source: publisher }
+  v94: { source: publisher }
+  v95: { source: publisher }
+  v96: { source: publisher }
+  v97: { source: publisher }
+  v98: { source: publisher }
+  v99: { source: publisher }
+  v100: { source: publisher }
