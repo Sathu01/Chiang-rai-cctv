@@ -35,7 +35,7 @@ public class HLSStreamService {
     private static final int MAX_RECONNECT_ATTEMPTS = 3;
     private static final long RECONNECT_DELAY_MS = 5000;
     
-    // Thread pools - REFACTOR #3: SynchronousQueue for strict thread control
+    // Thread pools - REFACTOR #3:commit SynchronousQueue for strict thread control
     private final ExecutorService streamExecutor;
     private final ScheduledExecutorService startupScheduler;
     
