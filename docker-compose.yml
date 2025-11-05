@@ -11,14 +11,6 @@ services:
       - ./mediamtx.yml:/mediamtx.yml
       - ./recordings:/recordings
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 3G
-        reservations:
-          cpus: '2'
-          memory: 2G
     environment:
       - MTX_PROTOCOLS=tcp
     network_mode: bridge
