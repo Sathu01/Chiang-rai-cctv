@@ -38,4 +38,4 @@ build/
 
 config.js
 /recordings
-# /secrets
+/secrets/
