@@ -1,38 +1,38 @@
 package com.backendcam.backendcam.firestore;
 
-import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
-
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 @Service
 public class FirestoreService {
-
     private static final String COLLECTION = "cameras";
+    private static final ZoneId BANGKOK = ZoneId.of("Asia/Bangkok");
+    private static final DateTimeFormatter ISO_OFFSET = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     public List<QueryDocumentSnapshot> fetchAllCameras() {
         try {
             Firestore db = FirestoreClient.getFirestore();
-            ApiFuture<QuerySnapshot> fut = db.collection(COLLECTION).get();
-            return fut.get().getDocuments();
-        } catch (InterruptedException | ExecutionException e) {
+            return db.collection(COLLECTION).get().get().getDocuments();
+        } catch (Exception e) {
             throw new RuntimeException("Failed to fetch cameras", e);
         }
     }
 
     /**
      * อัปเดตสถานะ ONLINE: เขียน status และ lastSeen (timestamp + message)
-     * ใช้ merge เสมอ (มีทับ, ไม่มีสร้าง)
+     * (timestamp เป็น Asia/Bangkok)
      */
-    public void updateOnline(String docId, String message, Instant now) {
+    public void updateOnline(String docId, String message) {
         Firestore db = FirestoreClient.getFirestore();
+
         Map<String, Object> lastSeen = new HashMap<>();
-        lastSeen.put("timestamp", now.toString()); // ISO-8601
+        lastSeen.put("timestamp", OffsetDateTime.now(BANGKOK).format(ISO_OFFSET));
         lastSeen.put("message", message);
 
         Map<String, Object> payload = new HashMap<>();
