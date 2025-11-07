@@ -37,3 +37,5 @@ build/
 /PowershellScript/stream_logs/
 
 config.js
+/recordings
+/secrets/

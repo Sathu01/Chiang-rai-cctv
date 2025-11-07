@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INPUT_DIR="/recordings"
+INPUT_DIR="recordings"
 RTSP_BASE="rtsp://127.0.0.1:8554"
 
 idx=1
