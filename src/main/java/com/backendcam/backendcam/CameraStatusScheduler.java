@@ -6,7 +6,6 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -66,10 +65,9 @@ public class CameraStatusScheduler {
 
       if (ok) {
         online++;
-        Instant now = Instant.now();
         // online ตอนนี้ → message เป็น "just now"
         String message = TimeAgoFormatter.humanizeSinceSeconds(0);
-        firestoreService.updateOnline(docId, message, now);
+        firestoreService.updateOnline(docId, message);
       } else {
         offline++;
         // offline → ไม่แตะ lastSeen
