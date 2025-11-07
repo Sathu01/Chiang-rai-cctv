@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/stream")
 @CrossOrigin(origins = "*")
@@ -13,23 +15,23 @@ public class StreamController {
     private HLSStreamService hlsService;
 
     @PostMapping("/hls/start")
-    public ResponseEntity<String> startHLS(@RequestBody StreamRequest request) {
+    public ResponseEntity<Map<String, String>> startHLS(@RequestBody StreamRequest request) {
         if (request.getRtspUrl() == null || request.getStreamName() == null) {
-            return ResponseEntity.badRequest().body("RTSP URL and stream name are required");
+            return ResponseEntity.badRequest().body(Map.of("error", "RTSP URL and stream name are required"));
         }
         String hlsUrl = hlsService.startHLSStream(request.getRtspUrl(), request.getStreamName());
-        return ResponseEntity.ok(hlsUrl);
+        return ResponseEntity.ok(Map.of("message", hlsUrl));
     }
 
     @PostMapping("/hls/stop/{streamName}")
-    public ResponseEntity<String> stopHLS(@PathVariable String streamName) {
+    public ResponseEntity<Map<String, String>> stopHLS(@PathVariable String streamName) {
         hlsService.stopHLSStream(streamName);
-        return ResponseEntity.ok("Stream stopped: " + streamName);
+        return ResponseEntity.ok(Map.of("message", "Stream stopped: " + streamName));
     }
     
     @GetMapping("/health")
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("OK");
+    public ResponseEntity<Map<String, String>> health() {
+        return ResponseEntity.ok(Map.of("status", "OK"));
     }
 
     

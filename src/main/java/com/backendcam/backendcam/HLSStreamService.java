@@ -97,7 +97,7 @@ public class HLSStreamService {
         if (isShuttingDown.get()) {
             throw new RuntimeException("Service is shutting down");
         }
-        
+
         if (streamLinks.containsKey(streamName)) {
             logger.info("✓ Stream already exists: " + streamName);
             return streamLinks.get(streamName);
@@ -107,29 +107,30 @@ public class HLSStreamService {
             throw new RuntimeException("Max capacity reached: " + MAX_STREAMS);
         }
 
-        String playlistPath = "/hls/" + streamName + "/stream.m3u8";
+        String playlistPath = "/api/hls/" + streamName + "/stream.m3u8";
+
         streamLinks.put(streamName, playlistPath);
         streamRtspUrls.put(streamName, rtspUrl);
         streamStopFlags.put(streamName, new AtomicBoolean(false));
-        
+
         StreamStats stats = new StreamStats(streamName);
         streamStats.put(streamName, stats);
 
         int queuePosition = startupQueue.incrementAndGet();
         long delay = (queuePosition - 1) * STARTUP_DELAY_MS;
-        
+
         logger.info("→ Queued: " + streamName + " (position: " + queuePosition + ", delay: " + delay + "ms)");
-        
+
         startupScheduler.schedule(() -> {
             try {
                 startupSemaphore.acquire();
-                
+
                 if (isShuttingDown.get()) {
                     logger.info("⚠ Skipping startup (shutdown in progress): " + streamName);
                     cleanupStreamState(streamName);
                     return;
                 }
-                
+
                 logger.info("▶ Starting: " + streamName);
                 stats.recordStartAttempt();
 
@@ -138,7 +139,7 @@ public class HLSStreamService {
                 });
 
                 streamTasks.put(streamName, future);
-                
+
             } catch (InterruptedException e) {
                 logger.severe("⚠ Startup interrupted: " + streamName);
                 cleanupStreamState(streamName);
