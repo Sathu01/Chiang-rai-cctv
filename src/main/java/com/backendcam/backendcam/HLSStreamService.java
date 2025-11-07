@@ -107,7 +107,8 @@ public class HLSStreamService {
             throw new RuntimeException("Max capacity reached: " + MAX_STREAMS);
         }
 
-        String playlistPath = "/hls/" + streamName + "/stream.m3u8";
+        String playlistPath = "/api/hls/" + streamName + "/stream.m3u8";
+
         streamLinks.put(streamName, playlistPath);
         streamRtspUrls.put(streamName, rtspUrl);
         streamStopFlags.put(streamName, new AtomicBoolean(false));
