@@ -3,13 +3,11 @@ package com.backendcam.backendcam.firestore;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.backendcam.backendcam.util.TimeAgoFormatter;
-
 import org.springframework.stereotype.Service;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 @Service
 public class FirestoreService {
@@ -17,7 +15,16 @@ public class FirestoreService {
     private static final ZoneId BANGKOK = ZoneId.of("Asia/Bangkok");
     private static final DateTimeFormatter ISO_OFFSET = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
+    private final FirebaseAdminBootstrap bootstrap;
+
+    public FirestoreService(FirebaseAdminBootstrap bootstrap) {
+        this.bootstrap = bootstrap;
+    }
+
     public List<QueryDocumentSnapshot> fetchAllCameras() {
+        if (!bootstrap.isInitialized()) {
+            return Collections.emptyList();
+        }
         try {
             Firestore db = FirestoreClient.getFirestore();
             return db.collection(COLLECTION).get().get().getDocuments();
@@ -27,10 +34,12 @@ public class FirestoreService {
     }
 
     /**
-     * อัปเดตสถานะ ONLINE: เขียน status และ lastSeen (timestamp + message)
-     * (timestamp เป็น Asia/Bangkok)
+     * ONLINE: เขียน status และ lastSeen (timestamp + message)
+     * timestamp เป็น Asia/Bangkok (ISO_OFFSET)
      */
     public void updateOnline(String docId, String message) {
+        if (!bootstrap.isInitialized()) return;
+
         Firestore db = FirestoreClient.getFirestore();
 
         Map<String, Object> lastSeen = new HashMap<>();
@@ -44,8 +53,11 @@ public class FirestoreService {
         db.collection(COLLECTION).document(docId).set(payload, SetOptions.merge());
     }
 
-    /** OFFLINE: อัปเดต status และคำนวณ lastSeen.message ใหม่ โดย “ไม่เปลี่ยน” timestamp เดิม */
+    /** OFFLINE: อัปเดต status + คำนวณ lastSeen.message ใหม่ โดย “ไม่เปลี่ยน” timestamp เดิม */
+    @SuppressWarnings("unchecked")
     public void updateOffline(String docId) {
+        if (!bootstrap.isInitialized()) return;
+
         try {
             Firestore db = FirestoreClient.getFirestore();
             DocumentReference ref = db.collection(COLLECTION).document(docId);
@@ -54,7 +66,6 @@ public class FirestoreService {
             Map<String, Object> payload = new HashMap<>();
             payload.put("status", "offline");
 
-            // ดึง timestamp เดิม (ถ้ามี) แล้วคำนวณ message ใหม่
             if (snap.exists()) {
                 Map<String, Object> lastSeen = (Map<String, Object>) snap.get("lastSeen");
                 String tsStr = lastSeen != null ? (String) lastSeen.get("timestamp") : null;
@@ -69,8 +80,6 @@ public class FirestoreService {
                     newLastSeen.put("message", msg);      // อัปเดตใหม่
                     payload.put("lastSeen", newLastSeen);
                 }
-                // ถ้าไม่มี timestamp เดิม ก็ไม่แตะ lastSeen (หรือจะใส่ message="unknown" ก็ได้)
-                // else { payload.put("lastSeen", Map.of("message", "unknown")); }
             }
 
             ref.set(payload, SetOptions.merge());
