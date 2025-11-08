@@ -1,0 +1,3 @@
+Timestamp,ActiveStreams,WorkerThreads,ActiveThreads,QueueSize,UsedMemoryMB,MaxMemoryMB,MemoryUsagePercent,SystemCPULoad,ProcessCPULoad,TotalReadFrames,TotalEncodedFrames,TotalErrors,DeadStreams
+2025-11-08 22:39:18,1,50,1,0,58,4058,1.44,0.00,9.61,4387,1462,0,0
+2025-11-08 22:42:17,1,50,1,0,36,4058,0.90,27.23,3.11,8877,2958,0,0
