@@ -37,7 +37,7 @@ public class HLSStreamService {
     private static final int TARGET_FPS = 10;
     private static final int MAX_RECONNECT_ATTEMPTS = 3;
     private static final long RECONNECT_DELAY_MS = 5000;
-    private static final long HEALTH_CHECK_INTERVAL_MS = 30000; // 30 seconds
+    private static final long HEALTH_CHECK_INTERVAL_MS = 60000; // 1 minute (was 30 seconds)
     private static final long MEMORY_CHECK_INTERVAL_MS = 60000; // 1 minute
     private static final long CSV_LOG_INTERVAL_MS = 180000; // 3 minutes
     private static final long STREAM_TIMEOUT_MS = 300000; // 5 minutes
@@ -158,32 +158,59 @@ public class HLSStreamService {
         }
     }
 
+    private final ConcurrentHashMap<String, AtomicInteger> streamReconnectAttempts = new ConcurrentHashMap<>();
+    private static final int MAX_HEALTH_CHECK_RECONNECTS = 3;
+
     private void startHealthCheck() {
         healthCheckScheduler.scheduleAtFixedRate(() -> {
             try {
                 long now = System.currentTimeMillis();
                 List<String> deadStreams = new ArrayList<>();
+                List<String> reconnectStreams = new ArrayList<>();
 
                 for (Map.Entry<String, Long> entry : lastFrameTimes.entrySet()) {
                     String streamName = entry.getKey();
                     long lastFrame = entry.getValue();
 
                     if (now - lastFrame > STREAM_TIMEOUT_MS) {
-                        logger.warning("⚠ Stream appears dead (no frames): " + streamName);
-                        deadStreams.add(streamName);
+                        AtomicInteger reconnectCount = streamReconnectAttempts.computeIfAbsent(
+                            streamName, k -> new AtomicInteger(0));
+                        
+                        int attempts = reconnectCount.get();
+                        
+                        if (attempts < MAX_HEALTH_CHECK_RECONNECTS) {
+                            logger.warning("⚠ Stream appears dead (no frames): " + streamName + 
+                                         " - Reconnect attempt " + (attempts + 1) + "/" + MAX_HEALTH_CHECK_RECONNECTS);
+                            reconnectStreams.add(streamName);
+                            reconnectCount.incrementAndGet();
+                        } else {
+                            logger.severe("☠ Stream exhausted reconnect attempts: " + streamName + " - KILLING");
+                            deadStreams.add(streamName);
+                        }
+                    } else {
+                        // Stream is healthy, reset reconnect counter
+                        streamReconnectAttempts.remove(streamName);
                     }
                 }
 
+                // Trigger reconnection for dead streams
+                for (String streamName : reconnectStreams) {
+                    logger.info("🔄 Health check triggering reconnect: " + streamName);
+                    triggerStreamReconnect(streamName);
+                }
+
+                // Kill streams that exhausted reconnect attempts
                 for (String deadStream : deadStreams) {
-                    logger.warning("☠ Killing dead stream: " + deadStream);
+                    streamReconnectAttempts.remove(deadStream);
                     stopHLSStream(deadStream);
                 }
 
                 ThreadPoolExecutor pool = (ThreadPoolExecutor) streamExecutor;
                 logger.info(String.format(
-                    "📊 Health: Streams=%d, Workers=%d/%d (queue:%d), Dead=%d",
+                    "📊 Health: Streams=%d, Workers=%d/%d (queue:%d), Reconnecting=%d, Killed=%d",
                     streamLinks.size(),
                     pool.getActiveCount(), WORKER_THREADS, pool.getQueue().size(),
+                    reconnectStreams.size(),
                     deadStreams.size()
                 ));
 
@@ -191,6 +218,40 @@ public class HLSStreamService {
                 logger.severe("❌ Health check error: " + e.getMessage());
             }
         }, HEALTH_CHECK_INTERVAL_MS, HEALTH_CHECK_INTERVAL_MS, TimeUnit.MILLISECONDS);
+    }
+
+    private void triggerStreamReconnect(String streamName) {
+        try {
+            // Cancel current stream task
+            Future<?> future = streamTasks.get(streamName);
+            if (future != null && !future.isDone()) {
+                future.cancel(true);
+            }
+
+            // Get RTSP URL
+            String rtspUrl = streamRtspUrls.get(streamName);
+            if (rtspUrl == null) {
+                logger.warning("⚠ Cannot reconnect " + streamName + ": No RTSP URL found");
+                return;
+            }
+
+            // Reset last frame time to prevent immediate re-trigger
+            lastFrameTimes.put(streamName, System.currentTimeMillis());
+
+            // Get or create stats (must be final for lambda)
+            final StreamStats finalStats = streamStats.computeIfAbsent(streamName, StreamStats::new);
+
+            // Submit new task
+            logger.info("▶ Reconnecting stream: " + streamName);
+            Future<?> newFuture = streamExecutor.submit(() -> {
+                runStreamWithAutoReconnect(rtspUrl, streamName, finalStats);
+            });
+
+            streamTasks.put(streamName, newFuture);
+
+        } catch (Exception e) {
+            logger.severe("❌ Failed to trigger reconnect for " + streamName + ": " + e.getMessage());
+        }
     }
 
     private void startMemoryMonitor() {
@@ -496,6 +557,7 @@ public class HLSStreamService {
 
     /**
      * CRITICAL FIX: Properly close frames to prevent memory leaks
+     * IMMEDIATE RECONNECT: Reconnect on null frames instead of waiting for health check
      */
     private void streamFrames(FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder, 
                               String streamName, StreamStats stats, int frameSkipRatio) throws Exception {
@@ -504,7 +566,7 @@ public class HLSStreamService {
         long lastStatsUpdate = System.currentTimeMillis();
 
         final int MAX_CONSECUTIVE_ERRORS = 30;
-        final int MAX_NULL_FRAMES = 100;
+        final int MAX_NULL_FRAMES = 100;  // Changed: More tolerance before reconnect
         int consecutiveErrors = 0;
         int consecutiveNullFrames = 0;
         int frameCounter = 0;
@@ -522,13 +584,17 @@ public class HLSStreamService {
                 if (frame == null) {
                     consecutiveNullFrames++;
 
-                    if (consecutiveNullFrames < MAX_NULL_FRAMES) {
-                        Thread.sleep(5);
-                        continue;
-                    } else {
-                        logger.warning(streamName + ": Stream ended (too many null frames)");
-                        break;
+                    if (consecutiveNullFrames >= MAX_NULL_FRAMES) {
+                        // IMMEDIATE RECONNECT: Trigger reconnect instead of just logging
+                        logger.warning(streamName + ": Too many null frames (" + consecutiveNullFrames + ") - Triggering immediate reconnect");
+                        
+                        // Throw exception to exit this stream loop
+                        // The auto-reconnect wrapper will catch it and reconnect
+                        throw new RuntimeException("Stream ended: Too many consecutive null frames (" + consecutiveNullFrames + ")");
                     }
+                    
+                    Thread.sleep(5);
+                    continue;
                 }
 
                 consecutiveNullFrames = 0;
@@ -549,7 +615,7 @@ public class HLSStreamService {
                         consecutiveErrors++;
 
                         if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-                            logger.warning(streamName + ": Too many encode errors (" + consecutiveErrors + ")");
+                            logger.warning(streamName + ": Too many encode errors (" + consecutiveErrors + ") - Triggering reconnect");
                             throw new RuntimeException("Too many encode errors: " + consecutiveErrors);
                         }
                     }
@@ -589,9 +655,16 @@ public class HLSStreamService {
                 }
 
                 stats.recordError(e);
-                consecutiveErrors++;
-
+                
                 String msg = e.getMessage();
+
+                // Check if this is a "no frames" reconnect trigger
+                if (msg != null && msg.contains("Too many consecutive null frames")) {
+                    // This will be caught by runStreamWithAutoReconnect and trigger reconnection
+                    throw e;
+                }
+
+                consecutiveErrors++;
 
                 if (msg != null && (
                         msg.contains("Could not find ref") ||
@@ -604,7 +677,7 @@ public class HLSStreamService {
                     if (consecutiveErrors < MAX_CONSECUTIVE_ERRORS) {
                         continue;
                     } else {
-                        logger.warning(streamName + ": Too many HEVC errors, reconnecting");
+                        logger.warning(streamName + ": Too many HEVC errors - Triggering reconnect");
                         throw new RuntimeException("Too many HEVC errors: " + consecutiveErrors);
                     }
                 }
@@ -791,6 +864,7 @@ public class HLSStreamService {
         streamRtspUrls.remove(streamName);
         streamStopFlags.remove(streamName);
         lastFrameTimes.remove(streamName);
+        streamReconnectAttempts.remove(streamName);
 
         StreamResources resources = streamResources.remove(streamName);
         if (resources != null) {
