@@ -35,7 +35,7 @@ public class HLSStreamService {
     private static final int WORKER_THREADS = 50;
     private static final long STARTUP_DELAY_MS = 800;
     private static final int TARGET_FPS = 10;
-    private static final int MAX_RECONNECT_ATTEMPTS = 3;
+    private static final int MAX_RECONNECT_ATTEMPTS = 20;
     private static final long RECONNECT_DELAY_MS = 5000;
     private static final long HEALTH_CHECK_INTERVAL_MS = 60000; // 1 minute (was 30 seconds)
     private static final long MEMORY_CHECK_INTERVAL_MS = 60000; // 1 minute
