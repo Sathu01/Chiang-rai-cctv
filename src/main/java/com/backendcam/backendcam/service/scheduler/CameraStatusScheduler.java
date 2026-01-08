@@ -21,7 +21,7 @@ public class CameraStatusScheduler {
     }
 
     // รันทุก 60 วินาที
-    @Scheduled(fixedRate = 60_000)
+    // @Scheduled(fixedRate = 60_000)
     public void checkCameras() {
         long t0 = System.nanoTime();
 
