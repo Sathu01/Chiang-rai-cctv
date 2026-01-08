@@ -14,6 +14,7 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.springframework.stereotype.Service;
+
 @Service
 public class HLSStreamService {
 
@@ -32,10 +33,10 @@ public class HLSStreamService {
     public String StartHLSstream(String RTSPUrl, String streamName) {
         File outputDir = new File(HLS_Root, streamName);
         outputDir.mkdirs();
-        
+
         StreamContext context = new StreamContext(); // NEW
         streamContexts.put(streamName, context); // NEW
-        
+
         Thread t = new Thread(() -> {
             FFmpegFrameGrabber grabber = null;
             FFmpegFrameRecorder recorder = null;
@@ -78,21 +79,44 @@ public class HLSStreamService {
                 grabber.setOption("strict", "-2");
                 grabber.setOption("err_detect", "compliant");
                 grabber.start();
+                Frame firstFrame = null;
+                int width = 0;
+                int height = 0;
+                int maxRetries = 70; // Try for ~7 seconds
+                for (int i = 0; i < maxRetries && !context.shouldStop; i++) {
+                    firstFrame = grabber.grabImage();
+                    if (firstFrame != null && firstFrame.imageWidth > 0 && firstFrame.imageHeight > 0) {
+                        System.out.println("Got first frame: " + firstFrame.imageWidth + "x" + firstFrame.imageHeight);
+                        break;
+                    }
+                    Thread.sleep(100); // Wait 100ms between attempts
+                }
 
+                if (firstFrame == null || firstFrame.imageWidth <= 0 || firstFrame.imageHeight <= 0) {
+                    width = 1280;
+                    height = 720;
+                } else {
+                    width = firstFrame.imageWidth;
+                    height = firstFrame.imageHeight;
+
+                }
+               /* 
                 int width = grabber.getImageWidth();
-                int height = grabber.getImageHeight();
+                int height = grabber.getImageHeight();*/
+
                 recorder = new FFmpegFrameRecorder(hlsOutput, width, height, 0);
                 context.recorder = recorder; // NEW: Store in context
-                
+
                 recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
                 recorder.setFormat("hls");
                 recorder.setFrameRate(TARGET_FPS);
                 recorder.setGopSize(TARGET_FPS * 2);
                 recorder.setOption("hls_time", "4");
                 recorder.setOption("hls_list_size", "3");
-                recorder.setOption("hls_flags", "delete_segments");
+                recorder.setOption("hls_flags", "delete_segments+append_list+omit_endlist");
                 recorder.setOption("hls_segment_type", "mpegts");
                 recorder.setOption("hls_allow_cache", "0");
+                recorder.setOption("hls_delete_threshold", "1");
 
                 String segPath = outputDir.getAbsolutePath().replace('\\', '/') + "/s%d.ts";
                 recorder.setOption("hls_segment_filename", segPath);
@@ -151,7 +175,7 @@ public class HLSStreamService {
                 streamContexts.remove(streamName); // NEW: Cleanup context
             }
         });
-        
+
         t.setName(streamName);
         Thread existing = streamThreads.putIfAbsent(streamName, t);
 
@@ -169,21 +193,23 @@ public class HLSStreamService {
         StreamContext context = streamContexts.get(streamName);
         if (context != null) {
             context.shouldStop = true; // Signal the loop to stop
-            
+
             // Force close FFmpeg resources to unblock grabImage()
             try {
                 if (context.recorder != null) {
                     context.recorder.stop();
                 }
-            } catch (Exception ignored) {}
-            
+            } catch (Exception ignored) {
+            }
+
             try {
                 if (context.grabber != null) {
                     context.grabber.stop();
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
-        
+
         // Get and interrupt thread
         Thread t = streamThreads.remove(streamName);
         if (t != null) {
@@ -193,19 +219,20 @@ public class HLSStreamService {
             } catch (InterruptedException ignored) {
                 Thread.currentThread().interrupt(); // Restore interrupt status
             }
-            
+
             // FIXED: Force stop if still alive
             if (t.isAlive()) {
                 System.err.println("Warning: Thread " + streamName + " did not stop gracefully");
                 // Thread will eventually die when finally block executes
             }
         }
-        
+
         // FIXED: Small delay to ensure files are fully released
         try {
             Thread.sleep(500); // Give OS time to release file handles
-        } catch (InterruptedException ignored) {}
-        
+        } catch (InterruptedException ignored) {
+        }
+
         // Now safe to delete files
         deleteStreamDirectory(streamName);
         return "Stream stopped and files deleted.";
