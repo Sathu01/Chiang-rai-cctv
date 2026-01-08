@@ -1,4 +1,4 @@
-package com.backendcam.backendcam.firestore;
+package com.backendcam.backendcam.service.firestore;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
@@ -27,7 +27,8 @@ public class FirebaseAdminBootstrap {
 
             String saPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
             if (saPath == null || saPath.isBlank()) {
-                log.warn("Firebase Admin NOT initialized: env GOOGLE_APPLICATION_CREDENTIALS is missing. Firestore features will be disabled.");
+                log.warn(
+                        "Firebase Admin NOT initialized: env GOOGLE_APPLICATION_CREDENTIALS is missing. Firestore features will be disabled.");
                 return; // ไม่โยน exception ให้แอปรันต่อ
             }
 
@@ -40,7 +41,8 @@ public class FirebaseAdminBootstrap {
                 log.info("Firebase Admin SDK initialized successfully.");
             }
         } catch (Exception e) {
-            log.warn("Firebase Admin initialization failed. App will continue without Firestore. Cause: {}", e.getMessage(), e);
+            log.warn("Firebase Admin initialization failed. App will continue without Firestore. Cause: {}",
+                    e.getMessage(), e);
         }
     }
 

@@ -1,5 +1,7 @@
-package com.backendcam.backendcam;
+package com.backendcam.backendcam.controller;
 
+import com.backendcam.backendcam.model.dto.StreamRequest;
+import com.backendcam.backendcam.service.hls.HLSStreamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +30,5 @@ public class StreamController {
         hlsService.stopStream(streamName);
         return ResponseEntity.ok(Map.of("message", "Stream stopped: " + streamName));
     }
-    
 
-    
 }

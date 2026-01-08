@@ -1,4 +1,4 @@
-package com.backendcam.backendcam;
+package com.backendcam.backendcam.service.scheduler;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -13,7 +13,7 @@ public class CameraStatusChecker {
      * @return true = online, false = offline
      */
     public boolean isCameraOnline(String rtspUrl) {
-        long start = System.nanoTime();
+        // long start = System.nanoTime();
 
         try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(rtspUrl)) {
             // บังคับ format / transport ให้ชัด ๆ แบบเดียวกับที่ ffplay ใช้
@@ -28,14 +28,14 @@ public class CameraStatusChecker {
             // ลอง grab มาสักเฟรมให้แน่ใจว่ามี stream จริง
             grabber.grab();
 
-            long ms = (System.nanoTime() - start) / 1_000_000L;
+            // long ms = (System.nanoTime() - start) / 1_000_000L;
             // System.out.printf("[CamCheck] ONLINE after %d ms | url=%s%n", ms, rtspUrl);
             return true;
 
         } catch (Exception e) {
-            long ms = (System.nanoTime() - start) / 1_000_000L;
-            System.out.printf("[CamCheck] OFFLINE after %d ms | url=%s | err=%s%n",
-                    ms, rtspUrl, e.getMessage());
+            // long ms = (System.nanoTime() - start) / 1_000_000L;
+            // System.out.printf("[CamCheck] OFFLINE after %d ms | url=%s | err=%s%n",
+            //         ms, rtspUrl, e.getMessage());
             return false;
         }
     }

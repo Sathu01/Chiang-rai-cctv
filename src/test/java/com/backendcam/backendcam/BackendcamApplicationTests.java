@@ -1,6 +1,9 @@
 package com.backendcam.backendcam;
 
 import org.junit.jupiter.api.*;
+
+import com.backendcam.backendcam.service.hls.HLSStreamService;
+
 import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.*;

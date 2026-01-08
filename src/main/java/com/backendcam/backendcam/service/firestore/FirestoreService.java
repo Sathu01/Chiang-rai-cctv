@@ -1,4 +1,4 @@
-package com.backendcam.backendcam.firestore;
+package com.backendcam.backendcam.service.firestore;
 
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
@@ -38,7 +38,8 @@ public class FirestoreService {
      * timestamp เป็น Asia/Bangkok (ISO_OFFSET)
      */
     public void updateOnline(String docId, String message) {
-        if (!bootstrap.isInitialized()) return;
+        if (!bootstrap.isInitialized())
+            return;
 
         Firestore db = FirestoreClient.getFirestore();
 
@@ -53,10 +54,14 @@ public class FirestoreService {
         db.collection(COLLECTION).document(docId).set(payload, SetOptions.merge());
     }
 
-    /** OFFLINE: อัปเดต status + คำนวณ lastSeen.message ใหม่ โดย “ไม่เปลี่ยน” timestamp เดิม */
+    /**
+     * OFFLINE: อัปเดต status + คำนวณ lastSeen.message ใหม่ โดย "ไม่เปลี่ยน"
+     * timestamp เดิม
+     */
     @SuppressWarnings("unchecked")
     public void updateOffline(String docId) {
-        if (!bootstrap.isInitialized()) return;
+        if (!bootstrap.isInitialized())
+            return;
 
         try {
             Firestore db = FirestoreClient.getFirestore();
@@ -76,8 +81,8 @@ public class FirestoreService {
                     String msg = TimeAgoFormatter.humanizeSinceSeconds(Math.max(0, secs));
 
                     Map<String, Object> newLastSeen = new HashMap<>();
-                    newLastSeen.put("timestamp", tsStr);  // คงค่าเดิม
-                    newLastSeen.put("message", msg);      // อัปเดตใหม่
+                    newLastSeen.put("timestamp", tsStr); // คงค่าเดิม
+                    newLastSeen.put("message", msg); // อัปเดตใหม่
                     payload.put("lastSeen", newLastSeen);
                 }
             }
