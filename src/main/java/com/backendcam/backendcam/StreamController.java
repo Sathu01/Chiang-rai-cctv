@@ -15,24 +15,20 @@ public class StreamController {
     private HLSStreamService hlsService;
 
     @PostMapping("/hls/start")
-    public ResponseEntity<Map<String, String>> startHLS(@RequestBody StreamRequest request) {
+    public ResponseEntity<Map<String, String>> startStream(@RequestBody StreamRequest request) {
         if (request.getRtspUrl() == null || request.getStreamName() == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "RTSP URL and stream name are required"));
         }
-        String hlsUrl = hlsService.startHLSStream(request.getRtspUrl(), request.getStreamName());
+        String hlsUrl = hlsService.StartHLSstream(request.getRtspUrl(), request.getStreamName());
         return ResponseEntity.ok(Map.of("message", hlsUrl));
     }
 
     @PostMapping("/hls/stop/{streamName}")
-    public ResponseEntity<Map<String, String>> stopHLS(@PathVariable String streamName) {
-        hlsService.stopHLSStream(streamName);
+    public ResponseEntity<Map<String, String>> stopStream(@PathVariable String streamName) {
+        hlsService.stopStream(streamName);
         return ResponseEntity.ok(Map.of("message", "Stream stopped: " + streamName));
     }
     
-    @GetMapping("/health")
-    public ResponseEntity<Map<String, String>> health() {
-        return ResponseEntity.ok(Map.of("status", "OK"));
-    }
 
     
 }
