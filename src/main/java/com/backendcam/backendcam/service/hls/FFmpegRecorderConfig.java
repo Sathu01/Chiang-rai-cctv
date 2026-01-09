@@ -33,9 +33,10 @@ class FFmpegRecorderConfig {
         // HLS specific settings
         recorder.setOption("hls_time", "4");
         recorder.setOption("hls_list_size", "3");
-        recorder.setOption("hls_flags", "delete_segments");
+        recorder.setOption("hls_flags", "delete_segments+append_list+omit_endlist");
         recorder.setOption("hls_segment_type", "mpegts");
         recorder.setOption("hls_allow_cache", "0");
+        recorder.setOption("hls_delete_threshold", "1");
 
         // Segment filename pattern
         String segPath = outputDir.getAbsolutePath().replace('\\', '/') + "/s%d.ts";

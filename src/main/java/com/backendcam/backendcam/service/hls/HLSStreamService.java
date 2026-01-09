@@ -48,8 +48,31 @@ public class HLSStreamService {
                 // Use configuration class for grabber setup
                 grabberConfig.configureGrabber(grabber, RTSPUrl);
 
-                int width = grabber.getImageWidth();
-                int height = grabber.getImageHeight();
+                Frame firstFrame = null;
+                int width = 0;
+                int height = 0;
+                int maxRetries = 70; // Try for ~7 seconds
+                for (int i = 0; i < maxRetries && !context.shouldStop; i++) {
+                    firstFrame = grabber.grabImage();
+                    if (firstFrame != null && firstFrame.imageWidth > 0 && firstFrame.imageHeight > 0) {
+                        System.out.println("Got first frame: " + firstFrame.imageWidth + "x" + firstFrame.imageHeight);
+                        break;
+                    }
+                    Thread.sleep(100); // Wait 100ms between attempts
+                }
+
+                if (firstFrame == null || firstFrame.imageWidth <= 0 || firstFrame.imageHeight <= 0) {
+                    width = 1280;
+                    height = 720;
+                } else {
+                    width = firstFrame.imageWidth;
+                    height = firstFrame.imageHeight;
+
+                }
+
+                // int width = grabber.getImageWidth();
+                // int height = grabber.getImageHeight();
+                
                 recorder = new FFmpegFrameRecorder(hlsOutput, width, height, 0);
                 context.recorder = recorder;
 

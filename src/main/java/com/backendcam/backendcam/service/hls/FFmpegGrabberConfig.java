@@ -23,8 +23,6 @@ class FFmpegGrabberConfig {
         // Thread configuration
         grabber.setOption("threads", "1");
         grabber.setOption("thread_count", "0");
-        // TODO: REDUNDANT - Line below duplicates thread setting above
-        // grabber.setVideoOption("threads", "1");
 
         // Connection and timeout settings
         grabber.setOption("analyzeduration", "5000000");
@@ -58,9 +56,6 @@ class FFmpegGrabberConfig {
         grabber.setOption("rw_timeout", "60000000");
         grabber.setOption("use_wallclock_as_timestamps", "1");
         grabber.setOption("strict", "-2");
-
-        // TODO: REDUNDANT - This overwrites the err_detect setting from line above
-        // grabber.setOption("err_detect", "compliant");
 
         grabber.start();
     }
