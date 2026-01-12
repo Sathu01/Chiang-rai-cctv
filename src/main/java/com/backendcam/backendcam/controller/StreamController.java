@@ -18,17 +18,32 @@ public class StreamController {
 
     @PostMapping("/hls/start")
     public ResponseEntity<Map<String, String>> startStream(@RequestBody StreamRequest request) {
-        if (request.getRtspUrl() == null || request.getStreamName() == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "RTSP URL and stream name are required"));
+        // Input validation
+        if (request.getRtspUrl() == null || request.getRtspUrl().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "RTSP URL cannot be null or empty"));
         }
-        String hlsUrl = hlsService.StartHLSstream(request.getRtspUrl(), request.getStreamName());
+        if (request.getStreamName() == null || request.getStreamName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Stream name cannot be null or empty"));
+        }
+
+        // Sanitize stream name to prevent directory traversal
+        String sanitizedStreamName = request.getStreamName().replaceAll("[^a-zA-Z0-9_-]", "_");
+
+        String hlsUrl = hlsService.StartHLSstream(request.getRtspUrl(), sanitizedStreamName);
         return ResponseEntity.ok(Map.of("message", hlsUrl));
     }
 
     @PostMapping("/hls/stop/{streamName}")
     public ResponseEntity<Map<String, String>> stopStream(@PathVariable String streamName) {
-        hlsService.stopStream(streamName);
-        return ResponseEntity.ok(Map.of("message", "Stream stopped: " + streamName));
+        if (streamName == null || streamName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Stream name cannot be null or empty"));
+        }
+
+        // Sanitize stream name consistently
+        String sanitizedStreamName = streamName.replaceAll("[^a-zA-Z0-9_-]", "_");
+
+        hlsService.stopStream(sanitizedStreamName);
+        return ResponseEntity.ok(Map.of("message", "Stream stopped: " + sanitizedStreamName));
     }
 
 }
