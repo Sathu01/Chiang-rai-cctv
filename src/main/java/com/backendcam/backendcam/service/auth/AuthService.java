@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.backendcam.backendcam.model.dto.auth.AuthResponseDto;
 import com.backendcam.backendcam.model.dto.auth.LoginDto;
 import com.backendcam.backendcam.model.dto.auth.RegisterDto;
 import com.backendcam.backendcam.model.entity.User;
@@ -29,24 +28,23 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
 
-    public AuthResponseDto register(RegisterDto request) {
+    public Map<String, String> register(RegisterDto registerDto) {
 
         // Check if username already exists
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.existsByUsername(registerDto.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
 
         User user = new User(
-                request.getUsername(),
-                passwordEncoder.encode(request.getPassword()));
+                registerDto.getUsername(),
+                passwordEncoder.encode(registerDto.getPassword()));
 
         user = userRepository.save(user);
 
-        // Generate JWT token
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
         String token = jwt.generateToken(userDetails);
 
-        return new AuthResponseDto(token, user.getUsername());
+        return Map.of("token", token, "username", user.getUsername());
     }
 
     public Map<String, String> login(LoginDto loginDto) {

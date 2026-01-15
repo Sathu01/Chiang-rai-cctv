@@ -32,9 +32,9 @@ public class AuthController {
 
     @PublicEndpoint
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDto> register(@Valid @RequestBody RegisterDto registerDto) {
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterDto registerDto) {
         try {
-            AuthResponseDto response = authService.register(registerDto);
+            Map<String, String> response = authService.register(registerDto);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
