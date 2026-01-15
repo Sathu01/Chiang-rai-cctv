@@ -10,8 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.backendcam.backendcam.model.dto.auth.LoginRequestDto;
-import com.backendcam.backendcam.model.dto.auth.RegisterRequestDto;
+import com.backendcam.backendcam.model.dto.auth.LoginDto;
+import com.backendcam.backendcam.model.dto.auth.RegisterDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
@@ -26,7 +26,7 @@ public class AuthControllerTest {
 
     @Test
     public void testRegisterValidation() throws Exception {
-        RegisterRequestDto request = new RegisterRequestDto();
+        RegisterDto request = new RegisterDto();
         // Missing fields
 
         mockMvc.perform(post("/api/auth/register")
@@ -37,7 +37,7 @@ public class AuthControllerTest {
 
     @Test
     public void testLoginValidation() throws Exception {
-        LoginRequestDto request = new LoginRequestDto();
+        LoginDto request = new LoginDto();
         // Missing fields
 
         mockMvc.perform(post("/api/auth/login")

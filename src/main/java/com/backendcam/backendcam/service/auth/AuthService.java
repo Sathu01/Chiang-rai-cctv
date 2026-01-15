@@ -11,8 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.backendcam.backendcam.model.dto.auth.AuthResponseDto;
-import com.backendcam.backendcam.model.dto.auth.LoginRequestDto;
-import com.backendcam.backendcam.model.dto.auth.RegisterRequestDto;
+import com.backendcam.backendcam.model.dto.auth.LoginDto;
+import com.backendcam.backendcam.model.dto.auth.RegisterDto;
 import com.backendcam.backendcam.model.entity.User;
 import com.backendcam.backendcam.repository.UserRepository;
 import com.backendcam.backendcam.util.jwt.Jwt;
@@ -29,7 +29,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
 
-    public AuthResponseDto register(RegisterRequestDto request) {
+    public AuthResponseDto register(RegisterDto request) {
 
         // Check if username already exists
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -49,9 +49,9 @@ public class AuthService {
         return new AuthResponseDto(token, user.getUsername());
     }
 
-    public Map<String, String> login(LoginRequestDto request) {
+    public Map<String, String> login(LoginDto loginDto) {
         Authentication authenticationRequest =
-			UsernamePasswordAuthenticationToken.unauthenticated(request.getUsername(), request.getPassword());
+			UsernamePasswordAuthenticationToken.unauthenticated(loginDto.getUsername(), loginDto.getPassword());
 
 		Authentication authenticationResponse =
 			this.authenticationManager.authenticate(authenticationRequest);

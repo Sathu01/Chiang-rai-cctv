@@ -21,9 +21,9 @@ public class AuthController {
 
     @PublicEndpoint
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequestDto request) {
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginDto loginDto) {
         try {
-            Map<String, String> response = authService.login(request);
+            Map<String, String> response = authService.login(loginDto);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(401).build();
@@ -32,9 +32,9 @@ public class AuthController {
 
     @PublicEndpoint
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDto> register(@Valid @RequestBody RegisterRequestDto request) {
+    public ResponseEntity<AuthResponseDto> register(@Valid @RequestBody RegisterDto registerDto) {
         try {
-            AuthResponseDto response = authService.register(request);
+            AuthResponseDto response = authService.register(registerDto);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
