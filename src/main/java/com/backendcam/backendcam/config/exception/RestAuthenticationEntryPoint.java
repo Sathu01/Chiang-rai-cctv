@@ -1,6 +1,7 @@
 package com.backendcam.backendcam.config.exception;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import com.backendcam.backendcam.util.ResponseWriter;
 
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -18,14 +21,13 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpServletResponse response,
             AuthenticationException authException) throws IOException {
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-
-        response.getWriter().write("""
-            {
-              "status": 401,
-              "message": "Unauthorized"
-            }
-        """);
+        ResponseWriter.writeJson(
+			response, 
+			HttpServletResponse.SC_UNAUTHORIZED,
+			Map.of(
+				"statusCode", HttpServletResponse.SC_UNAUTHORIZED, 
+				"message", "Unauthorized"
+			)
+		);
     }
 }

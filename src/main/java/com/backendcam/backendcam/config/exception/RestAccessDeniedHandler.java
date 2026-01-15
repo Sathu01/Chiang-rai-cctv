@@ -1,6 +1,7 @@
 package com.backendcam.backendcam.config.exception;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import com.backendcam.backendcam.util.ResponseWriter;
 
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
@@ -18,14 +21,13 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
             HttpServletResponse response,
             AccessDeniedException accessDeniedException) throws IOException {
 
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.setContentType("application/json");
-
-        response.getWriter().write("""
-            {
-              "status": 403,
-              "message": "Forbidden - insufficient permission"
-            }
-        """);
+        ResponseWriter.writeJson(
+			response, 
+			HttpServletResponse.SC_FORBIDDEN,
+			Map.of(
+				"statusCode", HttpServletResponse.SC_FORBIDDEN, 
+				"message", "Forbidden"
+			)
+		);
     }
 }
