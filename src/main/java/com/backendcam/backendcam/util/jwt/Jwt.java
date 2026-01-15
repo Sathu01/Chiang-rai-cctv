@@ -12,11 +12,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import lombok.RequiredArgsConstructor;
+import com.backendcam.backendcam.repository.UserRepository;
+import com.backendcam.backendcam.model.entity.User;
+
 /**
  * Utility class for JWT operations
  */
 @Component
+@RequiredArgsConstructor
 public class Jwt {
+
+    private final UserRepository userRepository;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -28,7 +35,7 @@ public class Jwt {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String extractUsername(String token) {
+    public String extractUserId(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -54,8 +61,13 @@ public class Jwt {
     }
 
     public String generateToken(UserDetails userDetails) {
+        // Generate token with subject = user id
+        String username = userDetails.getUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found for token generation"));
+
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername());
+        return createToken(claims, user.getId());
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
@@ -71,24 +83,8 @@ public class Jwt {
                 .compact();
     }
 
-    /**
-     * Validate token against user details
-     */
-    public Boolean validateToken(String token, UserDetails userDetails) {
-        try {
-            final String username = extractUsername(token);
-            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Validate token (basic validation)
-     */
     public Boolean validateToken(String token) {
         try {
-            extractAllClaims(token);
             return !isTokenExpired(token);
         } catch (JwtException | IllegalArgumentException e) {
             return false;

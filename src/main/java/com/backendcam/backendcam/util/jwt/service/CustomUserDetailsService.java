@@ -40,4 +40,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .authorities(authorities)
                 .build();
     }
+
+    public UserDetails loadUserById(String id) throws UsernameNotFoundException {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found by id"));
+        return buildUserDetails(user);
+    }
 }

@@ -18,15 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-/**
- * JWT Authentication Filter
- * Intercepts all requests and validates JWT token
- * Supports token extraction from:
- * 1. Authorization header (Priority 1)
- * 2. Cookie (Priority 2)
- * 
- * Skips authentication for methods annotated with @PublicEndpoint
- */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthGuard extends OncePerRequestFilter {
@@ -45,10 +36,10 @@ public class JwtAuthGuard extends OncePerRequestFilter {
 
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
-                String username = jwt.extractUsername(token);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                String userId = jwt.extractUserId(token);
+                UserDetails userDetails = userDetailsService.loadUserById(userId);
 
-                if (jwt.validateToken(token, userDetails)) {
+                if (jwt.validateToken(token)) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails,
@@ -65,26 +56,21 @@ public class JwtAuthGuard extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    /**
-     * Extract JWT token from request
-     * Priority 1: Authorization header (Bearer token)
-     * Priority 2: Cookie named "jwt_token"
-     */
     private String extractJwtToken(HttpServletRequest request) {
-        // Priority 1: Check Authorization header
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        }
-
-        // Priority 2: Check cookie
+        // Priority 1: Check cookie
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("jwt_token".equals(cookie.getName())) {
+                if ("accessToken".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }
+        }
+
+        // Priority 2: Check Authorization header
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
         }
 
         return null;
