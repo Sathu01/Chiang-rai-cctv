@@ -20,6 +20,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.backendcam.backendcam.config.exception.RestAccessDeniedHandler;
+import com.backendcam.backendcam.config.exception.RestAuthenticationEntryPoint;
 import com.backendcam.backendcam.util.jwt.JwtAuthGuard;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,8 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtAuthGuard jwtAuthGuard;
+    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final RestAccessDeniedHandler restAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -41,7 +45,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthGuard, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthGuard, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                    .authenticationEntryPoint(restAuthenticationEntryPoint)
+                    .accessDeniedHandler(restAccessDeniedHandler)
+                );
 
         return http.build();
     }
