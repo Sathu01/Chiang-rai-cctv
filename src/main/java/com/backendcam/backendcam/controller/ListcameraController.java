@@ -1,13 +1,10 @@
 package com.backendcam.backendcam.controller;
-import com.backendcam.backendcam.model.dto.StreamRequest;
-import com.backendcam.backendcam.service.hls.HLSStreamService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.backendcam.backendcam.model.dto.ListCamera;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import com.backendcam.backendcam.service.listcamera.ListCameraService;
 
 

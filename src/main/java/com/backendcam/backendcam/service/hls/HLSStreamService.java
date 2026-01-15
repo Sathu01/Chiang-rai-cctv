@@ -7,17 +7,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FFmpegLogCallback;
-import org.bytedeco.ffmpeg.global.avutil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class HLSStreamService {
 
-    // ⚙️ CONFIGURATION: Change this to adjust output FPS (5, 8, 10, 15, etc.)
-    private static final int TARGET_OUTPUT_FPS = 10;
-    
+    private static final Logger logger = LoggerFactory.getLogger(HLSStreamService.class);
+
     private final Map<String, Thread> streamThreads = new ConcurrentHashMap<>();
     private final Map<String, StreamContext> streamContexts = new ConcurrentHashMap<>();
 
@@ -30,18 +31,33 @@ public class HLSStreamService {
     @Autowired
     private StreamResourceManager resourceManager;
 
-    public HLSStreamService() {
-        // Suppress FFmpeg logging
-        FFmpegLogCallback.set();
-        avutil.av_log_set_level(avutil.AV_LOG_FATAL);
+    /**
+     * Initialize the HLS service by cleaning up any leftover files from previous
+     * runs
+     * This ensures a clean state when the application starts, preventing issues
+     * with
+     * residual .ts and .m3u8 files from crashed or interrupted sessions
+     */
+    @PostConstruct
+    public void init() {
+        logger.info("Initializing HLS Stream Service...");
+        resourceManager.cleanupAllStreams();
+        logger.info("HLS Stream Service initialized successfully");
     }
 
     public String StartHLSstream(String RTSPUrl, String streamName) {
+
+        // Check if stream already exists
+        if (streamThreads.containsKey(streamName)) {
+            return "/api/hls/" + streamName + "/stream.m3u8";
+        }
+
         File outputDir = new File(resourceManager.getHlsRoot(), streamName);
-        outputDir.mkdirs();
+        if (!outputDir.exists() && !outputDir.mkdirs()) {
+            throw new RuntimeException("Failed to create output directory: " + outputDir.getAbsolutePath());
+        }
 
         StreamContext context = new StreamContext();
-        streamContexts.put(streamName, context);
 
         Thread t = new Thread(() -> {
             FFmpegFrameGrabber grabber = null;
@@ -53,226 +69,115 @@ public class HLSStreamService {
                 grabber = new FFmpegFrameGrabber(RTSPUrl);
                 context.grabber = grabber;
 
-                // Configure grabber
-                grabberConfig.configureGrabber(grabber, RTSPUrl);
+                // Use configuration class for grabber setup
+                grabberConfig.configureGrabber(grabber);
 
-                // Get first frame for dimensions
-                Frame firstFrame = null;
-                int width = 0;
-                int height = 0;
-                int maxRetries = 70;
-                
-                for (int i = 0; i < maxRetries && !context.shouldStop; i++) {
-                    firstFrame = grabber.grabImage();
-                    if (firstFrame != null && firstFrame.imageWidth > 0 && firstFrame.imageHeight > 0) {
-                        width = firstFrame.imageWidth;
-                        height = firstFrame.imageHeight;
-                        firstFrame.close();
-                        break;
-                    }
-                    Thread.sleep(100);
-                }
+                int width = grabber.getImageWidth();
+                int height = grabber.getImageHeight();
 
-                if (width <= 0 || height <= 0) {
-                    width = 1280;
-                    height = 720;
-                }
-
-                // Setup recorder with TARGET_OUTPUT_FPS
                 recorder = new FFmpegFrameRecorder(hlsOutput, width, height, 0);
                 context.recorder = recorder;
 
-                // Configure recorder - it will use TARGET_OUTPUT_FPS internally
-                recorderConfig.configureRecorder(recorder, outputDir, width, height, TARGET_OUTPUT_FPS);
+                // Use configuration class for recorder setup
+                recorderConfig.configureRecorder(recorder, outputDir);
 
-                // Get source FPS from camera
-                double sourceFps = grabber.getFrameRate();
-                if (sourceFps <= 0 || sourceFps > 60) {
-                    sourceFps = 25.0; // Default assumption for IP cameras
+                Frame frame;
+                // Check both interrupt flag AND shouldStop flag
+                while (!Thread.currentThread().isInterrupted() && !context.shouldStop) {
+                    frame = grabber.grabImage();
+                    if (frame == null) {
+                        break; // End of stream
+                    }
+                    recorder.record(frame);
                 }
-                
-                // Calculate how many frames to skip
-                // Example: 25fps source → 10fps target = skip ratio of 2.5 (encode every ~3rd frame)
-                int frameSkipRatio = Math.max(1, (int) Math.round(sourceFps / TARGET_OUTPUT_FPS));
-                
-                System.out.println("Stream " + streamName + 
-                                 " - Source: " + sourceFps + "fps → Target: " + TARGET_OUTPUT_FPS + 
-                                 "fps (encoding 1 out of every " + frameSkipRatio + " frames)");
-
-                // Stream with frame skipping to achieve target FPS
-                streamFramesWithSkipping(grabber, recorder, streamName, context, sourceFps, frameSkipRatio);
-                
-                System.out.println("Stream " + streamName + " ended normally");
 
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error in stream processing for {}: {}", streamName, e.getMessage(), e);
             } finally {
+                logger.info("Cleaning up resources for {}", streamName);
                 resourceManager.cleanupResources(context);
                 streamContexts.remove(streamName);
+                streamThreads.remove(streamName);
             }
         });
 
-        t.setName(streamName);
-        Thread existing = streamThreads.putIfAbsent(streamName, t);
+        t.setName("HLS-" + streamName);
+        t.setDaemon(false); // Ensure thread completes cleanup before JVM shutdown
 
-        if (existing != null) {
-            streamContexts.remove(streamName);
+        // Atomically put context and thread - prevents race condition
+        StreamContext existingContext = streamContexts.putIfAbsent(streamName, context);
+        Thread existingThread = streamThreads.putIfAbsent(streamName, t);
+
+        if (existingContext != null || existingThread != null) {
+            // Another thread won the race, clean up our context
+            streamContexts.remove(streamName, context);
+            streamThreads.remove(streamName, t);
             return "/api/hls/" + streamName + "/stream.m3u8";
         }
-        
+
         t.start();
+        logger.info("Started stream thread for {}", streamName);
+
         return "/api/hls/" + streamName + "/stream.m3u8";
     }
 
-    /**
-     * ✅ Stream frames with proper pacing and selective encoding
-     * 
-     * This method:
-     * 1. Reads frames at camera speed (e.g., 25fps = every 40ms)
-     * 2. Only encodes selected frames based on frameSkipRatio
-     * 3. Creates consistent HLS segment timing
-     */
-    private void streamFramesWithSkipping(FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder,
-                                         String streamName, StreamContext context, 
-                                         double sourceFps, int frameSkipRatio) {
-        
-        final int MAX_NULL_FRAMES = 500;
-        final long FRAME_TIME_MS = (long)(1000.0 / sourceFps);
-        
-        int consecutiveNullFrames = 0;
-        int frameCounter = 0;
-        int encodedFrames = 0;
-        long lastFrameTime = System.currentTimeMillis();
-        long startTime = System.currentTimeMillis();
-
-        System.out.println("Frame timing: Read every " + FRAME_TIME_MS + "ms, encode every " + frameSkipRatio + "th frame");
-
-        while (!Thread.currentThread().isInterrupted() && !context.shouldStop) {
-            Frame frame = null;
-            
-            try {
-                long now = System.currentTimeMillis();
-                
-                // ✅ CRITICAL: Pace frame reading to match camera speed
-                long timeSinceLastFrame = now - lastFrameTime;
-                if (timeSinceLastFrame < FRAME_TIME_MS) {
-                    Thread.sleep(FRAME_TIME_MS - timeSinceLastFrame);
-                }
-                lastFrameTime = System.currentTimeMillis();
-
-                // Read frame from camera
-                frame = grabber.grabImage();
-
-                // ✅ Handle null frames properly
-                if (frame == null) {
-                    consecutiveNullFrames++;
-
-                    if (consecutiveNullFrames >= MAX_NULL_FRAMES) {
-                        System.out.println("Stream " + streamName + " stalled - " + consecutiveNullFrames + " null frames");
-                        break;
-                    }
-                    
-                    Thread.sleep(consecutiveNullFrames < 10 ? 5 : 
-                                consecutiveNullFrames < 100 ? 10 : 
-                                consecutiveNullFrames < 300 ? 20 : 50);
-                    continue;
-                }
-
-                consecutiveNullFrames = 0;
-                frameCounter++;
-
-                // Validate frame before encoding
-                if (frame.image == null || frame.imageWidth <= 0 || frame.imageHeight <= 0) {
-                    frame.close();
-                    frame = null;
-                    Thread.sleep(5);
-                    continue;
-                }
-
-                // ✅ Selective encoding: Only encode every Nth frame
-                boolean shouldEncode = (frameCounter % frameSkipRatio == 0);
-
-                if (shouldEncode) {
-                    try {
-                        recorder.record(frame);
-                        encodedFrames++;
-                        
-                        // Log every 100 encoded frames
-                        if (encodedFrames % 100 == 0) {
-                            long elapsed = (System.currentTimeMillis() - startTime) / 1000;
-                            double actualFps = encodedFrames / (double)elapsed;
-                            System.out.println(streamName + ": Read " + frameCounter + " frames, " +
-                                             "Encoded " + encodedFrames + " @ " + 
-                                             String.format("%.1f", actualFps) + " fps");
-                        }
-                    } catch (Exception e) {
-                        // Continue on encoding errors
-                    }
-                }
-
-                // ✅ CRITICAL: Always close frame immediately after use
-                frame.close();
-                frame = null;
-
-            } catch (Exception e) {
-                // Continue streaming on errors
-                try {
-                    Thread.sleep(5);
-                } catch (InterruptedException ie) {
-                    break;
-                }
-                
-            } finally {
-                // ✅ Safety net: Ensure frame is closed
-                if (frame != null) {
-                    try {
-                        frame.close();
-                    } catch (Exception ignored) {}
-                    frame = null;
-                }
-            }
-        }
-        
-        long totalTime = (System.currentTimeMillis() - startTime) / 1000;
-        double avgFps = totalTime > 0 ? encodedFrames / (double)totalTime : 0;
-        System.out.println(streamName + ": Finished - Read " + frameCounter + 
-                         " frames, Encoded " + encodedFrames + " in " + totalTime + 
-                         "s (avg " + String.format("%.1f", avgFps) + " fps)");
-    }
-
     public String stopStream(String streamName) {
+        // Get and remove thread first to prevent new operations
+        Thread t = streamThreads.remove(streamName);
         StreamContext context = streamContexts.get(streamName);
+
+        if (t == null && context == null) {
+            return "Stream not found or already stopped.";
+        }
+
+        // Signal thread to stop
         if (context != null) {
             context.shouldStop = true;
-
-            try {
-                if (context.recorder != null) {
-                    context.recorder.stop();
-                }
-            } catch (Exception ignored) {}
-
-            try {
-                if (context.grabber != null) {
-                    context.grabber.stop();
-                }
-            } catch (Exception ignored) {}
         }
 
-        Thread t = streamThreads.remove(streamName);
+        // Interrupt thread if it exists
         if (t != null) {
             t.interrupt();
+
             try {
-                t.join(5000);
-            } catch (InterruptedException ignored) {
-                Thread.currentThread().interrupt();
+                // Wait for thread to finish with timeout
+                t.join(5000); // Wait up to 5 seconds
+
+                if (t.isAlive()) {
+                    // Force close resources to help thread exit
+                    if (context != null) {
+                        resourceManager.cleanupResources(context);
+                    }
+                    // Try one more time with shorter timeout
+                    t.join(2000);
+
+                    if (t.isAlive()) {
+                        logger.error("Thread {} still alive after forced cleanup. It will be abandoned.",
+                                streamName);
+                    }
+                } else {
+                    logger.info("Thread {} stopped gracefully", streamName);
+                }
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted while waiting for thread {} to stop", streamName);
+                Thread.currentThread().interrupt(); // Restore interrupt status
             }
         }
 
+        // Remove context if still present (should be removed by thread's finally block)
+        streamContexts.remove(streamName);
+
+        // Small delay to ensure OS releases file handles
         try {
             Thread.sleep(500);
-        } catch (InterruptedException ignored) {}
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
+        // Delete stream directory
         resourceManager.deleteStreamDirectory(streamName);
+        logger.info("Stream {} stopped and files deleted", streamName);
+
         return "Stream stopped and files deleted.";
     }
 }
