@@ -31,18 +31,10 @@ public class HLSStreamService {
     @Autowired
     private StreamResourceManager resourceManager;
 
-    /**
-     * Initialize the HLS service by cleaning up any leftover files from previous
-     * runs
-     * This ensures a clean state when the application starts, preventing issues
-     * with
-     * residual .ts and .m3u8 files from crashed or interrupted sessions
-     */
+    // Cleanup on startup
     @PostConstruct
     public void init() {
-        logger.info("Initializing HLS Stream Service...");
         resourceManager.cleanupAllStreams();
-        logger.info("HLS Stream Service initialized successfully");
     }
 
     public String StartHLSstream(String RTSPUrl, String streamName) {
@@ -59,7 +51,7 @@ public class HLSStreamService {
 
         StreamContext context = new StreamContext();
 
-        Thread t = new Thread(() -> {
+        Thread thread = new Thread(() -> {
             FFmpegFrameGrabber grabber = null;
             FFmpegFrameRecorder recorder = null;
 
@@ -101,21 +93,21 @@ public class HLSStreamService {
             }
         });
 
-        t.setName("HLS-" + streamName);
-        t.setDaemon(false); // Ensure thread completes cleanup before JVM shutdown
+        thread.setName("HLS-" + streamName);
+        thread.setDaemon(false); // Ensure thread completes cleanup before JVM shutdown
 
         // Atomically put context and thread - prevents race condition
         StreamContext existingContext = streamContexts.putIfAbsent(streamName, context);
-        Thread existingThread = streamThreads.putIfAbsent(streamName, t);
+        Thread existingThread = streamThreads.putIfAbsent(streamName, thread);
 
         if (existingContext != null || existingThread != null) {
             // Another thread won the race, clean up our context
             streamContexts.remove(streamName, context);
-            streamThreads.remove(streamName, t);
+            streamThreads.remove(streamName, thread);
             return "/api/hls/" + streamName + "/stream.m3u8";
         }
 
-        t.start();
+        thread.start();
         logger.info("Started stream thread for {}", streamName);
 
         return "/api/hls/" + streamName + "/stream.m3u8";
@@ -123,10 +115,10 @@ public class HLSStreamService {
 
     public String stopStream(String streamName) {
         // Get and remove thread first to prevent new operations
-        Thread t = streamThreads.remove(streamName);
+        Thread thread = streamThreads.remove(streamName);
         StreamContext context = streamContexts.get(streamName);
 
-        if (t == null && context == null) {
+        if (thread == null && context == null) {
             return "Stream not found or already stopped.";
         }
 
@@ -136,22 +128,22 @@ public class HLSStreamService {
         }
 
         // Interrupt thread if it exists
-        if (t != null) {
-            t.interrupt();
+        if (thread != null) {
+            thread.interrupt();
 
             try {
                 // Wait for thread to finish with timeout
-                t.join(5000); // Wait up to 5 seconds
+                thread.join(5000); // Wait up to 5 seconds
 
-                if (t.isAlive()) {
+                if (thread.isAlive()) {
                     // Force close resources to help thread exit
                     if (context != null) {
                         resourceManager.cleanupResources(context);
                     }
                     // Try one more time with shorter timeout
-                    t.join(2000);
+                    thread.join(2000);
 
-                    if (t.isAlive()) {
+                    if (thread.isAlive()) {
                         logger.error("Thread {} still alive after forced cleanup. It will be abandoned.",
                                 streamName);
                     }
