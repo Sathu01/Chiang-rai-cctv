@@ -125,6 +125,12 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		
+		<dependency>
+        	<groupId>org.bytedeco</groupId>
+        	<artifactId>opencv-platform</artifactId>
+        	<version>4.7.0-1.5.9</version>
+    	</dependency>
 	</dependencies>
 
 

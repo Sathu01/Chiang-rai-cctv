@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
  * Configures FFmpeg frame grabber for RTSP stream input
  */
 @Component
-class FFmpegGrabberConfig {
+ public class FFmpegGrabberConfig {
 
     /**
      * Configure grabber with all necessary options for RTSP streaming
