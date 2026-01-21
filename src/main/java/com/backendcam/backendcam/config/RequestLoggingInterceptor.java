@@ -11,6 +11,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Component
 public class RequestLoggingInterceptor implements HandlerInterceptor {
@@ -27,7 +30,9 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         }
 
         long ts = System.currentTimeMillis();
-        String iso = Instant.ofEpochMilli(ts).toString();
+        // Format timestamp in Asia/Bangkok (GMT+7)
+        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.of("Asia/Bangkok"));
+        String iso = zdt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         String handlerInfo = (handler instanceof HandlerMethod) ? ((HandlerMethod) handler).getShortLogMessage() : String.valueOf(handler);
 
         logger.info("Incoming request - time={}, method={}, uri={}, handler={}, remoteAddr={}",
