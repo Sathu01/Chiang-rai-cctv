@@ -1,6 +1,9 @@
 package com.backendcam.backendcam;
 
 import org.junit.jupiter.api.*;
+
+import com.backendcam.backendcam.service.hls.HLSStreamService;
+
 import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,7 +33,7 @@ class HLSStreamServiceTest {
         String rtspUrl = "rtsp://Police:PoliceCR1234$@183.89.209.110:4442/1/2";
         String streamName = "testStream";
 
-        String result = service.startHLSStream(rtspUrl, streamName);
+        String result = service.StartHLSstream(rtspUrl, streamName);
 
         // Expect the HLS playlist path
         assertEquals("/hls/" + streamName + "/stream.m3u8", result);
@@ -41,7 +44,7 @@ class HLSStreamServiceTest {
         String rtspUrl = "rtsp://Police:PoliceCR1234$@183.89.209.110:4442/1/2";
         String streamName = "testStream";
 
-        service.startHLSStream(rtspUrl, streamName);
+        service.StartHLSstream(rtspUrl, streamName);
 
         // Give async startup a moment if needed
         Thread.sleep(100);
@@ -56,8 +59,8 @@ class HLSStreamServiceTest {
         String rtspUrl = "rtsp://Police:PoliceCR1234$@183.89.209.110:4442/1/2";
         String streamName = "testStream";
 
-        String first = service.startHLSStream(rtspUrl, streamName);
-        String second = service.startHLSStream(rtspUrl, streamName);
+        String first = service.StartHLSstream(rtspUrl, streamName);
+        String second = service.StartHLSstream(rtspUrl, streamName);
 
         assertEquals(first, second, "Starting the same stream twice should return the same URL");
     }
