@@ -73,7 +73,7 @@ public class FirebaseAdminBootstrap {
             try (InputStream in = resource.getInputStream()) {
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(in))
-                        .setStorageBucket("centralcamera-7de28.appspot.com")
+                        .setStorageBucket("centralcamera-7de28.firebasestorage.app")
                         .build();
                 FirebaseApp.initializeApp(options);
                 initialized = true;

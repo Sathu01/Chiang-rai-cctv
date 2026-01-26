@@ -6,6 +6,7 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.backendcam.backendcam.service.motion.SaveMotionFrameService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +26,9 @@ public class MotionTestAPI {
     @Autowired
     private FFmpegGrabberConfig grabberConfig;
 
+    @Autowired
+    private SaveMotionFrameService saveMotionFrameService;
+
     /**
      * Test motion detection on RTSP stream
      * 
@@ -37,7 +41,7 @@ public class MotionTestAPI {
     @GetMapping("/test")
     public Map<String, Object> testMotion(
             @RequestParam String url,
-            @RequestParam(defaultValue = "10") int frames) {
+            @RequestParam(defaultValue = "3") int frames) {
         
         Map<String, Object> result = new HashMap<>();
         FFmpegFrameGrabber grabber = null;
@@ -82,6 +86,8 @@ public class MotionTestAPI {
                         motionCount++;
                         System.out.println("  Frame " + (i+1) + ": 🔴 MOTION (" + 
                                          String.format("%.1f%%", motionPercent) + ")");
+                        String imageUrl = saveMotionFrameService.uploadMotionFrame(frame,"test-camera");
+                        
                     } else {
                         System.out.println("  Frame " + (i+1) + ": ✓ No motion (" + 
                                          String.format("%.1f%%", motionPercent) + ")");
