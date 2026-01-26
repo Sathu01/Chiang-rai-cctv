@@ -27,7 +27,7 @@ services:
       - "19092:19092" # external listener
       - "9093:9093"   # controller listener
     environment:
-      # KRaft settings (broker + controller in one)
+      # KRaft settings (broker + controller in one) development mode
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
 
@@ -41,6 +41,11 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       ALLOW_PLAINTEXT_LISTENER: "yes"
+
+      # Only in development/testing environments
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
