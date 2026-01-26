@@ -13,14 +13,43 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+
 @Service
 public class SaveMotionFrameService {
 
-     private final FirebaseAdminBootstrap bootstrap;
-    private final Java2DFrameConverter converter = new Java2DFrameConverter();
+    private final FirebaseAdminBootstrap bootstrap;
 
     public SaveMotionFrameService(FirebaseAdminBootstrap bootstrap) {
         this.bootstrap = bootstrap;
+    }
+
+    /**
+     * Deep copy a frame to BufferedImage
+     * Creates a new converter each time to avoid buffer sharing issues
+     */
+    private BufferedImage deepCopyFrameToImage(Frame frame) {
+        if (frame == null || frame.image == null) {
+            return null;
+        }
+        
+        // Create a NEW converter for each conversion to avoid buffer sharing
+        Java2DFrameConverter converter = new Java2DFrameConverter();
+        BufferedImage original = converter.convert(frame);
+        
+        if (original == null) {
+            return null;
+        }
+        
+        // Create a completely new BufferedImage with copied data
+        // Use TYPE_3BYTE_BGR which is well-supported for JPEG encoding
+        BufferedImage copy = new BufferedImage(
+            original.getWidth(), 
+            original.getHeight(), 
+            BufferedImage.TYPE_3BYTE_BGR
+        );
+        copy.getGraphics().drawImage(original, 0, 0, null);
+        
+        return copy;
     }
 
     public String uploadMotionFrame(Frame frame, String cameraId) {
@@ -29,7 +58,8 @@ public class SaveMotionFrameService {
         }
 
         try {
-            BufferedImage image = converter.convert(frame);
+            // Use deep copy to avoid buffer sharing issues
+            BufferedImage image = deepCopyFrameToImage(frame);
             if (image == null) return null;
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
