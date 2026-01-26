@@ -1,6 +1,7 @@
 package com.backendcam.backendcam.model.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @Setter 
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class MotionEvent {
     private String cameraId;
     private long timestamp;
