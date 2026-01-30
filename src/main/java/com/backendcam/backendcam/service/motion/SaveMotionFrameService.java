@@ -52,6 +52,9 @@ public class SaveMotionFrameService {
         return copy;
     }
 
+    /**
+     * Upload a Frame to Firebase Storage
+     */
     public String uploadMotionFrame(Frame frame, String cameraId) {
         if (!bootstrap.isInitialized()) {
             return null;
@@ -62,21 +65,46 @@ public class SaveMotionFrameService {
             BufferedImage image = deepCopyFrameToImage(frame);
             if (image == null) return null;
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(image, "jpg", baos);
-            byte[] bytes = baos.toByteArray();
-
-            String path = "motion/" + cameraId + "/" + System.currentTimeMillis() + ".jpg";
-
-            Bucket bucket = StorageClient.getInstance().bucket();
-            Blob blob = bucket.create(path, bytes, "image/jpeg");
-
-            return "https://storage.googleapis.com/"
-                    + bucket.getName() + "/"
-                    + blob.getName();
+            return uploadBufferedImage(image, cameraId);
 
         } catch (Exception e) {
             throw new RuntimeException("Upload frame to Firebase Storage failed", e);
         }
+    }
+
+    /**
+     * Upload a BufferedImage directly to Firebase Storage
+     * Used when we've already selected the best frame
+     */
+    public String uploadMotionFrame(BufferedImage image, String cameraId) {
+        if (!bootstrap.isInitialized()) {
+            return null;
+        }
+
+        if (image == null) return null;
+
+        try {
+            return uploadBufferedImage(image, cameraId);
+        } catch (Exception e) {
+            throw new RuntimeException("Upload BufferedImage to Firebase Storage failed", e);
+        }
+    }
+
+    /**
+     * Common upload logic for BufferedImage
+     */
+    private String uploadBufferedImage(BufferedImage image, String cameraId) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(image, "jpg", baos);
+        byte[] bytes = baos.toByteArray();
+
+        String path = "motion/" + cameraId + "/" + System.currentTimeMillis() + ".jpg";
+
+        Bucket bucket = StorageClient.getInstance().bucket();
+        Blob blob = bucket.create(path, bytes, "image/jpeg");
+
+        return "https://storage.googleapis.com/"
+                + bucket.getName() + "/"
+                + blob.getName();
     }
 }

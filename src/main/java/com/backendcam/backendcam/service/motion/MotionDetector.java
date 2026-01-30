@@ -35,17 +35,23 @@ import static org.bytedeco.opencv.global.opencv_video.*;
 @Component
 public class MotionDetector {
 
-    // Motion detection sensitivity (0-100, higher = more sensitive)
-    private static final int MOTION_THRESHOLD = 500;      // Minimum pixels changed
-    private static final double SENSITIVITY = 25.0;       // Background learning rate
+    // Motion detection sensitivity - TUNED FOR OUTDOOR TRAFFIC CAMERAS
+    // For 1920x1080 = 2,073,600 pixels, we need significant motion
+    private static final int MOTION_THRESHOLD = 8000;     // Minimum pixels changed (~0.4% of frame)
+    private static final double SENSITIVITY = 16.0;       // Lower = less sensitive to small changes
+    private static final double MIN_MOTION_PERCENT = 0.3; // Minimum % of frame that must change
     
     // OpenCV objects
     private BackgroundSubtractorMOG2 backgroundSubtractor;
     private OpenCVFrameConverter.ToMat converterToMat;
     private Mat foregroundMask;
     private Mat morphKernel;
+    private Mat grayMat;
+    private Mat laplacianMat;
     
     private boolean initialized = false;
+    private int frameWidth = 0;
+    private int frameHeight = 0;
 
     public MotionDetector() {
         this.converterToMat = new OpenCVFrameConverter.ToMat();
@@ -63,24 +69,34 @@ public class MotionDetector {
             cleanup();
         }
 
+        this.frameWidth = width;
+        this.frameHeight = height;
+
         // Create background subtractor (MOG2 algorithm)
-        // Parameters: history, varThreshold, detectShadows
-        backgroundSubtractor = createBackgroundSubtractorMOG2(500, 16, false);
+        // Parameters: history=1000 (longer history for stable background), varThreshold, detectShadows
+        backgroundSubtractor = createBackgroundSubtractorMOG2(1000, 25, false);
         backgroundSubtractor.setVarThreshold(SENSITIVITY);
         backgroundSubtractor.setDetectShadows(false); // Faster without shadow detection
+        backgroundSubtractor.setNMixtures(5); // More Gaussian mixtures for complex scenes
         
         // Create mask for foreground
         foregroundMask = new Mat();
         
-        // Create morphology kernel for noise reduction
-        morphKernel = getStructuringElement(MORPH_RECT, new Size(3, 3));
+        // Create LARGER morphology kernel for better noise reduction
+        morphKernel = getStructuringElement(MORPH_RECT, new Size(5, 5));
+        
+        // For sharpness calculation
+        grayMat = new Mat();
+        laplacianMat = new Mat();
         
         initialized = true;
-        System.out.println("Motion detector initialized: " + width + "x" + height);
+        System.out.println("Motion detector initialized: " + width + "x" + height + 
+                         " (threshold: " + MOTION_THRESHOLD + " pixels, " + MIN_MOTION_PERCENT + "%)");
     }
 
     /**
      * Detect motion in a frame
+     * Uses both pixel count AND percentage thresholds to avoid false positives
      * 
      * @param frame Frame from FFmpegFrameGrabber
      * @return true if motion detected, false otherwise
@@ -105,19 +121,68 @@ public class MotionDetector {
             // Apply background subtraction
             backgroundSubtractor.apply(frameMat, foregroundMask);
 
-            // Reduce noise with morphological operations
+            // Apply threshold to remove weak detections (shadows, noise)
+            threshold(foregroundMask, foregroundMask, 200, 255, THRESH_BINARY);
+
+            // Reduce noise with morphological operations (open removes small noise, close fills gaps)
             morphologyEx(foregroundMask, foregroundMask, MORPH_OPEN, morphKernel);
             morphologyEx(foregroundMask, foregroundMask, MORPH_CLOSE, morphKernel);
+            
+            // Additional erosion to remove edge noise
+            erode(foregroundMask, foregroundMask, morphKernel);
 
             // Count non-zero pixels (white = motion)
             int motionPixels = countNonZero(foregroundMask);
+            int totalPixels = frameWidth * frameHeight;
+            double motionPercent = (motionPixels * 100.0) / totalPixels;
 
-            // Return true if motion exceeds threshold
-            return motionPixels > MOTION_THRESHOLD;
+            // Must exceed BOTH thresholds (absolute pixel count AND percentage)
+            boolean hasMotion = motionPixels > MOTION_THRESHOLD && motionPercent > MIN_MOTION_PERCENT;
+            
+            return hasMotion;
 
         } catch (Exception e) {
             System.err.println("Motion detection error: " + e.getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Calculate sharpness of a frame using Laplacian variance
+     * Higher value = sharper image, lower value = more blur
+     * 
+     * @param frame Frame to analyze
+     * @return Sharpness score (typically 0-1000+, higher is sharper)
+     */
+    public double calculateSharpness(Frame frame) {
+        if (!initialized || frame == null || frame.image == null) {
+            return 0.0;
+        }
+
+        try {
+            Mat frameMat = converterToMat.convert(frame);
+            if (frameMat == null || frameMat.empty()) return 0.0;
+
+            // Convert to grayscale
+            cvtColor(frameMat, grayMat, COLOR_BGR2GRAY);
+            
+            // Calculate Laplacian (edge detection)
+            Laplacian(grayMat, laplacianMat, CV_64F);
+            
+            // Calculate variance of Laplacian (measure of sharpness)
+            Mat mean = new Mat();
+            Mat stddev = new Mat();
+            meanStdDev(laplacianMat, mean, stddev);
+            
+            double variance = Math.pow(stddev.createIndexer().getDouble(0), 2);
+            
+            mean.close();
+            stddev.close();
+            
+            return variance;
+
+        } catch (Exception e) {
+            return 0.0;
         }
     }
 
@@ -186,6 +251,12 @@ public class MotionDetector {
         }
         if (morphKernel != null) {
             morphKernel.close();
+        }
+        if (grayMat != null) {
+            grayMat.close();
+        }
+        if (laplacianMat != null) {
+            laplacianMat.close();
         }
         initialized = false;
     }

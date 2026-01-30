@@ -44,12 +44,16 @@ public class MotionDetectionService {
     // Thread pool for handling multiple camera streams
     private final ExecutorService executorService = Executors.newCachedThreadPool();
     
-    // Debug settings
-    private static final boolean DEBUG_SAVE_FRAMES = true;
-    private static final String DEBUG_FOLDER = "debug_frames";
     
     // Number of frames to skip at start to ensure keyframe is received
     private static final int WARMUP_FRAMES = 30;
+    
+    // COOLDOWN: Minimum seconds between motion event uploads (prevents spam)
+    private static final int MOTION_COOLDOWN_SECONDS = 5;
+    
+    // FRAME BUFFER: Collect frames during motion and pick sharpest one
+    private static final int MOTION_FRAME_BUFFER_SIZE = 10;
+    private static final double MIN_SHARPNESS_THRESHOLD = 50.0; // Reject very blurry frames
 
     /**
      * Start motion detection for a camera
@@ -160,7 +164,7 @@ public class MotionDetectionService {
    
     /**
      * Main detection loop - runs continuously checking for motion
-     * Uploads frames with motion to Firebase and sends events to Kafka
+     * Uses cooldown and sharpest-frame selection to improve capture quality
      */
     private void runDetectionLoop(DetectionSession session) {
         FFmpegFrameGrabber grabber = null;
@@ -181,17 +185,24 @@ public class MotionDetectionService {
             detector.initialize(width, height);
             
             System.out.println("✓ Motion detector initialized: " + width + "x" + height);
+            System.out.println("✓ Cooldown: " + MOTION_COOLDOWN_SECONDS + "s between saves");
             
             // WARMUP: Skip initial frames to ensure we have a proper keyframe (I-frame)
-            // H.264 streams need I-frames to decode properly, P/B frames decode as gray
             System.out.println("⏳ Warming up - waiting for keyframe (" + WARMUP_FRAMES + " frames)...");
             for (int i = 0; i < WARMUP_FRAMES && session.isRunning(); i++) {
                 Frame warmupFrame = grabber.grabImage();
                 if (warmupFrame != null) {
+                    // Feed to detector to build background model
+                    detector.detectMotion(warmupFrame);
                     warmupFrame.close();
                 }
             }
-            System.out.println("✓ Warmup complete - keyframe should be received");
+            System.out.println("✓ Warmup complete - background model initialized");
+            
+            // Frame buffer for sharpest frame selection
+            BufferedImage sharpestImage = null;
+            double bestSharpness = 0;
+            int consecutiveMotionFrames = 0;
             
             // Main detection loop
             while (session.isRunning()) {
@@ -202,45 +213,103 @@ public class MotionDetectionService {
                     if (frame != null && frame.image != null) {
                         session.incrementFramesChecked();
                         long timestamp = System.currentTimeMillis();
-                        // OpenCV converters modify the underlying buffer
-                        Frame frameToSave = frame.clone();
+                        
                         // Detect motion in frame
                         boolean hasMotion = detector.detectMotion(frame);
                         double motionPercent = detector.getMotionPercentage(frame);
                         
-                        
                         if (hasMotion) {
-                            session.incrementMotionCount();
+                            consecutiveMotionFrames++;
                             
-                            System.out.println("🔴 MOTION DETECTED - Camera: " + session.getCameraId() + 
-                                             " (" + String.format("%.1f%%", motionPercent) + ")");
-                            
-                            // Upload the cloned frame (with original color data) to Firebase Storage
-                            String imageUrl = saveMotionFrameService.uploadMotionFrame(
-                                frameToSave, 
-                                session.getCameraId()
-                            );
-                            
-                            // Send event to Kafka
-                            if (imageUrl != null) {
-                                MotionEvent event = new MotionEvent(
-                                    session.getCameraId(),
-                                    timestamp,
-                                    imageUrl,
-                                    String.format("%.1f%% motion detected", motionPercent)
-                                );
+                            // Check if we can save (cooldown)
+                            if (session.canSaveMotion()) {
+                                // Calculate sharpness
+                                double sharpness = detector.calculateSharpness(frame);
                                 
-                                motionEventProducer.send(event);
+                                System.out.println("🔴 MOTION - Camera: " + session.getCameraId() + 
+                                                 " (" + String.format("%.1f%%", motionPercent) + 
+                                                 ", sharpness: " + String.format("%.0f", sharpness) + ")");
                                 
-                                System.out.println("✓ Motion event sent - Image: " + imageUrl);
+                                // Collect frames to find sharpest one
+                                if (sharpness > bestSharpness && sharpness >= MIN_SHARPNESS_THRESHOLD) {
+                                    bestSharpness = sharpness;
+                                    sharpestImage = deepCopyFrameToImage(frame);
+                                }
+                                
+                                // After collecting enough frames OR motion stops, save the sharpest
+                                if (consecutiveMotionFrames >= MOTION_FRAME_BUFFER_SIZE) {
+                                    if (sharpestImage != null && bestSharpness >= MIN_SHARPNESS_THRESHOLD) {
+                                        session.incrementMotionCount();
+                                        
+                                        // Upload the sharpest frame
+                                        String imageUrl = saveMotionFrameService.uploadMotionFrame(
+                                            sharpestImage,
+                                            session.getCameraId()
+                                        );
+                                        
+                                        // Send event to Kafka
+                                        if (imageUrl != null) {
+                                            MotionEvent event = new MotionEvent(
+                                                session.getCameraId(),
+                                                timestamp,
+                                                imageUrl,
+                                                String.format("%.1f%% motion, sharpness: %.0f", motionPercent, bestSharpness)
+                                            );
+                                            
+                                            motionEventProducer.send(event);
+                                            session.setLastMotionSavedTime(LocalDateTime.now());
+                                            
+                                            System.out.println("✓ Motion saved - Sharpness: " + 
+                                                             String.format("%.0f", bestSharpness) + " - " + imageUrl);
+                                        }
+                                    } else {
+                                        System.out.println("⚠️ Skipped save - all frames too blurry (best: " + 
+                                                         String.format("%.0f", bestSharpness) + ")");
+                                    }
+                                    
+                                    // Reset buffer
+                                    sharpestImage = null;
+                                    bestSharpness = 0;
+                                    consecutiveMotionFrames = 0;
+                                }
+                            } else {
+                                long cooldownRemaining = MOTION_COOLDOWN_SECONDS - 
+                                    java.time.Duration.between(session.getLastMotionSavedTime(), LocalDateTime.now()).getSeconds();
+                                System.out.println("⏳ Motion detected but on cooldown (" + cooldownRemaining + "s remaining)");
                             }
                         } else {
-                            System.out.println("✓ No motion - Camera: " + session.getCameraId() + 
-                                             " (" + String.format("%.1f%%", motionPercent) + ")");
+                            // No motion - if we had motion frames buffered, save the best one
+                            if (consecutiveMotionFrames > 0 && sharpestImage != null && 
+                                bestSharpness >= MIN_SHARPNESS_THRESHOLD && session.canSaveMotion()) {
+                                
+                                session.incrementMotionCount();
+                                
+                                String imageUrl = saveMotionFrameService.uploadMotionFrame(
+                                    sharpestImage,
+                                    session.getCameraId()
+                                );
+                                
+                                if (imageUrl != null) {
+                                    MotionEvent event = new MotionEvent(
+                                        session.getCameraId(),
+                                        timestamp,
+                                        imageUrl,
+                                        String.format("Motion ended, sharpness: %.0f", bestSharpness)
+                                    );
+                                    
+                                    motionEventProducer.send(event);
+                                    session.setLastMotionSavedTime(LocalDateTime.now());
+                                    
+                                    System.out.println("✓ Motion ended - saved sharpest frame: " + imageUrl);
+                                }
+                            }
+                            
+                            // Reset buffer
+                            sharpestImage = null;
+                            bestSharpness = 0;
+                            consecutiveMotionFrames = 0;
                         }
                         
-                        // Cleanup both frames
-                        frameToSave.close();
                         frame.close();
                     }
                     
@@ -291,6 +360,7 @@ public class MotionDetectionService {
         private int framesChecked = 0;
         private int motionCount = 0;
         private LocalDateTime lastCheckTime;
+        private LocalDateTime lastMotionSavedTime; // For cooldown
         private Future<?> future;
 
         public DetectionSession(String cameraId, String url, int checkIntervalSeconds) {
@@ -344,5 +414,14 @@ public class MotionDetectionService {
         public LocalDateTime getLastCheckTime() { return lastCheckTime; }
         public LocalDateTime getStartTime() { return startTime; }
         public void setFuture(Future<?> future) { this.future = future; }
+        
+        public LocalDateTime getLastMotionSavedTime() { return lastMotionSavedTime; }
+        public synchronized void setLastMotionSavedTime(LocalDateTime time) { this.lastMotionSavedTime = time; }
+        
+        public boolean canSaveMotion() {
+            if (lastMotionSavedTime == null) return true;
+            long secondsSinceLastSave = java.time.Duration.between(lastMotionSavedTime, LocalDateTime.now()).getSeconds();
+            return secondsSinceLastSave >= MOTION_COOLDOWN_SECONDS;
+        }
     }
 }
