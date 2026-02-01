@@ -25,8 +25,7 @@ public class KafkaController {
 		MotionEvent motionEvent = MotionEvent.builder()
 				.cameraId("camera123")
 				.timestamp(System.currentTimeMillis())
-				.imageUrl("http://example.com/image.jpg")
-				.metadata("Sample motion event")
+				.imageUrl("input/car1.jpg")
 				.build();
 
 		motionEventProducer.send(motionEvent);
