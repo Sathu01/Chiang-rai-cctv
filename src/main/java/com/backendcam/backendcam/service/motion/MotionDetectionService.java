@@ -48,19 +48,31 @@ public class MotionDetectionService {
     // Number of frames to skip at start to ensure keyframe is received
     private static final int WARMUP_FRAMES = 30;
     
-    // COOLDOWN: Minimum seconds between motion event uploads (prevents spam)
-    private static final int MOTION_COOLDOWN_SECONDS = 5;
+    // COOLDOWN DISABLED: Save every motion event immediately
+    private static final int MOTION_COOLDOWN_SECONDS = 0;
     
     // FRAME BUFFER: Collect frames during motion and pick sharpest one
-    private static final int MOTION_FRAME_BUFFER_SIZE = 10;
+    private static final int MOTION_FRAME_BUFFER_SIZE = 5;
     private static final double MIN_SHARPNESS_THRESHOLD = 50.0; // Reject very blurry frames
+
+
+     /**
+     * Start motion detection for a camera
+     * 
+     * @param cameraId Unique camera identifier
+     * @param url RTSP stream URL
+     * @return true if started successfully, false if already running
+     */
+    public boolean startDetection(String cameraId, String url) {
+    return startDetection(cameraId, url, 3);
+}
 
     /**
      * Start motion detection for a camera
      * 
      * @param cameraId Unique camera identifier
      * @param url RTSP stream URL
-     * @param checkIntervalSeconds Interval between frame checks (default: 1 second)
+     * @param checkIntervalSeconds Interval between frame checks (recommended: 3-4 seconds)
      * @return true if started successfully, false if already running
      */
     public boolean startDetection(String cameraId, String url, int checkIntervalSeconds) {
@@ -185,7 +197,7 @@ public class MotionDetectionService {
             detector.initialize(width, height);
             
             System.out.println("✓ Motion detector initialized: " + width + "x" + height);
-            System.out.println("✓ Cooldown: " + MOTION_COOLDOWN_SECONDS + "s between saves");
+            System.out.println("✓ No cooldown - saving every motion event");
             
             // WARMUP: Skip initial frames to ensure we have a proper keyframe (I-frame)
             System.out.println("⏳ Warming up - waiting for keyframe (" + WARMUP_FRAMES + " frames)...");
@@ -272,10 +284,6 @@ public class MotionDetectionService {
                                     bestSharpness = 0;
                                     consecutiveMotionFrames = 0;
                                 }
-                            } else {
-                                long cooldownRemaining = MOTION_COOLDOWN_SECONDS - 
-                                    java.time.Duration.between(session.getLastMotionSavedTime(), LocalDateTime.now()).getSeconds();
-                                System.out.println("⏳ Motion detected but on cooldown (" + cooldownRemaining + "s remaining)");
                             }
                         } else {
                             // No motion - if we had motion frames buffered, save the best one
@@ -315,7 +323,7 @@ public class MotionDetectionService {
                     
                     session.updateLastCheckTime();
                     
-                    // Wait for next check interval (e.g., 1 second)
+                    // Wait for next check interval (recommended: 3-4 seconds)
                     Thread.sleep(session.getCheckIntervalSeconds() * 1000L);
                     
                 } catch (InterruptedException e) {
