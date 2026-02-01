@@ -20,12 +20,12 @@ public class KafkaController {
 	}
 
 	@PostMapping("/sendMotionEvent")
-	public String sendMotionEvent() {
+	public String sendMotionEvent(MotionEvent dto) {
 
 		MotionEvent motionEvent = MotionEvent.builder()
-				.cameraId("camera123")
+				.cameraId(dto.getCameraId())
 				.timestamp(System.currentTimeMillis())
-				.imageUrl("input/car1.jpg")
+				.imageUrl(dto.getImageUrl())
 				.build();
 
 		motionEventProducer.send(motionEvent);
