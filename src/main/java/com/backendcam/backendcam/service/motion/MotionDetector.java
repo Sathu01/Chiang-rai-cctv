@@ -101,6 +101,10 @@ public class MotionDetector {
      * @param frame Frame from FFmpegFrameGrabber
      * @return true if motion detected, false otherwise
      */
+    // Store last motion detection results to avoid redundant calculations
+    private int lastMotionPixels = 0;
+    private double lastMotionPercent = 0.0;
+    
     public boolean detectMotion(Frame frame) {
         if (!initialized) {
             throw new IllegalStateException("Motion detector not initialized. Call initialize() first.");
@@ -110,9 +114,10 @@ public class MotionDetector {
             return false;
         }
 
+        Mat frameMat = null;
         try {
             // Convert JavaCV Frame to OpenCV Mat
-            Mat frameMat = converterToMat.convert(frame);
+            frameMat = converterToMat.convert(frame);
             
             if (frameMat == null || frameMat.empty()) {
                 return false;
@@ -132,18 +137,23 @@ public class MotionDetector {
             erode(foregroundMask, foregroundMask, morphKernel);
 
             // Count non-zero pixels (white = motion)
-            int motionPixels = countNonZero(foregroundMask);
+            lastMotionPixels = countNonZero(foregroundMask);
             int totalPixels = frameWidth * frameHeight;
-            double motionPercent = (motionPixels * 100.0) / totalPixels;
+            lastMotionPercent = (lastMotionPixels * 100.0) / totalPixels;
 
             // Must exceed BOTH thresholds (absolute pixel count AND percentage)
-            boolean hasMotion = motionPixels > MOTION_THRESHOLD && motionPercent > MIN_MOTION_PERCENT;
+            boolean hasMotion = lastMotionPixels > MOTION_THRESHOLD && lastMotionPercent > MIN_MOTION_PERCENT;
             
             return hasMotion;
 
         } catch (Exception e) {
             System.err.println("Motion detection error: " + e.getMessage());
             return false;
+        } finally {
+            // CRITICAL: Close Mat to prevent memory leak
+            if (frameMat != null) {
+                frameMat.close();
+            }
         }
     }
 
@@ -159,8 +169,13 @@ public class MotionDetector {
             return 0.0;
         }
 
+        Mat frameMat = null;
+        Mat mean = null;
+        Mat stddev = null;
+        org.bytedeco.javacpp.indexer.Indexer indexer = null;
+        
         try {
-            Mat frameMat = converterToMat.convert(frame);
+            frameMat = converterToMat.convert(frame);
             if (frameMat == null || frameMat.empty()) return 0.0;
 
             // Convert to grayscale
@@ -170,48 +185,46 @@ public class MotionDetector {
             Laplacian(grayMat, laplacianMat, CV_64F);
             
             // Calculate variance of Laplacian (measure of sharpness)
-            Mat mean = new Mat();
-            Mat stddev = new Mat();
+            mean = new Mat();
+            stddev = new Mat();
             meanStdDev(laplacianMat, mean, stddev);
             
-            double variance = Math.pow(stddev.createIndexer().getDouble(0), 2);
-            
-            mean.close();
-            stddev.close();
+            indexer = stddev.createIndexer();
+            double variance = Math.pow(indexer.getDouble(0), 2);
             
             return variance;
 
         } catch (Exception e) {
             return 0.0;
+        } finally {
+            // CRITICAL: Close all resources to prevent memory leak
+            if (indexer != null) {
+                try { indexer.close(); } catch (Exception ignored) {}
+            }
+            if (mean != null) mean.close();
+            if (stddev != null) stddev.close();
+            if (frameMat != null) frameMat.close();
         }
     }
 
     /**
      * Get motion percentage (0-100)
+     * Returns the cached value from the last detectMotion() call.
+     * IMPORTANT: Call detectMotion() first, then call this method.
      * 
-     * @param frame Frame to analyze
-     * @return Percentage of pixels with motion
+     * @return Percentage of pixels with motion from last detection
      */
-    public double getMotionPercentage(Frame frame) {
-        if (!initialized || frame == null || frame.image == null) {
-            return 0.0;
-        }
-
-        try {
-            Mat frameMat = converterToMat.convert(frame);
-            if (frameMat == null) return 0.0;
-
-            backgroundSubtractor.apply(frameMat, foregroundMask);
-            morphologyEx(foregroundMask, foregroundMask, MORPH_OPEN, morphKernel);
-            
-            int motionPixels = countNonZero(foregroundMask);
-            int totalPixels = frameMat.rows() * frameMat.cols();
-            
-            return (motionPixels * 100.0) / totalPixels;
-
-        } catch (Exception e) {
-            return 0.0;
-        }
+    public double getLastMotionPercentage() {
+        return lastMotionPercent;
+    }
+    
+    /**
+     * Get motion pixel count from last detection
+     * 
+     * @return Number of pixels with motion from last detection
+     */
+    public int getLastMotionPixels() {
+        return lastMotionPixels;
     }
 
     /**

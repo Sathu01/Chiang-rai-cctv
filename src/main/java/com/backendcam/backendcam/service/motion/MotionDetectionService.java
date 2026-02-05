@@ -9,6 +9,7 @@ import org.bytedeco.javacv.Java2DFrameConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PreDestroy;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -43,6 +44,32 @@ public class MotionDetectionService {
     
     // Thread pool for handling multiple camera streams
     private final ExecutorService executorService = Executors.newCachedThreadPool();
+    
+    /**
+     * Cleanup resources when application shuts down
+     * Prevents thread pool memory leak
+     */
+    @PreDestroy
+    public void shutdown() {
+        System.out.println("🛑 Shutting down MotionDetectionService...");
+        
+        // Stop all active sessions
+        for (String cameraId : activeSessions.keySet()) {
+            stopDetection(cameraId);
+        }
+        
+        // Shutdown thread pool
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+        }
+        
+        System.out.println("✓ MotionDetectionService shutdown complete");
+    }
     
     
     // Number of frames to skip at start to ensure keyframe is received
@@ -168,7 +195,14 @@ public class MotionDetectionService {
             original.getHeight(), 
             BufferedImage.TYPE_3BYTE_BGR  // Force RGB format
         );
-        copy.getGraphics().drawImage(original, 0, 0, null);
+        
+        // CRITICAL: Dispose Graphics to prevent memory leak
+        java.awt.Graphics g = copy.getGraphics();
+        try {
+            g.drawImage(original, 0, 0, null);
+        } finally {
+            g.dispose();
+        }
         
         return copy;
     }
@@ -228,7 +262,8 @@ public class MotionDetectionService {
                         
                         // Detect motion in frame
                         boolean hasMotion = detector.detectMotion(frame);
-                        double motionPercent = detector.getMotionPercentage(frame);
+                        // Use cached value from detectMotion() - avoids running detection twice!
+                        double motionPercent = detector.getLastMotionPercentage();
                         
                         if (hasMotion) {
                             consecutiveMotionFrames++;
