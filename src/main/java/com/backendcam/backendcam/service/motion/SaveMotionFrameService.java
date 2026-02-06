@@ -47,7 +47,14 @@ public class SaveMotionFrameService {
             original.getHeight(), 
             BufferedImage.TYPE_3BYTE_BGR
         );
-        copy.getGraphics().drawImage(original, 0, 0, null);
+        
+        // CRITICAL: Dispose Graphics to prevent memory leak
+        java.awt.Graphics g = copy.getGraphics();
+        try {
+            g.drawImage(original, 0, 0, null);
+        } finally {
+            g.dispose();
+        }
         
         return copy;
     }
@@ -94,9 +101,12 @@ public class SaveMotionFrameService {
      * Common upload logic for BufferedImage
      */
     private String uploadBufferedImage(BufferedImage image, String cameraId) throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(image, "jpg", baos);
-        byte[] bytes = baos.toByteArray();
+        // Use try-with-resources to ensure stream is closed
+        byte[] bytes;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ImageIO.write(image, "jpg", baos);
+            bytes = baos.toByteArray();
+        }
 
         String path = "motion/" + cameraId + "/" + System.currentTimeMillis() + ".jpg";
 

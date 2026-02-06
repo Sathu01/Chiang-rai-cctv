@@ -13,11 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class HLSStreamService {
 
     private static final Logger logger = LoggerFactory.getLogger(HLSStreamService.class);
+    private static final int MAX_RECONNECT_ATTEMPTS = 10;
+    private static final int RECONNECT_DELAY_MS = 2000;
+    private static final int MAX_NULL_FRAMES = 50; // Max consecutive null frames before reconnect
 
     private final Map<String, Thread> streamThreads = new ConcurrentHashMap<>();
     private final Map<String, StreamContext> streamContexts = new ConcurrentHashMap<>();
@@ -35,6 +40,28 @@ public class HLSStreamService {
     @PostConstruct
     public void init() {
         resourceManager.cleanupAllStreams();
+    }
+    
+    /**
+     * Gracefully shutdown all streams when application stops
+     * Prevents thread and memory leaks
+     */
+    @PreDestroy
+    public void shutdown() {
+        logger.info("Shutting down HLSStreamService - stopping all streams...");
+        
+        // Copy keys to avoid ConcurrentModificationException
+        String[] streamNames = streamThreads.keySet().toArray(new String[0]);
+        
+        for (String streamName : streamNames) {
+            try {
+                stopStream(streamName);
+            } catch (Exception e) {
+                logger.error("Error stopping stream {} during shutdown: {}", streamName, e.getMessage());
+            }
+        }
+        
+        logger.info("HLSStreamService shutdown complete");
     }
 
     public String StartHLSstream(String RTSPUrl, String streamName) {
@@ -56,7 +83,8 @@ public class HLSStreamService {
             FFmpegFrameRecorder recorder = null;
 
             try {
-                String hlsOutput = outputDir.getAbsolutePath() + "/stream.m3u8";
+                // Normalize path to forward slashes for FFmpeg
+                String hlsOutput = outputDir.getAbsolutePath().replace('\\', '/') + "/stream.m3u8";
 
                 grabber = new FFmpegFrameGrabber(RTSPUrl);
                 context.grabber = grabber;
@@ -74,13 +102,58 @@ public class HLSStreamService {
                 recorderConfig.configureRecorder(recorder, outputDir);
 
                 Frame frame;
-                // Check both interrupt flag AND shouldStop flag
+                int nullFrameCount = 0;
+                int reconnectAttempts = 0;
+                
+                // Main streaming loop with reconnection support for 24/7 operation
                 while (!Thread.currentThread().isInterrupted() && !context.shouldStop) {
-                    frame = grabber.grabImage();
-                    if (frame == null) {
-                        break; // End of stream
+                    try {
+                        frame = grabber.grabImage();
+                        
+                        if (frame == null) {
+                            nullFrameCount++;
+                            
+                            if (nullFrameCount >= MAX_NULL_FRAMES) {
+                                logger.warn("Stream {} - {} consecutive null frames, attempting reconnect...", 
+                                    streamName, nullFrameCount);
+                                
+                                // Attempt reconnection
+                                if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                                    reconnectAttempts++;
+                                    logger.info("Stream {} - Reconnect attempt {}/{}", 
+                                        streamName, reconnectAttempts, MAX_RECONNECT_ATTEMPTS);
+                                    
+                                    // Stop and restart grabber
+                                    try {
+                                        grabber.stop();
+                                        Thread.sleep(RECONNECT_DELAY_MS);
+                                        grabberConfig.configureGrabber(grabber);
+                                        nullFrameCount = 0;
+                                        logger.info("Stream {} - Reconnected successfully", streamName);
+                                    } catch (Exception reconnectEx) {
+                                        logger.error("Stream {} - Reconnect failed: {}", 
+                                            streamName, reconnectEx.getMessage());
+                                        Thread.sleep(RECONNECT_DELAY_MS);
+                                    }
+                                } else {
+                                    logger.error("Stream {} - Max reconnect attempts reached, stopping stream", 
+                                        streamName);
+                                    break;
+                                }
+                            }
+                            continue; // Try to grab next frame
+                        }
+                        
+                        // Successfully got a frame - reset counters
+                        nullFrameCount = 0;
+                        reconnectAttempts = 0;
+                        
+                        recorder.record(frame);
+                        
+                    } catch (Exception frameEx) {
+                        logger.warn("Stream {} - Frame processing error: {}", streamName, frameEx.getMessage());
+                        nullFrameCount++;
                     }
-                    recorder.record(frame);
                 }
 
             } catch (Exception e) {
