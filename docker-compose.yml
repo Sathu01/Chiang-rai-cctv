@@ -52,3 +52,33 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
     depends_on:
       - kafka
+
+  license-plate-detector:
+    build:
+      context: ./license-plate-v1s
+      dockerfile: Dockerfile
+    container_name: license-plate-detector
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./license-plate-v1s/input:/app/input
+      - ./license-plate-v1s/output:/app/output
+      - ./license-plate-v1s/models:/app/models
+      - ./license-plate-v1s/.env:/app/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Bangkok
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_TOPIC=license-plate-topic
+      - KAFKA_GROUP_ID=license-plate-consumer-group
+    depends_on:
+      - kafka
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
