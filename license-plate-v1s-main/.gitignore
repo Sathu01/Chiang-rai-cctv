@@ -13,7 +13,7 @@ output/
 *.log
 
 # Environment files
-.env.dev
+.env
 # Editor files
 .vscode/
 
