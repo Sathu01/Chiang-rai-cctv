@@ -1,0 +1,23 @@
+# Ignore Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Generated output and temporary files
+output/
+*.log
+
+# Environment files
+.env
+
+# Editor files
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

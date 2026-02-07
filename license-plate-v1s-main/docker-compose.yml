@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  yolov11-license-plate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: license-plate-detector
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount input/output directories
+      - ./input:/app/input
+      - ./output:/app/output
+      - ./models:/app/models
+      - ./.env:/app/.env  # Mount .env file
+    environment:
+      - PYTHONUNBUFFERED=1
+     
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
