@@ -1,13 +1,12 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.yourcompany</groupId>
+  <groupId>com.centraleyes</groupId>
   <artifactId>monorepo</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
 
   <modules>
-    <module>license-plate-vls-main</module>
     <module>main-gateway</module>
   </modules>
 </project>
