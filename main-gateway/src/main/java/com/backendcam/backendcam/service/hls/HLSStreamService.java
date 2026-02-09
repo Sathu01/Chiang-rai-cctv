@@ -64,7 +64,7 @@ public class HLSStreamService {
         logger.info("HLSStreamService shutdown complete");
     }
 
-    public String StartHLSstream(String RTSPUrl, String streamName) {
+    public String startHLSStream(String RTSPUrl, String streamName) {
 
         // Check if stream already exists
         if (streamThreads.containsKey(streamName)) {
@@ -186,7 +186,7 @@ public class HLSStreamService {
         return "/api/hls/" + streamName + "/stream.m3u8";
     }
 
-    public String stopStream(String streamName) {
+    public String stopHLSStream(String streamName) {
         // Get and remove thread first to prevent new operations
         Thread thread = streamThreads.remove(streamName);
         StreamContext context = streamContexts.get(streamName);
