@@ -50,7 +50,13 @@ class LicensePlateDetector:
             gemini_config: custom config สำหรับ Gemini
         """
         # ใช้ค่าจาก settings ถ้าไม่ได้ระบุ
-        self.model_path = model_path or settings.MODEL_PATH
+        model_path_str = model_path or settings.MODEL_PATH
+        # Resolve relative path from project root
+        if not Path(model_path_str).is_absolute():
+            project_root = Path(__file__).parent.parent
+            self.model_path = str(project_root / model_path_str)
+        else:
+            self.model_path = model_path_str
         self.conf_threshold = conf_threshold or settings.CONFIDENCE_THRESHOLD
         self.use_gemini = use_gemini
         

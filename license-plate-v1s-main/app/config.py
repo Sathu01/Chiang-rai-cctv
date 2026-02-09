@@ -64,9 +64,11 @@ class Settings(BaseSettings):
     def create_output_dirs(self) -> None:
         Path(self.OUTPUT_IMAGE_DIR).mkdir(parents=True, exist_ok=True)
         Path(self.OUTPUT_JSON_DIR).mkdir(parents=True, exist_ok=True)
-    class Config:
-        env_file = Path('.') / '.env.dev'
-        env_file_encoding = 'utf-8'
+    
+    model_config = {
+        "env_file": Path(__file__).parent.parent / ".env.dev",
+        "env_file_encoding": "utf-8",
+    }
 
 # create a single settings instance
 settings = Settings()

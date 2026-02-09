@@ -3,6 +3,7 @@ package com.backendcam.backendcam.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.backendcam.backendcam.model.dto.MotionEvent;
@@ -20,7 +21,7 @@ public class KafkaController {
 	}
 
 	@PostMapping("/sendMotionEvent")
-	public String sendMotionEvent(MotionEvent dto) {
+	public String sendMotionEvent(@RequestBody MotionEvent dto) {
 
 		MotionEvent motionEvent = MotionEvent.builder()
 				.cameraId(dto.getCameraId())

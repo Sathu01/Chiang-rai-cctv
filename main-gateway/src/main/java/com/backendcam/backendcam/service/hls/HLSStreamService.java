@@ -55,7 +55,7 @@ public class HLSStreamService {
         
         for (String streamName : streamNames) {
             try {
-                stopStream(streamName);
+                stopHLSStream(streamName);
             } catch (Exception e) {
                 logger.error("Error stopping stream {} during shutdown: {}", streamName, e.getMessage());
             }

@@ -13,10 +13,12 @@ output/
 *.log
 
 # Environment files
-.env
+.env.dev
 # Editor files
 .vscode/
 
 # OS files
 .DS_Store
 Thumbs.db
+
+
