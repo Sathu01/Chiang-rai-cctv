@@ -44,7 +44,7 @@ class GeminiOCR:
         
         # สร้างโฟลเดอร์สำหรับเก็บภาพ crop (ถ้าใช้ URL)
         if self.use_image_url:
-            self.temp_dir = Path("output/temp_crops")
+            self.temp_dir = Path("license-plate-v1s-main/output/temp_crops")
             self.temp_dir.mkdir(parents=True, exist_ok=True)
             logger.info(f"✓ Using IMAGE URL mode - temp dir: {self.temp_dir}")
         else:
