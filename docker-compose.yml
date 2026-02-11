@@ -3,7 +3,7 @@ services:
   backendcam:
     container_name: backendcam
     build:
-      context: ./CCTV_Service
+      context: ./main-gateway
       dockerfile: Dockerfile
     image: backendcam:latest
     ports:
@@ -17,7 +17,7 @@ services:
       - /usr/share/zoneinfo/Asia/Bangkok:/etc/localtime:ro
       - /usr/share/zoneinfo/Asia/Bangkok:/etc/timezone:ro
     restart: unless-stopped
-    network_mode: host
+    # network_mode: host
 
   kafka:
     image: apache/kafka:latest
@@ -31,8 +31,8 @@ services:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
 
-      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:19092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:19092
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092
 
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
