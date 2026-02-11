@@ -34,6 +34,15 @@ class Settings(BaseSettings):
     # ===== Output Settings =====
     OUTPUT_IMAGE_DIR: str = "output/images"
     OUTPUT_JSON_DIR: str = "output/json"
+    OUTPUT_CROP_DIR: str = "output/crops"
+
+    # ===== Helper: Resolve paths =====
+    def get_absolute_path(self, relative_path: str) -> str:
+        """Resolve relative path from project root"""
+        if Path(relative_path).is_absolute():
+            return relative_path
+        project_root = Path(__file__).parent.parent
+        return str(project_root / relative_path)
 
     # ===== Validation =====
     def validate_gemini_api_key(self) -> None:
@@ -62,8 +71,9 @@ class Settings(BaseSettings):
         }
 
     def create_output_dirs(self) -> None:
-        Path(self.OUTPUT_IMAGE_DIR).mkdir(parents=True, exist_ok=True)
-        Path(self.OUTPUT_JSON_DIR).mkdir(parents=True, exist_ok=True)
+        Path(self.get_absolute_path(self.OUTPUT_IMAGE_DIR)).mkdir(parents=True, exist_ok=True)
+        Path(self.get_absolute_path(self.OUTPUT_JSON_DIR)).mkdir(parents=True, exist_ok=True)
+        Path(self.get_absolute_path(self.OUTPUT_CROP_DIR)).mkdir(parents=True, exist_ok=True)
     
     model_config = {
         "env_file": Path(__file__).parent.parent / ".env.dev",

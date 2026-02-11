@@ -3,7 +3,7 @@ services:
   backendcam:
     container_name: backendcam
     build:
-      context: ./CCTV_Service
+      context: ./main-gateway
       dockerfile: Dockerfile
     image: backendcam:latest
     ports:
@@ -11,13 +11,15 @@ services:
     environment:
       TZ: "Asia/Bangkok"
       GOOGLE_APPLICATION_CREDENTIALS: "/secrets/serviceAccount.json"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka:19092"
+      FIREBASE_CREDENTIALS_PATH: "file:/secrets/serviceAccount.json"
     volumes:
-      - ./CCTV_Service/hls:/hls
-      - ./CCTV_Service/secrets/serviceAccount.json:/secrets/serviceAccount.json:ro
+      - ./main-gateway/hls:/hls
+      - ./main-gateway/secrets/serviceAccount.json:/secrets/serviceAccount.json:ro
       - /usr/share/zoneinfo/Asia/Bangkok:/etc/localtime:ro
       - /usr/share/zoneinfo/Asia/Bangkok:/etc/timezone:ro
     restart: unless-stopped
-    network_mode: host
+    #network_mode: host
 
   kafka:
     image: apache/kafka:latest
