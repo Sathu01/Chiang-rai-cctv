@@ -6,8 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -19,60 +18,47 @@ public class GetLicensePlate {
 
     // Minimum fuzzy score (0-100) to consider a match
     private static final int FUZZY_THRESHOLD = 60;
+    // Max number of fuzzy results to return
+    private static final int MAX_RESULTS = 10;
 
     /**
-     * Fuzzy search: find the latest license plate matching the query.
+     * Fuzzy search: return the top 10 matching license plates.
      * 1. Try exact match first.
      * 2. If no exact match, fuzzy match across all records using FuzzySearch.
-     * 3. Return the latest (by dateTime) among the best fuzzy matches.
+     * 3. Return top 10 sorted by best score, then latest dateTime.
      */
-    public LicensePlate getLatestByLicensePlate(String query) throws ExecutionException, InterruptedException {
+    public List<LicensePlate> getTopMatchesByLicensePlate(String query) throws ExecutionException, InterruptedException {
         // 1. Try exact match first
         List<LicensePlate> exactMatches = licensePlateRepository.findByLicensePlate(query);
         if (exactMatches != null && !exactMatches.isEmpty()) {
-            return getLatest(exactMatches);
+            return exactMatches.stream()
+                    .sorted(Comparator.comparing(
+                            LicensePlate::getDateTime,
+                            Comparator.nullsLast(Comparator.reverseOrder())))
+                    .limit(MAX_RESULTS)
+                    .collect(Collectors.toList());
         }
 
         // 2. Fuzzy search across all records
         List<LicensePlate> allPlates = licensePlateRepository.getAll();
         if (allPlates == null || allPlates.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
 
         String normalizedQuery = normalize(query);
 
-        // Score each plate and keep those above the threshold
-        List<LicensePlate> fuzzyMatches = allPlates.stream()
+        // Score each plate, keep those above threshold, sort by score desc then dateTime desc
+        return allPlates.stream()
                 .filter(p -> p.getLicensePlate() != null)
                 .filter(p -> fuzzyScore(normalizedQuery, normalize(p.getLicensePlate())) >= FUZZY_THRESHOLD)
+                .sorted(Comparator
+                        .comparingInt((LicensePlate p) -> fuzzyScore(normalizedQuery, normalize(p.getLicensePlate())))
+                        .reversed()
+                        .thenComparing(
+                                LicensePlate::getDateTime,
+                                Comparator.nullsLast(Comparator.reverseOrder())))
+                .limit(MAX_RESULTS)
                 .collect(Collectors.toList());
-
-        if (fuzzyMatches.isEmpty()) {
-            return null;
-        }
-
-        // Find the best score among matches
-        int bestScore = fuzzyMatches.stream()
-                .mapToInt(p -> fuzzyScore(normalizedQuery, normalize(p.getLicensePlate())))
-                .max()
-                .orElse(0);
-
-        // Keep only plates with the best score, return the latest by dateTime
-        List<LicensePlate> bestMatches = fuzzyMatches.stream()
-                .filter(p -> fuzzyScore(normalizedQuery, normalize(p.getLicensePlate())) == bestScore)
-                .collect(Collectors.toList());
-
-        return getLatest(bestMatches);
-    }
-
-    /** Return the latest plate by dateTime from a list */
-    private LicensePlate getLatest(List<LicensePlate> plates) {
-        return plates.stream()
-                .sorted(Comparator.comparing(
-                        LicensePlate::getDateTime,
-                        Comparator.nullsLast(Comparator.reverseOrder())))
-                .findFirst()
-                .orElse(null);
     }
 
     /** Normalize: uppercase, remove spaces/dashes/dots */
