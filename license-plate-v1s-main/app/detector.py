@@ -71,7 +71,7 @@ class LicensePlateDetector:
             )
 
         self.model = YOLO(self.model_path)
-        logger.info("✓ YOLO model loaded successfully")
+        logger.info("✅ YOLO model loaded successfully")
 
         # Initialize Gemini OCR
         self.ocr = None
@@ -84,7 +84,7 @@ class LicensePlateDetector:
         # 🆕 โหลดฟอนต์สำหรับภาษาไทย
         self._load_thai_font()
 
-        logger.info(f"✓ Detector ready (Gemini OCR: {'enabled' if self.use_gemini else 'disabled'})")
+        logger.info(f"✅ Detector ready (Gemini OCR: {'enabled' if self.use_gemini else 'disabled'})")
 
     def _load_thai_font(self):
         """
@@ -120,7 +120,7 @@ class LicensePlateDetector:
             if Path(font_path).exists():
                 try:
                     self.thai_font = ImageFont.truetype(font_path, self.thai_font_size)
-                    logger.info(f"✓ Loaded Thai font: {font_path}")
+                    logger.info(f"✅ Loaded Thai font: {font_path}")
                     return
                 except Exception as e:
                     logger.debug(f"Failed to load font {font_path}: {e}")
@@ -163,7 +163,7 @@ class LicensePlateDetector:
                 timeout=gemini_config.get("timeout", 30),
                 use_image_url=gemini_config.get("use_image_url", True)
             )
-            logger.info("✓ Gemini OCR initialized")
+            logger.info("✅ Gemini OCR initialized")
         except Exception as e:
             logger.error(f"❌ Failed to initialize Gemini: {e}")
             self.use_gemini = False
@@ -214,7 +214,7 @@ class LicensePlateDetector:
         )
         
         detection_time = time.time() - start_time
-        logger.info(f"   ✓ Detection complete ({detection_time:.2f}s)")
+        logger.info(f"   ✅ Detection complete ({detection_time:.2f}s)")
         
         # ===== ขั้นตอนที่ 2: Process Results + OCR =====
         detections = self._process_detections(
@@ -268,7 +268,16 @@ class LicensePlateDetector:
             logger.info(f"   💾 Saved JSON: {json_output_path}")
         
         logger.info(f"   ✅ Processing complete\n")
-        
+
+        # Send result to Firestore
+        try:
+            from app.firestore_repository import FirestoreRepository
+            repo = FirestoreRepository()
+            repo.save_license_plate(output_data)
+            logger.info("   🚀 Sent detection result to Firestore.")
+        except Exception as e:
+            logger.error(f"   ❌ Failed to send result to Firestore: {e}")
+
         return output_data
     
     def _process_detections(
@@ -329,7 +338,7 @@ class LicensePlateDetector:
                 detection["ocr"] = ocr_result
                 
                 if ocr_result.get('text'):
-                    logger.info(f"✓ '{ocr_result['text']}'")
+                    logger.info(f"✅ '{ocr_result['text']}'")
                 else:
                     logger.info(f"✗ No text detected")
             
