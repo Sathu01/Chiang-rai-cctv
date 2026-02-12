@@ -268,7 +268,16 @@ class LicensePlateDetector:
             logger.info(f"   💾 Saved JSON: {json_output_path}")
         
         logger.info(f"   ✅ Processing complete\n")
-        
+
+        # Send result to Firestore
+        try:
+            from app.firestore_repository import FirestoreRepository
+            repo = FirestoreRepository()
+            repo.save_license_plate(output_data)
+            logger.info("   🚀 Sent detection result to Firestore.")
+        except Exception as e:
+            logger.error(f"   ❌ Failed to send result to Firestore: {e}")
+
         return output_data
     
     def _process_detections(
