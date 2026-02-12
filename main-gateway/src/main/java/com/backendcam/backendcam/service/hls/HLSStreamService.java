@@ -1,0 +1,248 @@
+package com.backendcam.backendcam.service.hls;
+
+import java.io.File;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
+import org.bytedeco.javacv.Frame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import java.util.concurrent.TimeUnit;
+
+@Service
+public class HLSStreamService {
+
+    private static final Logger logger = LoggerFactory.getLogger(HLSStreamService.class);
+    private static final int MAX_RECONNECT_ATTEMPTS = 10;
+    private static final int RECONNECT_DELAY_MS = 2000;
+    private static final int MAX_NULL_FRAMES = 50; // Max consecutive null frames before reconnect
+
+    private final Map<String, Thread> streamThreads = new ConcurrentHashMap<>();
+    private final Map<String, StreamContext> streamContexts = new ConcurrentHashMap<>();
+
+    @Autowired
+    private FFmpegGrabberConfig grabberConfig;
+
+    @Autowired
+    private FFmpegRecorderConfig recorderConfig;
+
+    @Autowired
+    private StreamResourceManager resourceManager;
+
+    // Cleanup on startup
+    @PostConstruct
+    public void init() {
+        resourceManager.cleanupAllStreams();
+    }
+    
+    /**
+     * Gracefully shutdown all streams when application stops
+     * Prevents thread and memory leaks
+     */
+    @PreDestroy
+    public void shutdown() {
+        logger.info("Shutting down HLSStreamService - stopping all streams...");
+        
+        // Copy keys to avoid ConcurrentModificationException
+        String[] streamNames = streamThreads.keySet().toArray(new String[0]);
+        
+        for (String streamName : streamNames) {
+            try {
+                stopHLSStream(streamName);
+            } catch (Exception e) {
+                logger.error("Error stopping stream {} during shutdown: {}", streamName, e.getMessage());
+            }
+        }
+        
+        logger.info("HLSStreamService shutdown complete");
+    }
+
+    public String startHLSStream(String RTSPUrl, String streamName) {
+
+        // Check if stream already exists
+        if (streamThreads.containsKey(streamName)) {
+            return "/api/hls/" + streamName + "/stream.m3u8";
+        }
+
+        File outputDir = new File(resourceManager.getHlsRoot(), streamName);
+        if (!outputDir.exists() && !outputDir.mkdirs()) {
+            throw new RuntimeException("Failed to create output directory: " + outputDir.getAbsolutePath());
+        }
+
+        StreamContext context = new StreamContext();
+
+        Thread thread = new Thread(() -> {
+            FFmpegFrameGrabber grabber = null;
+            FFmpegFrameRecorder recorder = null;
+
+            try {
+                // Normalize path to forward slashes for FFmpeg
+                String hlsOutput = outputDir.getAbsolutePath().replace('\\', '/') + "/stream.m3u8";
+
+                grabber = new FFmpegFrameGrabber(RTSPUrl);
+                context.grabber = grabber;
+
+                // Use configuration class for grabber setup
+                grabberConfig.configureGrabber(grabber);
+
+                int width = grabber.getImageWidth();
+                int height = grabber.getImageHeight();
+
+                recorder = new FFmpegFrameRecorder(hlsOutput, width, height, 0);
+                context.recorder = recorder;
+
+                // Use configuration class for recorder setup
+                recorderConfig.configureRecorder(recorder, outputDir);
+
+                Frame frame;
+                int nullFrameCount = 0;
+                int reconnectAttempts = 0;
+                
+                // Main streaming loop with reconnection support for 24/7 operation
+                while (!Thread.currentThread().isInterrupted() && !context.shouldStop) {
+                    try {
+                        frame = grabber.grabImage();
+                        
+                        if (frame == null) {
+                            nullFrameCount++;
+                            
+                            if (nullFrameCount >= MAX_NULL_FRAMES) {
+                                logger.warn("Stream {} - {} consecutive null frames, attempting reconnect...", 
+                                    streamName, nullFrameCount);
+                                
+                                // Attempt reconnection
+                                if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                                    reconnectAttempts++;
+                                    logger.info("Stream {} - Reconnect attempt {}/{}", 
+                                        streamName, reconnectAttempts, MAX_RECONNECT_ATTEMPTS);
+                                    
+                                    // Stop and restart grabber
+                                    try {
+                                        grabber.stop();
+                                        Thread.sleep(RECONNECT_DELAY_MS);
+                                        grabberConfig.configureGrabber(grabber);
+                                        nullFrameCount = 0;
+                                        logger.info("Stream {} - Reconnected successfully", streamName);
+                                    } catch (Exception reconnectEx) {
+                                        logger.error("Stream {} - Reconnect failed: {}", 
+                                            streamName, reconnectEx.getMessage());
+                                        Thread.sleep(RECONNECT_DELAY_MS);
+                                    }
+                                } else {
+                                    logger.error("Stream {} - Max reconnect attempts reached, stopping stream", 
+                                        streamName);
+                                    break;
+                                }
+                            }
+                            continue; // Try to grab next frame
+                        }
+                        
+                        // Successfully got a frame - reset counters
+                        nullFrameCount = 0;
+                        reconnectAttempts = 0;
+                        
+                        recorder.record(frame);
+                        
+                    } catch (Exception frameEx) {
+                        logger.warn("Stream {} - Frame processing error: {}", streamName, frameEx.getMessage());
+                        nullFrameCount++;
+                    }
+                }
+
+            } catch (Exception e) {
+                logger.error("Error in stream processing for {}: {}", streamName, e.getMessage(), e);
+            } finally {
+                logger.info("Cleaning up resources for {}", streamName);
+                resourceManager.cleanupResources(context);
+                streamContexts.remove(streamName);
+                streamThreads.remove(streamName);
+            }
+        });
+
+        thread.setName("HLS-" + streamName);
+        thread.setDaemon(false); // Ensure thread completes cleanup before JVM shutdown
+
+        // Atomically put context and thread - prevents race condition
+        StreamContext existingContext = streamContexts.putIfAbsent(streamName, context);
+        Thread existingThread = streamThreads.putIfAbsent(streamName, thread);
+
+        if (existingContext != null || existingThread != null) {
+            // Another thread won the race, clean up our context
+            streamContexts.remove(streamName, context);
+            streamThreads.remove(streamName, thread);
+            return "/api/hls/" + streamName + "/stream.m3u8";
+        }
+
+        thread.start();
+        logger.info("Started stream thread for {}", streamName);
+
+        return "/api/hls/" + streamName + "/stream.m3u8";
+    }
+
+    public String stopHLSStream(String streamName) {
+        // Get and remove thread first to prevent new operations
+        Thread thread = streamThreads.remove(streamName);
+        StreamContext context = streamContexts.get(streamName);
+
+        if (thread == null && context == null) {
+            return "Stream not found or already stopped.";
+        }
+
+        // Signal thread to stop
+        if (context != null) {
+            context.shouldStop = true;
+        }
+
+        // Interrupt thread if it exists
+        if (thread != null) {
+            thread.interrupt();
+
+            try {
+                // Wait for thread to finish with timeout
+                thread.join(5000); // Wait up to 5 seconds
+
+                if (thread.isAlive()) {
+                    // Force close resources to help thread exit
+                    if (context != null) {
+                        resourceManager.cleanupResources(context);
+                    }
+                    // Try one more time with shorter timeout
+                    thread.join(2000);
+
+                    if (thread.isAlive()) {
+                        logger.error("Thread {} still alive after forced cleanup. It will be abandoned.",
+                                streamName);
+                    }
+                } else {
+                    logger.info("Thread {} stopped gracefully", streamName);
+                }
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted while waiting for thread {} to stop", streamName);
+                Thread.currentThread().interrupt(); // Restore interrupt status
+            }
+        }
+
+        // Remove context if still present (should be removed by thread's finally block)
+        streamContexts.remove(streamName);
+
+        // Small delay to ensure OS releases file handles
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        // Delete stream directory
+        resourceManager.deleteStreamDirectory(streamName);
+        logger.info("Stream {} stopped and files deleted", streamName);
+
+        return "Stream stopped and files deleted.";
+    }
+}
