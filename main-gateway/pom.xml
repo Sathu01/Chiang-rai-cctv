@@ -56,6 +56,12 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+    		<groupId>me.xdrop</groupId>
+    		<artifactId>fuzzywuzzy</artifactId>
+    		<version>1.4.0</version>
+		</dependency>
+
 
 		<!-- JavaCV (includes FFmpeg native binaries for all platforms) -->
 		<dependency>
