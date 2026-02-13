@@ -32,9 +32,10 @@ class Settings(BaseSettings):
     EASYOCR_GPU: bool = False
 
     # ===== Output Settings =====
+    # All paths relative to project root (license-plate-v1s-main/)
     OUTPUT_IMAGE_DIR: str = "output/images"
     OUTPUT_JSON_DIR: str = "output/json"
-    OUTPUT_CROP_DIR: str = "output/crops"
+    OUTPUT_CROP_DIR: str = "output/temp_crops"  # บันทึกรูป crop ป้ายทะเบียนถาวร
 
     # ===== Helper: Resolve paths =====
     def get_absolute_path(self, relative_path: str) -> str:

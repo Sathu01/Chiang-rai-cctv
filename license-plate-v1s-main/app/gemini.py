@@ -13,6 +13,7 @@ import re
 import logging
 from pathlib import Path
 import random
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -42,11 +43,13 @@ class GeminiOCR:
         self.use_image_url = use_image_url
         self.initial_retry_delay = initial_retry_delay  # 🆕
         
-        # สร้างโฟลเดอร์สำหรับเก็บภาพ crop (ถ้าใช้ URL)
+        # สร้างโฟลเดอร์สำหรับเก็บภาพ crop ถาวร (ถ้าใช้ URL)
         if self.use_image_url:
-            self.temp_dir = Path("license-plate-v1s-main/output/temp_crops")
+            # Resolve path from project root (license-plate-v1s-main/)
+            project_root = Path(__file__).parent.parent
+            self.temp_dir = project_root / "output" / "temp_crops"
             self.temp_dir.mkdir(parents=True, exist_ok=True)
-            logger.info(f"✓ Using IMAGE URL mode - temp dir: {self.temp_dir}")
+            logger.info(f"✓ Using IMAGE URL mode - crops dir: {self.temp_dir}")
         else:
             self.temp_dir = None
             logger.info(f"✓ Using BASE64 mode")
@@ -54,33 +57,55 @@ class GeminiOCR:
         logger.info(f"✓ Gemini OCR initialized ({model_name})")
     
     def create_prompt(self, language: str = "thai") -> str:
-        """สร้าง prompt สำหรับ Gemini"""
+        """สร้าง prompt สำหรับ Gemini เพื่ออ่านเลขป้ายทะเบียนและจังหวัด"""
         base_prompt = """You are an OCR system specialized in reading Thai vehicle license plates from CCTV images.
 
 TASK:
-Read and extract ONLY the visible characters on the Thai license plate in the image.
-Do NOT guess, infer, or auto-correct missing characters.
+Read and extract the license plate number AND province name from the Thai vehicle license plate in the image.
 
 THAI LICENSE PLATE FORMATS:
-- Standard car: กข 1234 or กข-1234
-- New format: 1กข 2345 or 1กข-2345
-- Motorcycle: 1กข กรุงเทพ
-- Public vehicle: 12-3456, นท-123
+- Standard car: กข 1234 with province name (e.g., กรุงเทพมหานคร)
+- New format: 1กข 2345 with province name
+- Motorcycle: 1กข with province name (e.g., 1กข กรุงเทพมหานคร)
+- Public vehicle: 12-3456 or นท-123 with province name
+
+COMMON THAI PROVINCES:
+กรุงเทพมหานคร, เชียงใหม่, เชียงราย, ขอนแก่น, นครราชสีมา, ภูเก็ต, สงขลา, อุบลราชธานี, นนทบุรี, ปทุมธานี, สมุทรปราการ, ระยอง, ชลบุรี, นครปฐม, สุราษฎร์ธานี, etc.
 
 RULES (STRICT):
-- Read characters only if clearly visible.
-- If some characters are unclear, replace them with "?".
-- Use "UNREADABLE" ONLY if no characters can be read at all.
-- Do NOT explain your reasoning.
-- Do NOT output anything except the result.
+1. Read the license plate number clearly visible on the plate
+2. Read the province name (usually at the bottom or top of the plate)
+3. If characters are unclear, replace them with "?"
+4. If completely unreadable, use "UNREADABLE" for that field
+5. Do NOT explain your reasoning
+6. Do NOT output anything except JSON
 
-OUTPUT FORMAT:
-- Full readable plate: "กข 1234"
-- Partially readable: "กข ????", "?? 1234"
-- Completely unreadable: "UNREADABLE"
+OUTPUT FORMAT (JSON ONLY):
+{
+  "license_plate_number": "กข 1234",
+  "province": "กรุงเทพมหานคร"
+}
+
+EXAMPLES:
+{
+  "license_plate_number": "1กข 2345",
+  "province": "เชียงราย"
+}
+
+{
+  "license_plate_number": "กข ????",
+  "province": "กรุงเทพมหานคร"
+}
+
+{
+  "license_plate_number": "UNREADABLE",
+  "province": "UNREADABLE"
+}
 
 Allowed Thai characters:
 ก ข ฃ ค ฅ ฆ ง จ ฉ ช ซ ฌ ญ ฎ ฏ ฐ ฑ ฒ ณ ด ต ถ ท ธ น บ ป ผ ฝ พ ฟ ภ ม ย ร ล ว ศ ษ ส ห ฬ อ ฮ
+
+REMEMBER: Output ONLY valid JSON, nothing else!
 """
         return base_prompt
     
@@ -105,13 +130,13 @@ Allowed Thai characters:
         detection_id: int,
         original_filename: str
     ) -> str:
-        """บันทึกภาพ crop ชั่วคราว"""
+        """บันทึกภาพ crop ป้ายทะเบียน """
         timestamp = int(time.time() * 1000)
         filename = f"{Path(original_filename).stem}_plate_{detection_id}_{timestamp}.jpg"
         filepath = self.temp_dir / filename
         
         cv2.imwrite(str(filepath), image)
-        logger.debug(f"💾 Saved temp image: {filepath}")
+        logger.debug(f"💾 Saved cropped plate: {filepath}")
         
         return str(filepath)
     
@@ -213,19 +238,21 @@ Allowed Thai characters:
                 )
                 
                 raw_text = response.text.strip()
-                cleaned_text = self.clean_text(raw_text)
+                parsed_result = self.parse_json_response(raw_text)
                 processing_time = time.time() - start_time
-                confidence = self.estimate_confidence(cleaned_text, raw_text)
+                confidence = self.estimate_confidence_from_json(parsed_result, raw_text)
                 
                 # ✅ สำเร็จ
                 logger.info(f"✅ Gemini API success on attempt {attempt + 1}")
                 return {
-                    "text": cleaned_text,
+                    "license_plate_number": parsed_result.get("license_plate_number", ""),
+                    "province": parsed_result.get("province", ""),
                     "confidence": confidence,
                     "raw_response": raw_text,
                     "processing_time": processing_time,
                     "model": self.model_name,
-                    "attempts": attempt + 1
+                    "attempts": attempt + 1,
+                    "text": parsed_result.get("license_plate_number", "")  # backward compatibility
                 }
             
             except Exception as e:
@@ -253,6 +280,8 @@ Allowed Thai characters:
         
         # ถ้า retry หมดแล้วยังไม่ได้
         return {
+            "license_plate_number": "",
+            "province": "",
             "text": "",
             "confidence": 0.0,
             "error": str(last_error),
@@ -283,19 +312,21 @@ Allowed Thai characters:
                 )
                 
                 raw_text = response.text.strip()
-                cleaned_text = self.clean_text(raw_text)
+                parsed_result = self.parse_json_response(raw_text)
                 processing_time = time.time() - start_time
-                confidence = self.estimate_confidence(cleaned_text, raw_text)
+                confidence = self.estimate_confidence_from_json(parsed_result, raw_text)
                 
                 logger.info(f"✅ Gemini API success on attempt {attempt + 1}")
                 return {
-                    "text": cleaned_text,
+                    "license_plate_number": parsed_result.get("license_plate_number", ""),
+                    "province": parsed_result.get("province", ""),
                     "confidence": confidence,
                     "raw_response": raw_text,
                     "processing_time": processing_time,
                     "model": self.model_name,
                     "attempts": attempt + 1,
-                    "mode": "base64"
+                    "mode": "base64",
+                    "text": parsed_result.get("license_plate_number", "")  # backward compatibility
                 }
             
             except Exception as e:
@@ -321,6 +352,8 @@ Allowed Thai characters:
                     logger.error(f"❌ All {self.max_retries} retries failed")
         
         return {
+            "license_plate_number": "",
+            "province": "",
             "text": "",
             "confidence": 0.0,
             "error": str(last_error),
@@ -342,49 +375,103 @@ Allowed Thai characters:
         result["fallback"] = True
         return result
     
-    def clean_text(self, text: str) -> str:
-        """ทำความสะอาดข้อความจาก Gemini"""
+    def parse_json_response(self, text: str) -> Dict[str, str]:
+        """แปลง JSON response จาก Gemini เป็น dict"""
         if not text:
             logger.warning("⚠️ Gemini returned empty text")
-            return ""
+            return {"license_plate_number": "", "province": ""}
         
         logger.debug(f"🔍 Raw Gemini response: '{text}'")
         
-        lines = text.split('\n')
-        main_text = lines[0].strip()
-        
-        unwanted_phrases = [
-            "ป้ายทะเบียน", "license plate", "number plate",
-            "อ่านได้ว่า", "reads", "shows", "says",
-            "ภาพนี้", "this image", "the plate", "is", "the text"
-        ]
-        
-        for phrase in unwanted_phrases:
-            main_text = re.sub(phrase, "", main_text, flags=re.IGNORECASE)
-        
-        main_text = re.sub(r'[^\w\s\-\u0E00-\u0E7F]', '', main_text)
-        main_text = ' '.join(main_text.split())
-        main_text = main_text.upper()
-        
-        logger.info(f"✅ Cleaned text: '{main_text}'")
-        
-        return main_text
+        try:
+            # ลองแปลงเป็น JSON โดยตรง
+            # ลบ markdown code blocks ถ้ามี (```json ... ```)
+            clean_text = text.strip()
+            if clean_text.startswith('```'):
+                # ลบ ```json และ ```
+                clean_text = re.sub(r'^```(?:json)?\s*', '', clean_text)
+                clean_text = re.sub(r'\s*```$', '', clean_text)
+            
+            result = json.loads(clean_text)
+            
+            # ตรวจสอบว่ามี keys ที่ต้องการ
+            license_plate = result.get("license_plate_number", "").strip().upper()
+            province = result.get("province", "").strip()
+            
+            logger.info(f"✅ Parsed JSON - Plate: '{license_plate}', Province: '{province}'")
+            
+            return {
+                "license_plate_number": license_plate,
+                "province": province
+            }
+            
+        except json.JSONDecodeError as e:
+            logger.warning(f"⚠️ Failed to parse JSON: {e}, falling back to text extraction")
+            # ถ้า parse JSON ไม่ได้ ให้ลองหา pattern
+            return self._extract_from_text(text)
     
-    def estimate_confidence(self, cleaned_text: str, raw_text: str) -> float:
-        """ประมาณค่า confidence"""
-        if not cleaned_text or "UNREADABLE" in raw_text.upper():
+    def _extract_from_text(self, text: str) -> Dict[str, str]:
+        """สกัดข้อมูลจากข้อความธรรมดาเมื่อ parse JSON ไม่ได้"""
+        # ลองหา license_plate_number และ province จาก text
+        license_match = re.search(r'license_plate_number["\s:]+([^,\n"]+)', text, re.IGNORECASE)
+        province_match = re.search(r'province["\s:]+([^,\n"]+)', text, re.IGNORECASE)
+        
+        license_plate = ""
+        province = ""
+        
+        if license_match:
+            license_plate = license_match.group(1).strip().strip('"').upper()
+        
+        if province_match:
+            province = province_match.group(1).strip().strip('"')
+        
+        logger.info(f"✅ Extracted from text - Plate: '{license_plate}', Province: '{province}'")
+        
+        return {
+            "license_plate_number": license_plate,
+            "province": province
+        }
+    
+    def clean_text(self, text: str) -> str:
+        """ทำความสะอาดข้อความจาก Gemini (backward compatibility)"""
+        parsed = self.parse_json_response(text)
+        return parsed.get("license_plate_number", "")
+    
+    def estimate_confidence_from_json(self, parsed_result: Dict[str, str], raw_text: str) -> float:
+        """ประมาณค่า confidence จาก parsed JSON result"""
+        license_plate = parsed_result.get("license_plate_number", "")
+        province = parsed_result.get("province", "")
+        
+        # ถ้าอ่านไม่ได้เลย
+        if not license_plate or "UNREADABLE" in license_plate.upper():
             return 0.0
         
-        if len(cleaned_text) < 3:
-            return 0.5
+        # ถ้าป้ายทะเบียนสั้นเกินไป
+        if len(license_plate) < 3:
+            return 0.3
         
+        confidence = 0.0
+        
+        # ตรวจสอบ format ป้ายทะเบียน
         thai_pattern = r'[ก-ฮ]{1,3}[\s\-]?\d{3,4}'
         english_pattern = r'[A-Z]{2,3}[\s\-]?\d{3,4}'
+        new_format_pattern = r'\d[ก-ฮ]{2}[\s\-]?\d{3,4}'
         
-        if re.search(thai_pattern, cleaned_text) or re.search(english_pattern, cleaned_text):
-            return 0.9
+        if re.search(thai_pattern, license_plate) or re.search(english_pattern, license_plate) or re.search(new_format_pattern, license_plate):
+            confidence = 0.8
+        else:
+            confidence = 0.5
         
-        return 0.7
+        # ถ้ามีจังหวัดด้วย เพิ่ม confidence
+        if province and province != "UNREADABLE" and len(province) > 2:
+            confidence = min(confidence + 0.15, 1.0)
+        
+        return confidence
+    
+    def estimate_confidence(self, cleaned_text: str, raw_text: str) -> float:
+        """ประมาณค่า confidence (backward compatibility)"""
+        parsed = {"license_plate_number": cleaned_text, "province": ""}
+        return self.estimate_confidence_from_json(parsed, raw_text)
     
     def validate_plate_format(self, text: str) -> bool:
         """ตรวจสอบว่าข้อความมี format ป้ายทะเบียนหรือไม่"""
@@ -403,18 +490,23 @@ Allowed Thai characters:
         return False
     
     def cleanup_temp_files(self, older_than_hours: int = 24):
-        """ลบไฟล์ temp ที่เก่าเกินกำหนด"""
+        """ลบไฟล์เก่า (ปิดการใช้งาน - เก็บไฟล์ไว้ถาวร)"""
+        # ไม่ลบไฟล์ - บันทึกไว้ถาวรเพื่อการตรวจสอบ
         if not self.use_image_url or not self.temp_dir:
             return
         
-        current_time = time.time()
-        cutoff_time = current_time - (older_than_hours * 3600)
+        logger.debug("Cleanup disabled - keeping all cropped plate images")
+        return
         
-        deleted_count = 0
-        for file in self.temp_dir.glob("*.jpg"):
-            if file.stat().st_mtime < cutoff_time:
-                file.unlink()
-                deleted_count += 1
-        
-        if deleted_count > 0:
-            logger.info(f"🗑️ Cleaned up {deleted_count} old temp files")
+        # เดิม: ลบไฟล์เก่า (ถูกปิดการใช้งาน)
+        # current_time = time.time()
+        # cutoff_time = current_time - (older_than_hours * 3600)
+        # 
+        # deleted_count = 0
+        # for file in self.temp_dir.glob("*.jpg"):
+        #     if file.stat().st_mtime < cutoff_time:
+        #         file.unlink()
+        #         deleted_count += 1
+        # 
+        # if deleted_count > 0:
+        #     logger.info(f"🗑️ Cleaned up {deleted_count} old temp files")
