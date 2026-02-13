@@ -34,6 +34,8 @@ async def consume(detector):
             payload = msg.value
             image_url = payload.get("imageUrl")
             use_ocr = payload.get("use_ocr", True)
+            kafka_timestamp = payload.get("timestamp")  # รับ timestamp จาก Kafka
+            camera_id = payload.get("cameraId")  # รับ cameraId จาก Kafka
 
             if image_url:
                 try:
@@ -46,8 +48,18 @@ async def consume(detector):
                                 f.write(chunk)
 
                         # Perform detection on the downloaded image
-                        result = detector.detect(image_path=temp_image_path, use_ocr=use_ocr)
+                        result = detector.detect(
+                            image_path=temp_image_path,
+                            save_image=True,  # บันทึกรูปที่ annotate แล้ว
+                            save_json=True,   # บันทึก JSON result
+                            use_ocr=use_ocr,
+                            kafka_timestamp=kafka_timestamp,
+                            image_url=image_url,
+                            camera_id=camera_id
+                        )
                         logger.info(f"Detection finished for {image_url}: {result.get('total_plates')} plates detected.")
+                        logger.info(f"      Saved: {result.get('output_image_path')}")
+                        logger.info(f"      JSON: {result.get('output_json_path')}")
                     else:
                         logger.warning(f"Failed to download image from URL: {image_url}, Status Code: {response.status_code}")
                 except FileNotFoundError:
