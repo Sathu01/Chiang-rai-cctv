@@ -1,13 +1,9 @@
 package com.backendcam.backendcam.service.motion;
 
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_video.BackgroundSubtractorMOG2;
-import org.springframework.stereotype.Component;
-
-import java.awt.image.BufferedImage;
 
 import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
@@ -31,15 +27,17 @@ import static org.bytedeco.opencv.global.opencv_video.*;
  *         // Trigger alert, recording, etc.
  *     }
  * }
+ *
+ * NOTE: This class is NOT a Spring bean. Each camera stream must create
+ * its own instance to avoid shared state / race conditions.
  */
-@Component
 public class MotionDetector {
 
     // Motion detection sensitivity - TUNED FOR OUTDOOR TRAFFIC CAMERAS
     // For 1920x1080 = 2,073,600 pixels, we need significant motion
     private static final int MOTION_THRESHOLD = 8000;     // Minimum pixels changed (~0.4% of frame)
-    private static final double SENSITIVITY = 16.0;       // Lower = less sensitive to small changes
-    private static final double MIN_MOTION_PERCENT = 0.3; // Minimum % of frame that must change
+    private static final double SENSITIVITY = 12.0;       // Lower = less sensitive to small changes
+    private static final double MIN_MOTION_PERCENT = 0.4; // Minimum % of frame that must change
     
     // OpenCV objects
     private BackgroundSubtractorMOG2 backgroundSubtractor;

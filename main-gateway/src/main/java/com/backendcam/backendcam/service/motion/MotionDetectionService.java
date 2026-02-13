@@ -43,7 +43,16 @@ public class MotionDetectionService {
     private final Map<String, DetectionSession> activeSessions = new ConcurrentHashMap<>();
     
     // Thread pool for handling multiple camera streams
-    private final ExecutorService executorService = Executors.newCachedThreadPool();
+    // Fixed pool prevents thread explosion with many cameras
+    private final ExecutorService executorService = Executors.newFixedThreadPool(
+        Math.min(Runtime.getRuntime().availableProcessors(), 24),
+        r -> {
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            t.setName("motion-detect-" + t.getId());
+            return t;
+        }
+    );
     
     /**
      * Cleanup resources when application shuts down
