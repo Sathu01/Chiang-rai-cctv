@@ -50,8 +50,8 @@ async def consume(detector):
                         logger.info(f"Detection finished for {image_url}: {result.get('total_plates')} plates detected.")
                     else:
                         logger.warning(f"Failed to download image from URL: {image_url}, Status Code: {response.status_code}")
-                except FileNotFoundError:
-                    logger.warning(f"File not found for detection: {image_url}")
+                except FileNotFoundError as fnf:
+                    logger.warning(f"File not found for detection: {image_url}\nExpected path: {temp_image_path}\nReason: {fnf}")
                 except Exception as e:
                     logger.error(f"Error during detection for {image_url}: {e}")
             else:

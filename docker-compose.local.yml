@@ -1,0 +1,91 @@
+services:
+  
+  backendcam:
+    container_name: backendcam
+    build:
+      context: ./main-gateway
+      dockerfile: Dockerfile
+    image: backendcam:latest
+    ports:
+      - "8080:8080"
+    environment:
+      TZ: "Asia/Bangkok"
+      GOOGLE_APPLICATION_CREDENTIALS: "/secrets/serviceAccount.json"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka:19092"
+      FIREBASE_CREDENTIALS_PATH: "file:/secrets/serviceAccount.json"
+    volumes:
+      - ./main-gateway/hls:/hls
+      - ./main-gateway/secrets/serviceAccount.json:/secrets/serviceAccount.json:ro
+      - /usr/share/zoneinfo/Asia/Bangkok:/etc/localtime:ro
+      - /usr/share/zoneinfo/Asia/Bangkok:/etc/timezone:ro
+    restart: unless-stopped
+    # network_mode: host
+
+  kafka:
+    image: apache/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "19092:19092" # external listener
+      - "9093:9093"   # controller listener
+    environment:
+      # KRaft settings (broker + controller in one) development mode
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:19092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:19092
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      # controller quorum config (just one node)
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+
+      # Only in development/testing environments
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8088:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      - kafka
+
+  license-plate-detector:
+    build:
+      context: ./license-plate-v1s-main
+      dockerfile: Dockerfile
+    container_name: license-plate-detector
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./license-plate-v1s-main/input:/app/input
+      - ./license-plate-v1s-main/output:/app/output
+      - ./license-plate-v1s-main/models:/app/models
+      - ./license-plate-v1s-main/.env.dev:/app/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Bangkok
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_TOPIC=motion-event
+      - KAFKA_GROUP_ID=license-plate-consumer-group
+    depends_on:
+      - kafka
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
